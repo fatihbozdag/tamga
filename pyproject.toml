@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tamga"
+dynamic = ["version"]
+description = "Next-generation computational stylometry — a Python replacement for R's Stylo."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "BSD-3-Clause"
+authors = [{ name = "Fatih Bozdağ", email = "fbozdag1989@gmail.com" }]
+keywords = ["stylometry", "authorship", "corpus-linguistics", "digital-humanities", "nlp"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.12",
+    "pandas>=2.2",
+    "pyarrow>=15",
+    "scikit-learn>=1.4",
+    "spacy>=3.7",
+    "matplotlib>=3.8",
+    "seaborn>=0.13",
+    "typer>=0.12",
+    "rich>=13",
+    "questionary>=2",
+    "pyyaml>=6",
+    "pydantic>=2",
+    "jinja2>=3.1",
+    "joblib>=1.3",
+    "umap-learn>=0.5",
+    "hdbscan>=0.8",
+]
+
+[project.optional-dependencies]
+bayesian = ["pymc>=5.10", "arviz>=0.17"]
+embeddings = ["sentence-transformers>=2.6", "torch>=2.2"]
+viz = ["plotly>=5.20", "kaleido>=0.2.1", "ete3>=3.1.3"]
+reports = ["weasyprint>=61"]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=4",
+    "pytest-xdist>=3",
+    "hypothesis>=6",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "pre-commit>=3.7",
+    "types-PyYAML",
+]
+
+[project.scripts]
+tamga = "tamga.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/fatihbozdag/tamga"
+Documentation = "https://github.com/fatihbozdag/tamga"
+Source = "https://github.com/fatihbozdag/tamga"
+Issues = "https://github.com/fatihbozdag/tamga/issues"
+
+[tool.hatch.version]
+path = "src/tamga/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tamga"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/tamga", "tests", "docs", "README.md", "LICENSE", "CITATION.cff"]
