@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any
+
+import numpy as np
 
 from tamga.corpus.document import Document
 from tamga.plumbing.hashing import hash_mapping, hash_text
@@ -26,8 +28,17 @@ class Corpus:
     def __iter__(self) -> Iterator[Document]:
         return iter(self.documents)
 
-    def __getitem__(self, index: int) -> Document:
-        return self.documents[index]
+    def __getitem__(self, index: int | slice | Sequence[int] | np.ndarray) -> Document | Corpus:
+        """Index by int → Document; by slice or array-like → Corpus.
+
+        The array-like branch is needed for sklearn's cross-validation splitters, which
+        slice `X` with an ndarray of fold indices.
+        """
+        if isinstance(index, int | np.integer):
+            return self.documents[int(index)]
+        if isinstance(index, slice):
+            return Corpus(documents=self.documents[index])
+        return Corpus(documents=[self.documents[int(i)] for i in index])
 
     def filter(self, **query: Any) -> Corpus:
         """Return a new Corpus containing documents whose metadata matches every key in `query`.

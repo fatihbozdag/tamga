@@ -15,7 +15,21 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from tamga.corpus import Corpus
+from tamga.corpus import Corpus, Document
+
+
+def _ensure_corpus(obj: Corpus | list) -> Corpus:
+    """Wrap a list of Documents into a Corpus (idempotent for Corpus instances).
+
+    sklearn's cross-validation splitters slice `X` with an ndarray of indices and, when X is not
+    a pandas / ndarray / sparse type, fall back to `[X[i] for i in indices]` — producing a list.
+    We accept either form at the extractor boundary.
+    """
+    if isinstance(obj, Corpus):
+        return obj
+    if isinstance(obj, list) and (not obj or isinstance(obj[0], Document)):
+        return Corpus(documents=obj)
+    raise TypeError(f"expected Corpus or list[Document]; got {type(obj).__name__}")
 
 
 @dataclass
@@ -89,11 +103,12 @@ class BaseFeatureExtractor(BaseEstimator, TransformerMixin):
     def _transform(self, corpus: Corpus) -> tuple[np.ndarray, list[str]]:
         """Return (X, feature_names) for the given corpus."""
 
-    def fit(self, corpus: Corpus, y: Any = None) -> BaseFeatureExtractor:
-        self._fit(corpus)
+    def fit(self, corpus: Corpus | list, y: Any = None) -> BaseFeatureExtractor:
+        self._fit(_ensure_corpus(corpus))
         return self
 
-    def transform(self, corpus: Corpus) -> FeatureMatrix:
+    def transform(self, corpus: Corpus | list) -> FeatureMatrix:
+        corpus = _ensure_corpus(corpus)
         X, feature_names = self._transform(corpus)  # noqa: N806 (sklearn convention)
         return FeatureMatrix(
             X=X,
@@ -104,7 +119,7 @@ class BaseFeatureExtractor(BaseEstimator, TransformerMixin):
             provenance_hash=self._provenance(corpus),
         )
 
-    def fit_transform(self, corpus: Corpus, y: Any = None) -> FeatureMatrix:
+    def fit_transform(self, corpus: Corpus | list, y: Any = None) -> FeatureMatrix:
         return self.fit(corpus).transform(corpus)
 
     def _provenance(self, corpus: Corpus) -> str:
