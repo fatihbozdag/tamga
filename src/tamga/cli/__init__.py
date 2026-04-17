@@ -6,11 +6,13 @@ import typer
 from rich.console import Console
 
 from tamga._version import __version__
+from tamga.cli.bayesian_cmd import bayesian_command
 from tamga.cli.cache_cmd import cache_app
 from tamga.cli.classify_cmd import classify_command
 from tamga.cli.cluster_cmd import cluster_command
 from tamga.cli.consensus_cmd import consensus_command
 from tamga.cli.delta_cmd import delta_command
+from tamga.cli.embed_cmd import embed_command
 from tamga.cli.features_cmd import features_command
 from tamga.cli.info_cmd import info_command
 from tamga.cli.ingest_cmd import ingest_command
@@ -36,6 +38,8 @@ app.command(name="reduce")(reduce_command)
 app.command(name="cluster")(cluster_command)
 app.command(name="consensus")(consensus_command)
 app.command(name="classify")(classify_command)
+app.command(name="embed")(embed_command)
+app.command(name="bayesian")(bayesian_command)
 app.add_typer(cache_app, name="cache")
 
 
