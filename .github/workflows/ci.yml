@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"   # weekly Monday 06:00 UTC — catch upstream spaCy breakage
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: uv pip install --system -e ".[dev]"
+      - run: ruff check src tests
+      - run: ruff format --check src tests
+      - run: mypy src
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv pip install --system -e ".[dev]"
+      - name: Download small spaCy model
+        run: python -m spacy download en_core_web_sm
+      - run: pytest -n auto --cov=tamga --cov-report=term-missing -m "not slow"
