@@ -6,6 +6,7 @@ import typer
 from rich.console import Console
 
 from tamga._version import __version__
+from tamga.cli.init_cmd import init_command
 
 console = Console()
 app = typer.Typer(
@@ -14,6 +15,8 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=True,
 )
+
+app.command(name="init")(init_command)
 
 
 def _version_callback(value: bool) -> None:
