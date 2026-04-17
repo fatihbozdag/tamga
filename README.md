@@ -11,9 +11,14 @@ analysis. It reimplements the analytical breadth of R's `Stylo` and adds modern 
 
 ## Status
 
-**Phase 1 — Foundation.** Currently: corpus ingestion + spaCy parsing + DocBin caching +
-project scaffolding + skeleton CLI. Delta family, Zeta, consensus trees, classifiers,
-visualisations, reports, and the interactive wizard shell land in Phases 2–5.
+**Phase 2 — Features & Delta.** Ships feature extractors (MFW, char/word/POS n-grams,
+dependency bigrams, function words, punctuation, lexical diversity, readability, sentence length)
+and the full Delta family (Burrows, Eder, Eder-Simple, Argamon Linear, Cosine, Quadratic).
+`tamga features` and `tamga delta` CLI commands work end-to-end; the Federalist Papers parity
+test attributes the disputed paper 49 to Madison using Burrows/Eder/Cosine Delta on 500 MFW.
+
+Phases 3 (Zeta/reducers/clustering/consensus/classify), 4 (embeddings + Bayesian),
+5 (viz + reports + wizard shell), and 6 (docs + PyPI) remain.
 
 See `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md` for the full design.
 
