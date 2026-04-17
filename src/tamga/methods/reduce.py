@@ -44,6 +44,13 @@ class MDSReducer(_ReducerBase):
     _impl = MDS
     method_name = "mds"
 
+    def __init__(self, **kwargs: object) -> None:
+        # Pin defaults that sklearn will change in 1.9/1.10, preserving current behaviour
+        # and silencing the transient FutureWarnings. Callers can override either.
+        kwargs.setdefault("n_init", 4)
+        kwargs.setdefault("init", "random")
+        super().__init__(**kwargs)
+
 
 class TSNEReducer(_ReducerBase):
     _impl = TSNE
@@ -52,6 +59,13 @@ class TSNEReducer(_ReducerBase):
 
 class UMAPReducer(_ReducerBase):
     method_name = "umap"
+
+    def __init__(self, **kwargs: object) -> None:
+        # UMAP overrides n_jobs to 1 when random_state is set; pass it explicitly to silence
+        # the informational warning about deterministic reproducibility.
+        if "random_state" in kwargs:
+            kwargs.setdefault("n_jobs", 1)
+        super().__init__(**kwargs)
 
     @property
     def _impl(self) -> type:  # type: ignore[override]

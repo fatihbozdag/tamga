@@ -44,5 +44,7 @@ class SentenceLengthExtractor(BaseFeatureExtractor):
                 continue
             X[row, 0] = float(np.mean(lengths))
             X[row, 1] = float(np.std(lengths, ddof=0))
-            X[row, 2] = float(skew(lengths)) if len(lengths) > 2 else 0.0
+            # scipy.stats.skew warns on catastrophic cancellation when values are identical;
+            # guard with a variance check to keep the output well-defined (skew is 0 for constant data).
+            X[row, 2] = float(skew(lengths)) if len(lengths) > 2 and np.var(lengths) > 0 else 0.0
         return X, ["mean", "sd", "skew"]
