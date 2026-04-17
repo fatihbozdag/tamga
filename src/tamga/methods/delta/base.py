@@ -23,7 +23,7 @@ def _as_ndarray(X: FeatureMatrix | np.ndarray) -> np.ndarray:  # noqa: N803
     return X.X if isinstance(X, FeatureMatrix) else np.asarray(X)
 
 
-class _DeltaBase(BaseEstimator, ClassifierMixin):
+class _DeltaBase(ClassifierMixin, BaseEstimator):
     def __init__(self) -> None:
         self.classes_: np.ndarray = np.empty(0, dtype=object)
         self.centroids_: dict[str, np.ndarray] = {}
