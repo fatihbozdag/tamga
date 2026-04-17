@@ -1,0 +1,86 @@
+filename	author	role	notes
+fed_01.txt	Hamilton	train
+fed_02.txt	Jay	train
+fed_03.txt	Jay	train
+fed_04.txt	Jay	train
+fed_05.txt	Jay	train
+fed_06.txt	Hamilton	train
+fed_07.txt	Hamilton	train
+fed_08.txt	Hamilton	train
+fed_09.txt	Hamilton	train
+fed_10.txt	Madison	train
+fed_11.txt	Hamilton	train
+fed_12.txt	Hamilton	train
+fed_13.txt	Hamilton	train
+fed_14.txt	Madison	train
+fed_15.txt	Hamilton	train
+fed_16.txt	Hamilton	train
+fed_17.txt	Hamilton	train
+fed_18.txt	Joint_HM	excluded	Hamilton+Madison
+fed_19.txt	Joint_HM	excluded	Hamilton+Madison
+fed_20.txt	Joint_HM	excluded	Hamilton+Madison
+fed_21.txt	Hamilton	train
+fed_22.txt	Hamilton	train
+fed_23.txt	Hamilton	train
+fed_24.txt	Hamilton	train
+fed_25.txt	Hamilton	train
+fed_26.txt	Hamilton	train
+fed_27.txt	Hamilton	train
+fed_28.txt	Hamilton	train
+fed_29.txt	Hamilton	train
+fed_30.txt	Hamilton	train
+fed_31.txt	Hamilton	train
+fed_32.txt	Hamilton	train
+fed_33.txt	Hamilton	train
+fed_34.txt	Hamilton	train
+fed_35.txt	Hamilton	train
+fed_36.txt	Hamilton	train
+fed_37.txt	Madison	train
+fed_38.txt	Madison	train
+fed_39.txt	Madison	train
+fed_40.txt	Madison	train
+fed_41.txt	Madison	train
+fed_42.txt	Madison	train
+fed_43.txt	Madison	train
+fed_44.txt	Madison	train
+fed_45.txt	Madison	train
+fed_46.txt	Madison	train
+fed_47.txt	Madison	train
+fed_48.txt	Madison	train
+fed_49.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_50.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_51.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_52.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_53.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_54.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_55.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_56.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_57.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_58.txt	Madison	train
+fed_59.txt	Hamilton	train
+fed_60.txt	Hamilton	train
+fed_61.txt	Hamilton	train
+fed_62.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_63.txt	Disputed	test	historically disputed; M&W 1964 → Madison
+fed_64.txt	Jay	train
+fed_65.txt	Hamilton	train
+fed_66.txt	Hamilton	train
+fed_67.txt	Hamilton	train
+fed_68.txt	Hamilton	train
+fed_69.txt	Hamilton	train
+fed_70.txt	Hamilton	train
+fed_71.txt	Hamilton	train
+fed_72.txt	Hamilton	train
+fed_73.txt	Hamilton	train
+fed_74.txt	Hamilton	train
+fed_75.txt	Hamilton	train
+fed_76.txt	Hamilton	train
+fed_77.txt	Hamilton	train
+fed_78.txt	Hamilton	train
+fed_79.txt	Hamilton	train
+fed_80.txt	Hamilton	train
+fed_81.txt	Hamilton	train
+fed_82.txt	Hamilton	train
+fed_83.txt	Hamilton	train
+fed_84.txt	Hamilton	train
+fed_85.txt	Hamilton	train

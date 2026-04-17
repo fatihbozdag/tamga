@@ -48,3 +48,4 @@ scratch/
 # Environment / secrets
 .env
 .envrc
+examples/**/.tamga/

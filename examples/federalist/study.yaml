@@ -1,0 +1,76 @@
+# Full Federalist Papers stylometric analysis
+#
+# Reproduces the Mosteller & Wallace (1964) disputed-paper attribution using
+# Burrows Delta. Also exercises Zeta (contrastive vocabulary), PCA projection,
+# hierarchical clustering with Ward linkage, and a small bootstrap consensus
+# tree. Runs against the full 85-paper corpus with standard author labels.
+#
+# Usage:
+#   tamga run examples/federalist/study.yaml --name demo
+#   tamga report examples/federalist/results/demo --output examples/federalist/report.html
+
+name: federalist-full
+seed: 42
+
+corpus:
+  path: examples/federalist/corpus
+  metadata: examples/federalist/metadata.tsv
+  # Only analyse single-author papers; Joint_HM (18-20) and Disputed (test set)
+  # are excluded from the training-based views by the filter below.
+  filter:
+    role: [train]
+
+features:
+  - id: mfw500
+    type: mfw
+    n: 500
+    min_df: 2
+    scale: zscore
+    lowercase: true
+
+methods:
+  - id: burrows
+    kind: delta
+    method: burrows
+    features: mfw500
+    group_by: author
+
+  - id: pca
+    kind: reduce
+    features: mfw500
+    n_components: 2
+
+  - id: ward
+    kind: cluster
+    features: mfw500
+    n_clusters: 3
+    linkage: ward
+
+  - id: zeta_hamilton_madison
+    kind: zeta
+    group_by: author
+    group_a: Hamilton
+    group_b: Madison
+    top_k: 25
+
+  - id: consensus
+    kind: consensus
+    mfw_bands: [100, 200, 300, 400, 500]
+    replicates: 20
+    subsample: 0.8
+    seed: 42
+
+viz:
+  format: [pdf, png]
+  dpi: 300
+
+report:
+  format: html
+  title: "Federalist Papers — full stylometric analysis"
+
+cache:
+  dir: examples/federalist/.tamga/cache
+
+output:
+  dir: examples/federalist/results
+  timestamp: false
