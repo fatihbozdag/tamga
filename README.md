@@ -11,14 +11,15 @@ analysis. It reimplements the analytical breadth of R's `Stylo` and adds modern 
 
 ## Status
 
-**Phase 2 — Features & Delta.** Ships feature extractors (MFW, char/word/POS n-grams,
-dependency bigrams, function words, punctuation, lexical diversity, readability, sentence length)
-and the full Delta family (Burrows, Eder, Eder-Simple, Argamon Linear, Cosine, Quadratic).
-`tamga features` and `tamga delta` CLI commands work end-to-end; the Federalist Papers parity
-test attributes the disputed paper 49 to Madison using Burrows/Eder/Cosine Delta on 500 MFW.
+**Phase 3 — Analytical breadth.** Ships Craig's Zeta (classic + Eder variants),
+dimensionality reducers (PCA/MDS/t-SNE/UMAP), clustering (hierarchical Ward/avg/complete/single,
+k-means, HDBSCAN), bootstrap consensus trees (Newick output), and sklearn-wrapped classifiers
+(logreg/SVM/RF/HGBM) with stylometry-aware CV (LOAO, leave-one-text-out, stratified).
+CLI: `tamga zeta`, `reduce`, `cluster`, `consensus`, `classify` — all live. Phase 2 ships 10
+feature extractors and the full Delta family (Burrows/Eder/Argamon/Cosine/Quadratic);
+the Federalist Papers parity test attributes the disputed paper 49 to Madison at MFW=500.
 
-Phases 3 (Zeta/reducers/clustering/consensus/classify), 4 (embeddings + Bayesian),
-5 (viz + reports + wizard shell), and 6 (docs + PyPI) remain.
+Phases 4 (embeddings + Bayesian), 5 (viz + reports + wizard shell), 6 (docs + PyPI) remain.
 
 See `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md` for the full design.
 
