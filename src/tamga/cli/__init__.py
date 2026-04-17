@@ -7,11 +7,16 @@ from rich.console import Console
 
 from tamga._version import __version__
 from tamga.cli.cache_cmd import cache_app
+from tamga.cli.classify_cmd import classify_command
+from tamga.cli.cluster_cmd import cluster_command
+from tamga.cli.consensus_cmd import consensus_command
 from tamga.cli.delta_cmd import delta_command
 from tamga.cli.features_cmd import features_command
 from tamga.cli.info_cmd import info_command
 from tamga.cli.ingest_cmd import ingest_command
 from tamga.cli.init_cmd import init_command
+from tamga.cli.reduce_cmd import reduce_command
+from tamga.cli.zeta_cmd import zeta_command
 
 console = Console()
 app = typer.Typer(
@@ -26,6 +31,11 @@ app.command(name="ingest")(ingest_command)
 app.command(name="info")(info_command)
 app.command(name="features")(features_command)
 app.command(name="delta")(delta_command)
+app.command(name="zeta")(zeta_command)
+app.command(name="reduce")(reduce_command)
+app.command(name="cluster")(cluster_command)
+app.command(name="consensus")(consensus_command)
+app.command(name="classify")(classify_command)
 app.add_typer(cache_app, name="cache")
 
 
