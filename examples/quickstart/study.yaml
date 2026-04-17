@@ -1,0 +1,70 @@
+# Quickstart study — "Who wrote the mystery essay?"
+#
+# 8 training essays (4 Hamilton + 4 Madison) from the Federalist Papers,
+# plus 1 disputed essay (fed_50) whose author we want to identify.
+#
+# This study runs three methods, each explained in README.md:
+#   - Burrows Delta  → a "nearest neighbour" stylistic fingerprint score
+#   - PCA            → a 2-D map of who writes like whom
+#   - Craig's Zeta   → the words that most distinguish Hamilton from Madison
+#
+# Run it with:
+#   tamga run examples/quickstart/study.yaml --name demo
+
+name: quickstart
+seed: 42
+
+corpus:
+  path: examples/quickstart/corpus
+  metadata: examples/quickstart/metadata.tsv
+  # Only train on the 8 known essays. The mystery paper (role=test) is held out.
+  filter:
+    role: [train]
+
+features:
+  # "MFW" = Most Frequent Words. We count how often each of the top 200 words
+  # (the, of, to, and, in, …) appears in every essay, then z-score the counts
+  # so each word contributes equally regardless of its raw frequency.
+  - id: mfw200
+    type: mfw
+    n: 200
+    min_df: 2
+    scale: zscore
+    lowercase: true
+
+methods:
+  # 1. Burrows Delta — a classic authorship fingerprint. For each pair of essays
+  #    it measures how similar their word-frequency profiles are. Smaller = closer.
+  - id: burrows
+    kind: delta
+    method: burrows
+    features: mfw200
+    group_by: author
+
+  # 2. PCA — a 2-D projection of the same word-frequency profiles. Essays by the
+  #    same author tend to clump together on the resulting map.
+  - id: pca
+    kind: reduce
+    features: mfw200
+    n_components: 2
+
+  # 3. Craig's Zeta — finds the words Hamilton uses a lot that Madison almost
+  #    never uses, and vice versa. These are the "tells" that give each author away.
+  - id: zeta
+    kind: zeta
+    group_by: author
+    group_a: Hamilton
+    group_b: Madison
+    top_k: 20
+
+viz:
+  format: [png]
+  dpi: 200
+
+report:
+  format: html
+  title: "Quickstart — Who wrote the mystery essay?"
+
+output:
+  dir: examples/quickstart/results
+  timestamp: false
