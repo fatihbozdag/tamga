@@ -35,6 +35,9 @@ htmlcov/
 results/
 reports/
 
+# ad-hoc setup scripts
+scratch/
+
 # OS / editor
 .DS_Store
 .idea/
