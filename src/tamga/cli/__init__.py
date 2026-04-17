@@ -21,6 +21,7 @@ from tamga.cli.plot_cmd import plot_command
 from tamga.cli.reduce_cmd import reduce_command
 from tamga.cli.report_cmd import report_command
 from tamga.cli.run_cmd import run_command
+from tamga.cli.shell_cmd import shell_command
 from tamga.cli.zeta_cmd import zeta_command
 
 console = Console()
@@ -46,6 +47,7 @@ app.command(name="bayesian")(bayesian_command)
 app.command(name="run")(run_command)
 app.command(name="report")(report_command)
 app.command(name="plot")(plot_command)
+app.command(name="shell")(shell_command)
 app.add_typer(cache_app, name="cache")
 
 
