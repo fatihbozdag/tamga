@@ -6,6 +6,8 @@ import typer
 from rich.console import Console
 
 from tamga._version import __version__
+from tamga.cli.cache_cmd import cache_app
+from tamga.cli.info_cmd import info_command
 from tamga.cli.ingest_cmd import ingest_command
 from tamga.cli.init_cmd import init_command
 
@@ -19,6 +21,8 @@ app = typer.Typer(
 
 app.command(name="init")(init_command)
 app.command(name="ingest")(ingest_command)
+app.command(name="info")(info_command)
+app.add_typer(cache_app, name="cache")
 
 
 def _version_callback(value: bool) -> None:
