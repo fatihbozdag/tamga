@@ -1,0 +1,57 @@
+# {{ title }}
+
+**Generated:** {{ generated_at }} · **tamga:** {{ tamga_version }}
+
+{% if corpus_summary %}
+## Corpus
+
+| field | value |
+|-------|-------|
+{% for k, v in corpus_summary.items() %}| {{ k }} | {{ v }} |
+{% endfor %}
+{% endif %}
+
+{% if resolved_config %}
+## Resolved config
+
+```yaml
+{{ resolved_config }}
+```
+{% endif %}
+
+{% for result in results %}
+## {{ result.method_name }}
+
+{% if result.figures %}
+{% for figure in result.figures %}
+![{{ result.method_name }}]({{ figure }})
+{% endfor %}
+{% endif %}
+
+{% if result.params %}
+### Parameters
+
+```json
+{{ result.params }}
+```
+{% endif %}
+
+{% if result.tables %}
+{% for table in result.tables %}
+{{ table }}
+{% endfor %}
+{% endif %}
+
+{% if result.summary %}
+{{ result.summary }}
+{% endif %}
+
+{% endfor %}
+
+---
+
+## Provenance
+
+```json
+{{ provenance }}
+```

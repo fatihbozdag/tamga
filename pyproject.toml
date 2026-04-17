@@ -78,6 +78,7 @@ packages = ["src/tamga"]
 [tool.hatch.build.targets.wheel.force-include]
 "src/tamga/scaffold/templates" = "tamga/scaffold/templates"
 "src/tamga/resources" = "tamga/resources"
+"src/tamga/report/templates" = "tamga/report/templates"
 
 [tool.hatch.build.targets.sdist]
 include = ["src/tamga", "tests", "docs", "README.md", "LICENSE", "CITATION.cff"]
