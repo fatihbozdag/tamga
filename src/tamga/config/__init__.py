@@ -1,5 +1,6 @@
 """Configuration schema and resolution."""
 
+from tamga.config.resolve import load_config, resolve_config
 from tamga.config.schema import (
     CacheConfig,
     CorpusConfig,
@@ -22,4 +23,6 @@ __all__ = [
     "ReportConfig",
     "StudyConfig",
     "VizConfig",
+    "load_config",
+    "resolve_config",
 ]
