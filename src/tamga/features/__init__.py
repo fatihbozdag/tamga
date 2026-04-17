@@ -25,3 +25,17 @@ __all__ = [
     "SentenceLengthExtractor",
     "WordNgramExtractor",
 ]
+
+# Optional `tamga[embeddings]` extractors — available only when the extra is installed.
+try:
+    from tamga.features.embeddings import (
+        ContextualEmbeddingExtractor,
+        SentenceEmbeddingExtractor,
+    )
+
+    _EMBEDDINGS_AVAILABLE = True
+except ImportError:
+    _EMBEDDINGS_AVAILABLE = False
+
+if _EMBEDDINGS_AVAILABLE:
+    __all__ = [*__all__, "ContextualEmbeddingExtractor", "SentenceEmbeddingExtractor"]
