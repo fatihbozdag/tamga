@@ -11,13 +11,15 @@ analysis. It reimplements the analytical breadth of R's `Stylo` and adds modern 
 
 ## Status
 
-**Phase 4 — Optional extras.** `tamga[embeddings]` adds sentence-transformer + contextual-BERT
-embeddings (pool mean/cls/max). `tamga[bayesian]` adds Wallace-Mosteller Bayesian authorship
-attribution (sklearn ClassifierMixin, plugs into Pipeline/cross_validate) and a PyMC
-hierarchical group-comparison model. CLI: `tamga embed`, `tamga bayesian`. Phases 1-3 remain
-installable without either extra.
+**Phase 5 — Viz, reports, runner, shell.** Ships publication-grade matplotlib renderers
+(dendrogram, scatter, distance heatmap, confusion matrix, feature importance, Zeta preference
+plot) with 300-DPI defaults + colorblind palette; HTML/Markdown reports rendered from saved
+Result directories via Jinja2; `tamga run study.yaml` orchestrator that executes a full
+declarative study (features + methods) end-to-end; Rich-based `tamga shell` wizard.
+CLI: `tamga run`, `report`, `plot`, `shell`. Phase 4 extras: `tamga[embeddings]` (sentence +
+contextual-BERT embeddings), `tamga[bayesian]` (Wallace-Mosteller + PyMC hierarchical model).
 
-Phase 5 (viz + reports + wizard shell), Phase 6 (docs + PyPI) remain.
+Phase 6 (MkDocs site + Federalist/EFCAMDAT tutorials + PyPI publish) remains.
 
 See `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md` for the full design.
 

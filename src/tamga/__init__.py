@@ -33,7 +33,19 @@ from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReduce
 from tamga.methods.zeta import ZetaClassic, ZetaEder
 from tamga.preprocess.pipeline import ParsedCorpus, SpacyPipeline
 from tamga.provenance import Provenance
+from tamga.report import build_report
 from tamga.result import Result
+from tamga.runner import run_study
+from tamga.viz import (
+    apply_publication_style,
+    figure_size,
+    plot_confusion_matrix,
+    plot_dendrogram,
+    plot_distance_heatmap,
+    plot_feature_importance,
+    plot_scatter_2d,
+    plot_zeta,
+)
 
 __all__ = [
     "ArgamonLinearDelta",
@@ -72,12 +84,22 @@ __all__ = [
     "ZetaClassic",
     "ZetaEder",
     "__version__",
+    "apply_publication_style",
     "build_classifier",
+    "build_report",
     "cross_validate_tamga",
+    "figure_size",
     "load_config",
     "load_corpus",
     "load_metadata",
+    "plot_confusion_matrix",
+    "plot_dendrogram",
+    "plot_distance_heatmap",
+    "plot_feature_importance",
+    "plot_scatter_2d",
+    "plot_zeta",
     "resolve_config",
+    "run_study",
 ]
 
 # Optional extras — available only when tamga[embeddings] / tamga[bayesian] installed.
