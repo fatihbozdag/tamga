@@ -17,7 +17,10 @@ from tamga.cli.features_cmd import features_command
 from tamga.cli.info_cmd import info_command
 from tamga.cli.ingest_cmd import ingest_command
 from tamga.cli.init_cmd import init_command
+from tamga.cli.plot_cmd import plot_command
 from tamga.cli.reduce_cmd import reduce_command
+from tamga.cli.report_cmd import report_command
+from tamga.cli.run_cmd import run_command
 from tamga.cli.zeta_cmd import zeta_command
 
 console = Console()
@@ -40,6 +43,9 @@ app.command(name="consensus")(consensus_command)
 app.command(name="classify")(classify_command)
 app.command(name="embed")(embed_command)
 app.command(name="bayesian")(bayesian_command)
+app.command(name="run")(run_command)
+app.command(name="report")(report_command)
+app.command(name="plot")(plot_command)
 app.add_typer(cache_app, name="cache")
 
 
