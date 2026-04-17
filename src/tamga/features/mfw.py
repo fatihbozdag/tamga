@@ -38,8 +38,10 @@ class MFWExtractor(BaseFeatureExtractor):
     max_df : float
         Drop words appearing in more than `max_df` fraction of documents (1.0 disables).
     scale : {"none", "zscore", "l1", "l2"}
-        Per-feature scaling applied at transform-time. Burrows Delta requires "zscore";
-        "l1" normalises rows to sum to 1 (relative frequencies); "l2" normalises rows to unit length.
+        Per-feature scaling applied at transform-time. Burrows Delta requires "zscore", which
+        z-scores the *relative frequencies* (per-document rates) — the classical Mosteller &
+        Wallace / Burrows formulation. "l1" normalises rows to sum to 1 (relative frequencies);
+        "l2" normalises rows to unit length.
     lowercase : bool
         If True, case-fold before counting.
     """
@@ -86,11 +88,13 @@ class MFWExtractor(BaseFeatureExtractor):
         self._vocabulary = candidates[: self.n]
 
         if self.scale == "zscore":
-            X_raw = self._raw_counts(corpus)  # noqa: N806 (sklearn convention)
-            self._column_means = X_raw.mean(axis=0)
+            # Burrows Delta z-scores *relative frequencies* (rel_freq = count / doc_length),
+            # not raw counts. Normalising first ensures longer documents do not dominate.
+            X_rel = self._relative_frequencies(corpus)  # noqa: N806 (sklearn convention)
+            self._column_means = X_rel.mean(axis=0)
             # Population SD (ddof=0) to match Stylo's convention. Replace zero-stds with 1 to avoid
             # div-by-zero.
-            stds = X_raw.std(axis=0, ddof=0)
+            stds = X_rel.std(axis=0, ddof=0)
             stds[stds == 0] = 1.0
             self._column_stds = stds
 
@@ -98,11 +102,10 @@ class MFWExtractor(BaseFeatureExtractor):
         X = self._raw_counts(corpus)  # noqa: N806 (sklearn convention)
         if self.scale == "zscore":
             assert self._column_means is not None and self._column_stds is not None
-            X = (X - self._column_means) / self._column_stds  # noqa: N806
+            X_rel = self._l1_normalise(X)  # noqa: N806
+            X = (X_rel - self._column_means) / self._column_stds  # noqa: N806
         elif self.scale == "l1":
-            row_sums = X.sum(axis=1, keepdims=True)
-            row_sums[row_sums == 0] = 1.0
-            X = X / row_sums  # noqa: N806
+            X = self._l1_normalise(X)  # noqa: N806
         elif self.scale == "l2":
             row_norms = np.linalg.norm(X, axis=1, keepdims=True)
             row_norms[row_norms == 0] = 1.0
@@ -120,3 +123,13 @@ class MFWExtractor(BaseFeatureExtractor):
                 if tok in index:
                     X[row, index[tok]] += 1
         return X
+
+    def _relative_frequencies(self, corpus: Corpus) -> np.ndarray:
+        """Raw counts normalised to per-document rates (each row sums to ~1 over the MFW vocab)."""
+        return self._l1_normalise(self._raw_counts(corpus))
+
+    @staticmethod
+    def _l1_normalise(X: np.ndarray) -> np.ndarray:  # noqa: N803
+        row_sums = X.sum(axis=1, keepdims=True)
+        row_sums[row_sums == 0] = 1.0
+        return X / row_sums  # type: ignore[no-any-return]
