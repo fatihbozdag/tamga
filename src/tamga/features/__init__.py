@@ -2,5 +2,12 @@
 
 from tamga.features.base import BaseFeatureExtractor, FeatureMatrix
 from tamga.features.mfw import MFWExtractor
+from tamga.features.ngrams import CharNgramExtractor, WordNgramExtractor
 
-__all__ = ["BaseFeatureExtractor", "FeatureMatrix", "MFWExtractor"]
+__all__ = [
+    "BaseFeatureExtractor",
+    "CharNgramExtractor",
+    "FeatureMatrix",
+    "MFWExtractor",
+    "WordNgramExtractor",
+]
