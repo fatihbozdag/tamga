@@ -11,15 +11,13 @@ analysis. It reimplements the analytical breadth of R's `Stylo` and adds modern 
 
 ## Status
 
-**Phase 3 — Analytical breadth.** Ships Craig's Zeta (classic + Eder variants),
-dimensionality reducers (PCA/MDS/t-SNE/UMAP), clustering (hierarchical Ward/avg/complete/single,
-k-means, HDBSCAN), bootstrap consensus trees (Newick output), and sklearn-wrapped classifiers
-(logreg/SVM/RF/HGBM) with stylometry-aware CV (LOAO, leave-one-text-out, stratified).
-CLI: `tamga zeta`, `reduce`, `cluster`, `consensus`, `classify` — all live. Phase 2 ships 10
-feature extractors and the full Delta family (Burrows/Eder/Argamon/Cosine/Quadratic);
-the Federalist Papers parity test attributes the disputed paper 49 to Madison at MFW=500.
+**Phase 4 — Optional extras.** `tamga[embeddings]` adds sentence-transformer + contextual-BERT
+embeddings (pool mean/cls/max). `tamga[bayesian]` adds Wallace-Mosteller Bayesian authorship
+attribution (sklearn ClassifierMixin, plugs into Pipeline/cross_validate) and a PyMC
+hierarchical group-comparison model. CLI: `tamga embed`, `tamga bayesian`. Phases 1-3 remain
+installable without either extra.
 
-Phases 4 (embeddings + Bayesian), 5 (viz + reports + wizard shell), 6 (docs + PyPI) remain.
+Phase 5 (viz + reports + wizard shell), Phase 6 (docs + PyPI) remain.
 
 See `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md` for the full design.
 

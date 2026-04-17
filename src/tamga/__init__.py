@@ -79,3 +79,29 @@ __all__ = [
     "load_metadata",
     "resolve_config",
 ]
+
+# Optional extras — available only when tamga[embeddings] / tamga[bayesian] installed.
+try:
+    from tamga.features.embeddings import (
+        ContextualEmbeddingExtractor,
+        SentenceEmbeddingExtractor,
+    )
+
+    _EMBEDDINGS_AVAILABLE = True
+except ImportError:
+    _EMBEDDINGS_AVAILABLE = False
+
+try:
+    from tamga.methods.bayesian import (
+        BayesianAuthorshipAttributor,
+        HierarchicalGroupComparison,
+    )
+
+    _BAYESIAN_AVAILABLE = True
+except ImportError:
+    _BAYESIAN_AVAILABLE = False
+
+if _EMBEDDINGS_AVAILABLE:
+    __all__ = [*__all__, "ContextualEmbeddingExtractor", "SentenceEmbeddingExtractor"]
+if _BAYESIAN_AVAILABLE:
+    __all__ = [*__all__, "BayesianAuthorshipAttributor", "HierarchicalGroupComparison"]
