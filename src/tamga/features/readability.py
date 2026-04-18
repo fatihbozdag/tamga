@@ -15,6 +15,8 @@ import textstat
 from tamga.corpus import Corpus
 from tamga.features.base import BaseFeatureExtractor
 from tamga.languages import get_language
+from tamga.languages.readability_tr import atesman as _tr_atesman
+from tamga.languages.readability_tr import bezirci_yilmaz as _tr_bezirci_yilmaz
 
 # {language_code: {index_name: callable(text) -> float}}
 _INDEX_REGISTRY: dict[str, dict[str, Callable[[str], float]]] = {
@@ -26,7 +28,10 @@ _INDEX_REGISTRY: dict[str, dict[str, Callable[[str], float]]] = {
         "ari": textstat.automated_readability_index,
         "smog": textstat.smog_index,
     },
-    "tr": {},  # Task 5.1
+    "tr": {
+        "atesman": _tr_atesman,
+        "bezirci_yilmaz": _tr_bezirci_yilmaz,
+    },
     "de": {},  # Task 5.2
     "es": {},  # Task 5.3
     "fr": {},  # Task 5.4
