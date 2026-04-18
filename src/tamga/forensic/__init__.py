@@ -15,12 +15,14 @@ from tamga.forensic.lr import (
     log_lr_from_probs_with_priors,
 )
 from tamga.forensic.metrics import brier, cllr, ece, tippett
+from tamga.forensic.unmasking import Unmasking
 from tamga.forensic.verify import GeneralImpostors
 
 __all__ = [
     "CalibratedScorer",
     "CategorizedCharNgramExtractor",
     "GeneralImpostors",
+    "Unmasking",
     "brier",
     "classify_ngram",
     "cllr",
