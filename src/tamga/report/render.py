@@ -83,3 +83,64 @@ def _first_provenance(results: list[dict[str, Any]]) -> dict[str, Any] | None:
         if r.get("provenance"):
             return r["provenance"]  # type: ignore[no-any-return]
     return None
+
+
+def build_forensic_report(
+    result_dir: str | Path,
+    *,
+    output: str | Path,
+    title: str = "tamga forensic report",
+    lr_summaries: dict[str, dict[str, str]] | None = None,
+) -> Path:
+    """Render a forensic-styled report with known/questioned framing, LR output, and a
+    chain-of-custody block.
+
+    The forensic fields (``hypothesis_pair``, ``questioned_description``, ``known_description``,
+    ``acquisition_notes``, ``custody_notes``, ``source_hashes``) are read from the
+    ``provenance`` of the first Result in ``result_dir``. Populate them when calling
+    ``Provenance.current`` from your verification pipeline.
+
+    Parameters
+    ----------
+    result_dir : path
+        A Result directory or a parent directory of per-method Result subdirectories.
+    output : path
+        Output HTML path.
+    title : str
+    lr_summaries : dict, optional
+        Per-method LR summaries keyed by method name, e.g.,
+        ``{"general_impostors": {"log_lr": "1.34", "lr": "21.9"}}``. These render under the
+        relevant method section. If None, no LR block is drawn per method.
+    """
+    result_dir = Path(result_dir)
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    results = list(_collect_results(result_dir))
+    provenance = _first_provenance(results) or {}
+
+    if lr_summaries:
+        for r in results:
+            summary = lr_summaries.get(r["method_name"])
+            if summary:
+                r["lr_summary"] = summary
+
+    env = Environment(keep_trailing_newline=True)
+    template = env.from_string(
+        (resources.files(_TEMPLATE_PKG) / "forensic_lr.html.j2").read_text(encoding="utf-8")
+    )
+    rendered = template.render(
+        title=title,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        tamga_version=__version__,
+        hypothesis_pair=provenance.get("hypothesis_pair"),
+        questioned_description=provenance.get("questioned_description"),
+        known_description=provenance.get("known_description"),
+        acquisition_notes=provenance.get("acquisition_notes"),
+        custody_notes=provenance.get("custody_notes"),
+        source_hashes=provenance.get("source_hashes") or {},
+        results=results,
+        provenance=json.dumps(provenance, indent=2, default=str),
+    )
+    output.write_text(rendered, encoding="utf-8")
+    return output
