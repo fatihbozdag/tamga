@@ -17,6 +17,7 @@ from tamga.features import (
     SentenceLengthExtractor,
     WordNgramExtractor,
 )
+from tamga.forensic import GeneralImpostors
 from tamga.io import load_corpus, load_metadata
 from tamga.methods.classify import build_classifier, cross_validate_tamga
 from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
@@ -61,6 +62,7 @@ __all__ = [
     "EderSimpleDelta",
     "FeatureMatrix",
     "FunctionWordExtractor",
+    "GeneralImpostors",
     "HDBSCANCluster",
     "HierarchicalCluster",
     "KMeansCluster",
