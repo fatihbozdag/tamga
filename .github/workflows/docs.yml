@@ -1,23 +1,45 @@
 name: Docs
 
+# Builds the MkDocs site on every push that touches docs/ or src/ and uploads the
+# rendered HTML as a workflow artifact. The deploy-to-Pages step is intentionally
+# omitted: GitHub Pages is unavailable on private repositories below the Pro tier.
+# When the repo is made public (or upgraded), add a deploy job back:
+#
+#   deploy:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     environment:
+#       name: github-pages
+#       url: ${{ steps.deployment.outputs.page_url }}
+#     steps:
+#       - id: deployment
+#         uses: actions/deploy-pages@v4
+#
+# and re-grant `pages: write` + `id-token: write` at the workflow level, plus swap
+# `actions/upload-artifact` below for `actions/upload-pages-artifact`.
+
 on:
   push:
     branches: [main]
     paths:
       - "docs/**"
       - "mkdocs.yml"
-      - "src/tamga/**/*.py"     # so mkdocstrings re-renders the API reference
+      - "src/tamga/**/*.py"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "src/tamga/**/*.py"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: docs
-  cancel-in-progress: false
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -30,16 +52,8 @@ jobs:
           python-version: "3.11"
       - run: uv pip install --system -e ".[docs]"
       - run: mkdocs build --strict
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: docs-site
           path: site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          retention-days: 14
