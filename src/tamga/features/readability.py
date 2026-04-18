@@ -19,6 +19,8 @@ from tamga.languages.readability_de import flesch_amstad as _de_flesch_amstad
 from tamga.languages.readability_de import wiener_sachtextformel as _de_wst
 from tamga.languages.readability_es import fernandez_huerta as _es_fh
 from tamga.languages.readability_es import szigriszt_pazos as _es_sp
+from tamga.languages.readability_fr import kandel_moles as _fr_km
+from tamga.languages.readability_fr import lix as _fr_lix
 from tamga.languages.readability_tr import atesman as _tr_atesman
 from tamga.languages.readability_tr import bezirci_yilmaz as _tr_bezirci_yilmaz
 
@@ -44,7 +46,10 @@ _INDEX_REGISTRY: dict[str, dict[str, Callable[[str], float]]] = {
         "fernandez_huerta": _es_fh,
         "szigriszt_pazos": _es_sp,
     },
-    "fr": {},  # Task 5.4
+    "fr": {
+        "kandel_moles": _fr_km,
+        "lix": _fr_lix,
+    },
 }
 
 
