@@ -8,6 +8,9 @@ Two extractors:
   by mean or CLS.
 
 Both raise `ImportError` at construction if the optional `tamga[embeddings]` extra is not installed.
+
+When `model=None`, the default model is resolved per-language from `tamga.languages.get_language`
+at fit time (so `SentenceEmbeddingExtractor()` on a Turkish corpus picks the Turkish default).
 """
 
 from __future__ import annotations
@@ -42,23 +45,34 @@ class SentenceEmbeddingExtractor(BaseFeatureExtractor):
     def __init__(
         self,
         *,
-        model: str = "sentence-transformers/all-mpnet-base-v2",
+        model: str | None = None,
+        language: str | None = None,
         pool: Pool = "mean",
         device: str | None = None,
     ) -> None:
         if not _sentence_transformers_available:
             raise ImportError(_INSTALL_HINT)
         self.model = model
+        self.language = language
         self.pool = pool
         self.device = device
         self._encoder: Any = None
 
+    def _resolve_model(self, corpus: Corpus) -> None:
+        if self.model is None:
+            from tamga.languages import get_language
+
+            lang = self.language or corpus.language
+            self.model = get_language(lang).sentence_embedding_default
+
     def _load_encoder(self) -> Any:
         if self._encoder is None:
+            assert self.model is not None, "call _resolve_model(corpus) before _load_encoder()"
             self._encoder = SentenceTransformer(self.model, device=self.device)
         return self._encoder
 
     def _fit(self, corpus: Corpus) -> None:
+        self._resolve_model(corpus)
         self._load_encoder()
 
     def _transform(self, corpus: Corpus) -> tuple[np.ndarray, list[str]]:
@@ -81,7 +95,8 @@ class ContextualEmbeddingExtractor(BaseFeatureExtractor):
     def __init__(
         self,
         *,
-        model: str = "bert-base-uncased",
+        model: str | None = None,
+        language: str | None = None,
         layer: int = -1,
         pool: Pool = "mean",
         device: str | None = None,
@@ -90,6 +105,7 @@ class ContextualEmbeddingExtractor(BaseFeatureExtractor):
         if not _sentence_transformers_available:
             raise ImportError(_INSTALL_HINT)
         self.model = model
+        self.language = language
         self.layer = layer
         self.pool = pool
         self.device = device
@@ -97,10 +113,18 @@ class ContextualEmbeddingExtractor(BaseFeatureExtractor):
         self._tokenizer: Any = None
         self._transformer: Any = None
 
+    def _resolve_model(self, corpus: Corpus) -> None:
+        if self.model is None:
+            from tamga.languages import get_language
+
+            lang = self.language or corpus.language
+            self.model = get_language(lang).contextual_embedding_default
+
     def _load(self) -> None:
         if self._transformer is None:
             from transformers import AutoModel, AutoTokenizer
 
+            assert self.model is not None, "call _resolve_model(corpus) before _load()"
             self._tokenizer = AutoTokenizer.from_pretrained(self.model)
             self._transformer = AutoModel.from_pretrained(self.model, output_hidden_states=True)
             if self.device:
@@ -108,6 +132,7 @@ class ContextualEmbeddingExtractor(BaseFeatureExtractor):
             self._transformer.eval()
 
     def _fit(self, corpus: Corpus) -> None:
+        self._resolve_model(corpus)
         self._load()
 
     def _transform(self, corpus: Corpus) -> tuple[np.ndarray, list[str]]:
