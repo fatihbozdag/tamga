@@ -15,6 +15,8 @@ import textstat
 from tamga.corpus import Corpus
 from tamga.features.base import BaseFeatureExtractor
 from tamga.languages import get_language
+from tamga.languages.readability_de import flesch_amstad as _de_flesch_amstad
+from tamga.languages.readability_de import wiener_sachtextformel as _de_wst
 from tamga.languages.readability_tr import atesman as _tr_atesman
 from tamga.languages.readability_tr import bezirci_yilmaz as _tr_bezirci_yilmaz
 
@@ -32,7 +34,10 @@ _INDEX_REGISTRY: dict[str, dict[str, Callable[[str], float]]] = {
         "atesman": _tr_atesman,
         "bezirci_yilmaz": _tr_bezirci_yilmaz,
     },
-    "de": {},  # Task 5.2
+    "de": {
+        "flesch_amstad": _de_flesch_amstad,
+        "wiener_sachtextformel": _de_wst,
+    },
     "es": {},  # Task 5.3
     "fr": {},  # Task 5.4
 }
