@@ -19,7 +19,10 @@ from tamga.features import (
 )
 from tamga.forensic import (
     CalibratedScorer,
+    CategorizedCharNgramExtractor,
     GeneralImpostors,
+    distort_corpus,
+    distort_text,
     log_lr_from_probs,
     log_lr_from_probs_with_priors,
 )
@@ -59,6 +62,7 @@ __all__ = [
     "BootstrapConsensus",
     "BurrowsDelta",
     "CalibratedScorer",
+    "CategorizedCharNgramExtractor",
     "CharNgramExtractor",
     "Corpus",
     "CosineDelta",
@@ -96,6 +100,8 @@ __all__ = [
     "build_classifier",
     "build_report",
     "cross_validate_tamga",
+    "distort_corpus",
+    "distort_text",
     "figure_size",
     "load_config",
     "load_corpus",
