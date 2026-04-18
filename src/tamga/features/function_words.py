@@ -17,7 +17,7 @@ _WORD_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
 
 
 def _load_bundled_list() -> list[str]:
-    path = resources.files("tamga.resources") / "function_words_en.txt"
+    path = resources.files("tamga.resources.languages.en") / "function_words.txt"
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
