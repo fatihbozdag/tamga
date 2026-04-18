@@ -1,0 +1,55 @@
+name: Multi-language tests
+
+# Exercises the non-English paths that the default CI grid skips. The Turkish job installs
+# spacy-stanza and downloads Stanza's Turkish model; the European job downloads the
+# transformer spaCy pipelines for DE / ES / FR. Both run weekly and on tagged releases so
+# regressions surface before users hit them.
+
+on:
+  push:
+    tags: ["v*"]
+  schedule:
+    - cron: "17 3 * * 1"  # Mondays 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  turkish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install tamga + Turkish extras
+        run: uv pip install --system -e ".[turkish,embeddings,dev]"
+      - name: Download Stanza Turkish model
+        run: python -c "import stanza; stanza.download('tr')"
+      - name: Run Turkish integration tests
+        run: pytest -m slow tests/integration -v
+
+  european:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: uv pip install --system -e ".[dev]"
+      - name: Download spaCy pipelines (DE, ES, FR)
+        run: |
+          python -m spacy download de_dep_news_trf
+          python -m spacy download es_dep_news_trf
+          python -m spacy download fr_dep_news_trf
+      - name: Run language readability unit tests
+        run: pytest tests/languages -v
