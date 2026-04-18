@@ -128,7 +128,7 @@ class CalibratedScorer:
             raise ValueError(f"y must be binary with labels in {{0, 1}}; got {unique_y.tolist()}")
 
         if self.method == "platt":
-            lr = LogisticRegression(solver="lbfgs")
+            lr = LogisticRegression(solver="lbfgs", max_iter=1000)
             lr.fit(scores.reshape(-1, 1), y)
             self._model = lr
         else:
