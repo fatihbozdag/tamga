@@ -1,0 +1,100 @@
+# Verification
+
+Authorship *verification* is a one-class decision: **did this specific candidate produce
+this questioned document?** Real case-work rarely offers a closed candidate set, so
+verification — not attribution — is the forensically canonical task.
+
+tamga ships two complementary verifiers.
+
+## General Impostors (Koppel & Winter 2014)
+
+For a questioned document Q, a candidate's known documents K, and a pool of impostor
+documents I drawn from other authors, repeatedly:
+
+1. Sample a random feature subspace.
+2. Sample m impostors from the pool.
+3. Check whether Q is closer to K than to any sampled impostor.
+
+The fraction of winning iterations is the verification score in [0, 1].
+
+```python
+from tamga.features import MFWExtractor
+from tamga.forensic import GeneralImpostors
+
+# Build features over the pooled corpus so Q, K, and impostors share one vocabulary.
+fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(pooled_corpus)
+q_fm      = slice_by_ids(fm, ["questioned"])
+known_fm  = slice_by_ids(fm, known_doc_ids)
+impostors = slice_by_ids(fm, impostor_doc_ids)
+
+gi = GeneralImpostors(n_iterations=100, feature_subsample_rate=0.5, seed=42)
+result = gi.verify(questioned=q_fm, known=known_fm, impostors=impostors)
+result.values["score"]       # in [0, 1]
+result.values["wins"]        # raw winning-iteration count
+```
+
+### Knobs
+
+| Parameter | Default | Purpose |
+|---|---|---|
+| `n_iterations` | 100 | Number of random subspace + impostor-sample iterations |
+| `feature_subsample_rate` | 0.5 | Fraction of features sampled per iteration |
+| `impostor_sample_size` | `ceil(sqrt(pool_size))` | Impostors per iteration — scales sub-linearly so large pools don't trivialise the test |
+| `similarity` | `"cosine"` | `"cosine"` (real-valued) or `"minmax"` (non-negative features only) |
+| `aggregate` | `"centroid"` | `"centroid"` (mean of K) or `"nearest"` (most-similar known — conservative under within-author style heterogeneity) |
+| `seed` | 42 | RNG seed (feature + impostor sampling) |
+
+### Ties
+
+Ties break **toward the impostors** (strict `>`). If Q is equally close to K and an
+impostor, the iteration counts as a loss — the forensically conservative choice.
+
+## Unmasking (Koppel & Schler 2004)
+
+A distribution-free, long-text verification method. Chunk Q and K into word-windows, then
+iteratively:
+
+1. Train a binary classifier to distinguish Q-chunks from K-chunks.
+2. Measure CV accuracy.
+3. Remove the **top-N most-Q-discriminating** and **top-N most-K-discriminating**
+   features (2 × N per round per Koppel & Schler).
+4. Repeat.
+
+Same-author documents are stylistically similar: once a few surface differences are
+removed, the classifier collapses quickly (large drop). Different-author documents keep
+yielding discriminating features, so accuracy stays high (small drop).
+
+```python
+from tamga.features import MFWExtractor
+from tamga.forensic import Unmasking
+
+unmasking = Unmasking(chunk_size=500, n_rounds=10, n_eliminate=3, seed=42)
+result = unmasking.verify(
+    questioned=questioned_text,            # str, Document, or Corpus
+    known=known_text,
+    extractor=MFWExtractor(n=200, scale="zscore", lowercase=True),
+)
+result.values["accuracy_curve"]    # list[float], length n_rounds
+result.values["accuracy_drop"]     # scalar summary (curve[0] - curve[-1])
+result.values["eliminated_per_round"]   # auditable per-round feature removal
+```
+
+### When to pick which
+
+- **Short CMC / threat texts (< ~2000 words total)**: General Impostors. Unmasking needs
+  enough chunks per side to run k-fold CV meaningfully (default: `min_chunks_per_class=3`
+  so each side needs ~1500 words at `chunk_size=500`).
+- **Long prose (novels, essays, blog archives)**: Unmasking's curve is interpretable
+  directly. Pair with GI as a second opinion.
+- **Evidential report**: run both and calibrate both with `CalibratedScorer`. Agreement
+  between the two is itself evidential signal (a Juola-style multi-method verdict).
+
+## Reference
+
+::: tamga.forensic.verify.GeneralImpostors
+    options:
+      show_root_full_path: false
+
+::: tamga.forensic.unmasking.Unmasking
+    options:
+      show_root_full_path: false

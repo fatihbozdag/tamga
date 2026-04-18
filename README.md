@@ -5,6 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="BSD-3-Clause" src="https://img.shields.io/badge/license-BSD--3--Clause-0F1A2B?style=flat-square"></a>
   <a href="pyproject.toml"><img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-0F1A2B?style=flat-square"></a>
+  <a href="https://fatihbozdag.github.io/tamga/"><img alt="docs" src="https://img.shields.io/badge/docs-mkdocs%20material-0F1A2B?style=flat-square"></a>
   <img alt="status" src="https://img.shields.io/badge/status-phase%205%20%2B%20forensic%20phase%20landed-C9A34A?style=flat-square">
   <img alt="tests" src="https://img.shields.io/badge/tests-358%20passing-0F1A2B?style=flat-square">
 </p>
@@ -107,13 +108,23 @@ metadata fields (`questioned_description`, `known_description`, `hypothesis_pair
 `acquisition_notes`, `custody_notes`, `source_hashes`) so a report traces back to its source
 material. See [`src/tamga/forensic/`](src/tamga/forensic/) for the full surface.
 
+## Documentation
+
+Full documentation site (MkDocs Material): **https://fatihbozdag.github.io/tamga/**
+
+- [Getting started](https://fatihbozdag.github.io/tamga/getting-started/)
+- [Concepts](https://fatihbozdag.github.io/tamga/concepts/) — Corpus / Features / Methods / Results
+- [Forensic toolkit](https://fatihbozdag.github.io/tamga/forensic/)
+- [PAN-CLEF verification tutorial](https://fatihbozdag.github.io/tamga/tutorials/pan-clef/)
+- [CLI + API reference](https://fatihbozdag.github.io/tamga/reference/)
+
 ## Status
 
 **Phase 5 landed** — viz, reports, runner, and CLI shell — plus the **forensic-linguistics
 phase** (six additions, 123 new tests, 358 total passing).
 
-**Phase 6 (remaining)** — MkDocs documentation site, end-to-end EFCAMDAT + PAN-CLEF
-tutorials, and PyPI publish.
+**Phase 6 in progress** — MkDocs documentation site and a PAN-CLEF verification tutorial
+(shipping now). PyPI publish remains.
 
 See [`docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`](docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md) for the full design.
 
