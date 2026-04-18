@@ -60,6 +60,27 @@ class TestDistortText:
         with pytest.raises(ValueError, match="unknown distortion mode"):
             distort_text("hello", mode="dv_other")  # type: ignore[arg-type]
 
+    def test_contractions_preserved_verbatim(self) -> None:
+        """Contractions like "don't", "it's" are in the bundled function-word list and must
+        survive DV-MA / DV-SA intact. Regression test for a bug where _TOKEN_RE split the
+        apostrophe, producing "***'*" for "don't" — corrupting every common English
+        contraction.
+        """
+        out = distort_text("I don't think it's working", mode="dv_ma")
+        assert "don't" in out
+        assert "it's" in out
+        assert "think" not in out  # content word still masked
+        assert "working" not in out
+
+    def test_content_word_with_apostrophe_still_masked_as_single_token(self) -> None:
+        """Content words containing apostrophes (e.g., "o'clock") are masked as ONE token
+        rather than split into two content-word chunks around the apostrophe."""
+        out = distort_text("o'clock chiming", mode="dv_ma")
+        # "o'clock" (7 chars including apostrophe) is not in the function-word list, so it's
+        # masked. The point is that it's masked as one contiguous "*******" of length 7 —
+        # not as "*" + "'" + "*****".
+        assert out == "******* *******"
+
 
 class TestDistortCorpus:
     @staticmethod

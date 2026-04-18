@@ -35,8 +35,11 @@ from tamga.corpus import Corpus, Document
 
 DistortionMode = Literal["dv_ma", "dv_sa"]
 
-# Match sequences of alphanumeric / letter characters (what we consider "words").
-_TOKEN_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
+# Match a "word" — a letter sequence, optionally followed by an apostrophe and another
+# letter sequence, repeated any number of times. Keeps contractions intact: "don't", "you're",
+# "it's", "let's", "we'll", "they've", "o'clock" all match as single tokens so the
+# function-word lookup can preserve them verbatim.
+_TOKEN_RE = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)*", flags=re.UNICODE)
 
 
 def _load_bundled_function_words() -> frozenset[str]:
