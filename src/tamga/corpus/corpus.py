@@ -21,6 +21,7 @@ class Corpus:
     """
 
     documents: list[Document] = field(default_factory=list)
+    language: str = "en"
 
     def __len__(self) -> int:
         return len(self.documents)
@@ -37,8 +38,11 @@ class Corpus:
         if isinstance(index, int | np.integer):
             return self.documents[int(index)]
         if isinstance(index, slice):
-            return Corpus(documents=self.documents[index])
-        return Corpus(documents=[self.documents[int(i)] for i in index])
+            return Corpus(documents=self.documents[index], language=self.language)
+        return Corpus(
+            documents=[self.documents[int(i)] for i in index],
+            language=self.language,
+        )
 
     def filter(self, **query: Any) -> Corpus:
         """Return a new Corpus containing documents whose metadata matches every key in `query`.
@@ -56,7 +60,10 @@ class Corpus:
                     return False
             return True
 
-        return Corpus(documents=[d for d in self.documents if matches(d)])
+        return Corpus(
+            documents=[d for d in self.documents if matches(d)],
+            language=self.language,
+        )
 
     def groupby(self, field_name: str) -> dict[Any, Corpus]:
         """Group documents by a metadata field value.
@@ -68,7 +75,7 @@ class Corpus:
             if field_name not in doc.metadata:
                 raise KeyError(f"document {doc.id!r} has no metadata field {field_name!r}")
             groups.setdefault(doc.metadata[field_name], []).append(doc)
-        return {k: Corpus(documents=v) for k, v in groups.items()}
+        return {k: Corpus(documents=v, language=self.language) for k, v in groups.items()}
 
     def metadata_column(self, field_name: str) -> list[Any]:
         """Return the list of metadata values at `field_name`, in document order.
@@ -78,12 +85,12 @@ class Corpus:
         return [d.metadata.get(field_name) for d in self.documents]
 
     def hash(self) -> str:
-        """Stable hash — sorted document hashes + sorted metadata."""
+        """Stable hash — sorted document hashes + sorted metadata + language."""
         doc_hashes = sorted(d.hash for d in self.documents)
         metadata_summary = sorted((d.id, hash_mapping(d.metadata)) for d in self.documents)
-        payload = "|".join(doc_hashes) + "||" + str(metadata_summary)
+        payload = "|".join(doc_hashes) + "||" + str(metadata_summary) + "||lang=" + self.language
         return hash_text(payload)
 
     @classmethod
-    def from_iterable(cls, docs: Iterable[Document]) -> Corpus:
-        return cls(documents=list(docs))
+    def from_iterable(cls, docs: Iterable[Document], *, language: str = "en") -> Corpus:
+        return cls(documents=list(docs), language=language)

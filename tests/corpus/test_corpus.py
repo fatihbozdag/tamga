@@ -70,3 +70,26 @@ def test_corpus_metadata_column_extracts_field_per_document():
     docs = [_doc(1, author="A"), _doc(2, author="B"), _doc(3, author="A")]
     c = Corpus(documents=docs)
     assert c.metadata_column("author") == ["A", "B", "A"]
+
+
+def test_corpus_default_language_is_english() -> None:
+    from tamga.corpus import Corpus, Document
+
+    c = Corpus(documents=[Document(id="d0", text="hello")])
+    assert c.language == "en"
+
+
+def test_corpus_accepts_language_argument() -> None:
+    from tamga.corpus import Corpus, Document
+
+    c = Corpus(documents=[Document(id="d0", text="merhaba")], language="tr")
+    assert c.language == "tr"
+
+
+def test_corpus_hash_differs_by_language() -> None:
+    from tamga.corpus import Corpus, Document
+
+    doc = Document(id="d0", text="merhaba")
+    en = Corpus(documents=[doc], language="en")
+    tr = Corpus(documents=[doc], language="tr")
+    assert en.hash() != tr.hash()
