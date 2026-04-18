@@ -36,18 +36,24 @@ def test_function_word_accepts_custom_list() -> None:
     assert list(fm.feature_names) == ["custom"]
 
 
-def test_function_word_uses_corpus_language_when_unspecified() -> None:
-    # Create a Turkish corpus; ensure the extractor tries to load the Turkish list.
-    # (Turkish list won't exist yet; this test is marked xfail until Task 5.5 ships.)
-    import pytest
-
+def test_function_word_uses_corpus_language_turkish() -> None:
+    """Turkish corpus → Turkish function-word list loaded."""
     from tamga.corpus import Corpus, Document
     from tamga.features.function_words import FunctionWordExtractor
 
-    c = Corpus(documents=[Document(id="d0", text="merhaba")], language="tr")
+    c = Corpus(documents=[Document(id="d0", text="Ben ve sen gittik.")], language="tr")
     ex = FunctionWordExtractor(scale="none")
-    with pytest.raises(FileNotFoundError, match="function word list"):
-        ex.fit_transform(c)
+    fm = ex.fit_transform(c)
+    # "ve" is among the most frequent Turkish function words — must appear.
+    assert "ve" in fm.feature_names
+
+
+def test_function_word_list_bundled_for_all_five_languages() -> None:
+    from tamga.features.function_words import _load_bundled_list
+
+    for lang in ["en", "tr", "de", "es", "fr"]:
+        words = _load_bundled_list(lang)
+        assert len(words) >= 50, f"{lang} list has only {len(words)} entries"
 
 
 def test_function_word_explicit_language_overrides_corpus() -> None:

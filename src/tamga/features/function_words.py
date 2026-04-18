@@ -38,7 +38,11 @@ def _load_bundled_list(language: str) -> list[str]:
             f"No bundled function word list for language {language!r} "
             f"(expected at {path}). Supported: {supported}. Pass wordlist=[...] to override."
         )
-    return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
 
 
 class FunctionWordExtractor(BaseFeatureExtractor):
