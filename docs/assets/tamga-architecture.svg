@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="t a">
+  <title id="t">tamga architecture</title>
+  <desc id="a">Four-layer architecture: corpus, features, methods, forensic; output on the right.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #FBFAF6; }
+      .layer { fill: #FFFFFF; stroke: #B9AE90; stroke-width: 1.2; }
+      .layer-title { fill: #0F1A2B; font: 600 20px 'Helvetica Neue', Arial, sans-serif; letter-spacing: 0.6px; }
+      .item { fill: #0F1A2B; font: 13px 'Helvetica Neue', Arial, sans-serif; }
+      .item-accent { fill: #8A6A1F; font: 600 13px 'Helvetica Neue', Arial, sans-serif; }
+      .caption { fill: #5B5745; font: 12px 'Helvetica Neue', Arial, sans-serif; }
+      .arrow { stroke: #B9AE90; stroke-width: 1.4; fill: none; }
+      .arrow-head { fill: #B9AE90; }
+      .output-layer { fill: #0F1A2B; stroke: #0F1A2B; }
+      .output-title { fill: #E9D7A3; font: 600 20px 'Helvetica Neue', Arial, sans-serif; letter-spacing: 0.6px; }
+      .output-item { fill: #F5ECD5; font: 13px 'Helvetica Neue', Arial, sans-serif; }
+      .rail-label { fill: #5B5745; font: 600 11px 'Helvetica Neue', Arial, sans-serif; letter-spacing: 2px; }
+    </style>
+    <marker id="head" orient="auto" markerWidth="10" markerHeight="10" refX="8" refY="5">
+      <path d="M0,0 L10,5 L0,10 z" class="arrow-head"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="560" class="bg"/>
+
+  <!-- top rail label -->
+  <text x="60" y="40" class="rail-label">TAMGA · ANALYSIS PIPELINE</text>
+
+  <!-- CORPUS -->
+  <g>
+    <rect x="60" y="70" width="200" height="420" rx="10" class="layer"/>
+    <text x="80" y="108" class="layer-title">Corpus</text>
+    <text x="80" y="148" class="item">Document</text>
+    <text x="80" y="170" class="item">metadata.tsv</text>
+    <text x="80" y="192" class="item">filter / groupby</text>
+    <text x="80" y="214" class="item">content-addressed hash</text>
+
+    <text x="80" y="252" class="caption">ingest .txt + TSV</text>
+    <text x="80" y="272" class="caption">strict or lenient metadata</text>
+    <text x="80" y="292" class="caption">reproducibility hashing</text>
+  </g>
+
+  <!-- FEATURES -->
+  <g>
+    <rect x="300" y="70" width="220" height="420" rx="10" class="layer"/>
+    <text x="320" y="108" class="layer-title">Features</text>
+    <text x="320" y="148" class="item">MFW · character n-grams</text>
+    <text x="320" y="170" class="item">word n-grams · POS n-grams</text>
+    <text x="320" y="192" class="item">function-word · punctuation</text>
+    <text x="320" y="214" class="item">dependency bigrams</text>
+    <text x="320" y="236" class="item">readability · sentence length</text>
+    <text x="320" y="258" class="item">lexical diversity</text>
+    <text x="320" y="280" class="item">sentence &amp; context embeddings</text>
+
+    <text x="320" y="320" class="caption">z-score · L1 · L2 scaling</text>
+    <text x="320" y="340" class="caption">FeatureMatrix envelope</text>
+    <text x="320" y="360" class="caption">spaCy pipeline integration</text>
+  </g>
+
+  <!-- METHODS -->
+  <g>
+    <rect x="560" y="70" width="220" height="420" rx="10" class="layer"/>
+    <text x="580" y="108" class="layer-title">Methods</text>
+    <text x="580" y="148" class="item">Burrows · Eder · Argamon Delta</text>
+    <text x="580" y="170" class="item">Cosine · Quadratic Delta</text>
+    <text x="580" y="192" class="item">Craig's Zeta (classic + Eder)</text>
+    <text x="580" y="214" class="item">PCA · UMAP · t-SNE · MDS</text>
+    <text x="580" y="236" class="item">Ward / k-means / HDBSCAN</text>
+    <text x="580" y="258" class="item">bootstrap consensus</text>
+    <text x="580" y="280" class="item">sklearn classify + CV</text>
+    <text x="580" y="302" class="item">Wallace–Mosteller Bayesian</text>
+
+    <text x="580" y="342" class="caption">sklearn-compatible API</text>
+    <text x="580" y="362" class="caption">every result carries provenance</text>
+  </g>
+
+  <!-- FORENSIC -->
+  <g>
+    <rect x="820" y="70" width="220" height="420" rx="10" class="layer" style="fill:#FBF3DE; stroke:#C9A34A;"/>
+    <text x="840" y="108" class="layer-title" style="fill:#6E5000">Forensic</text>
+    <text x="840" y="148" class="item-accent">General Impostors</text>
+    <text x="840" y="170" class="item-accent">Unmasking</text>
+    <text x="840" y="192" class="item-accent">Stamatatos distortion</text>
+    <text x="840" y="214" class="item-accent">Sapkota n-gram categories</text>
+    <text x="840" y="236" class="item-accent">CalibratedScorer (Platt / iso)</text>
+    <text x="840" y="258" class="item-accent">log-LR + C_llr + Tippett</text>
+    <text x="840" y="280" class="item-accent">AUC · c@1 · F0.5u · ECE · Brier</text>
+    <text x="840" y="302" class="item-accent">PANReport</text>
+
+    <text x="840" y="342" class="caption">chain-of-custody Provenance</text>
+    <text x="840" y="362" class="caption">LR-framed HTML report (ENFSI)</text>
+  </g>
+
+  <!-- OUTPUT -->
+  <g>
+    <rect x="1080" y="70" width="80" height="420" rx="10" class="output-layer"/>
+    <text x="1095" y="108" class="output-title" transform="rotate(-90 1095 108)" text-anchor="end">Output</text>
+    <text x="1120" y="170" class="output-item" text-anchor="middle">Result</text>
+    <text x="1120" y="200" class="output-item" text-anchor="middle">Tables</text>
+    <text x="1120" y="230" class="output-item" text-anchor="middle">Figures</text>
+    <text x="1120" y="260" class="output-item" text-anchor="middle">Report</text>
+    <text x="1120" y="290" class="output-item" text-anchor="middle">JSON</text>
+    <text x="1120" y="320" class="output-item" text-anchor="middle">Parquet</text>
+    <text x="1120" y="350" class="output-item" text-anchor="middle">HTML / MD</text>
+  </g>
+
+  <!-- arrows between layers -->
+  <line x1="260" y1="280" x2="295" y2="280" class="arrow" marker-end="url(#head)"/>
+  <line x1="520" y1="280" x2="555" y2="280" class="arrow" marker-end="url(#head)"/>
+  <line x1="780" y1="280" x2="815" y2="280" class="arrow" marker-end="url(#head)"/>
+  <line x1="1040" y1="280" x2="1075" y2="280" class="arrow" marker-end="url(#head)"/>
+
+  <!-- bottom rail -->
+  <text x="60" y="530" class="caption">
+    Declarative study.yaml · tamga run · CLI: init · ingest · features · delta · zeta · reduce · cluster · consensus · classify · embed · bayesian · report · shell
+  </text>
+</svg>
