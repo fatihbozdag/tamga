@@ -5,18 +5,28 @@ binary ground truth (1 = target / same-author trial, 0 = non-target / different-
 These are the metrics forensic journals and courtroom gatekeeping (Daubert, *R v T*) expect
 above and beyond raw accuracy.
 
+``compute_pan_report`` bundles the full PAN-style evaluation suite (AUC, c@1, F0.5u,
+Brier, ECE, optional C_llr) behind one call, matching the metric menu used in the PAN
+shared-task overviews since Stamatatos et al. (2014).
+
 References
 ----------
 Brummer, N., & du Preez, J. (2006). Application-independent evaluation of speaker detection.
     Computer Speech & Language, 20(2-3), 230-275.
 Penas, A., & Rodrigo, A. (2011). A simple measure to assess non-response. Proceedings of
-    ACL-HLT 2011, 1415-1424.  [c@1 - not in this module; see PAN harness]
+    ACL-HLT 2011, 1415-1424.
+Bevendorff, J., Chulvi, B., Fersini, E., Heini, A., Kestemont, M., Kredens, K., Mayerl, M.,
+    Ortega-Bueno, R., Pezik, P., Potthast, M., Rangel, F., Rosso, P., Stamatatos, E., Stein,
+    B., Wiegmann, M., Wolska, M., & Zangerle, E. (2022). Overview of PAN 2022: Authorship
+    verification, profiling of irony and stereotype spreaders, and style change detection.
+    CEUR Workshop Proceedings, 3180.
 Brier, G. W. (1950). Verification of forecasts expressed in terms of probability. Monthly
     Weather Review, 78(1), 1-3.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from itertools import pairwise
 
 import numpy as np
@@ -157,3 +167,187 @@ def tippett(log_lrs: np.ndarray, y: np.ndarray) -> dict[str, np.ndarray]:
         "target_cdf": target_cdf,
         "nontarget_cdf": nontarget_cdf,
     }
+
+
+def auc(scores: np.ndarray, y: np.ndarray) -> float:
+    """Area under the ROC curve — computed via the Mann-Whitney U statistic.
+
+    Invariant to monotone transformations of ``scores``; 1.0 = perfect ranking, 0.5 = random,
+    0.0 = perfectly inverse. Ties contribute 0.5 each (standard convention).
+
+    Parameters
+    ----------
+    scores : np.ndarray of shape (n,)
+        Higher scores should indicate the target (y=1) hypothesis.
+    y : np.ndarray of shape (n,)
+        Binary labels.
+    """
+    scores = np.asarray(scores, dtype=float)
+    y = np.asarray(y)
+    if scores.shape != y.shape:
+        raise ValueError("scores and y must have the same shape")
+    target = scores[y == 1]
+    nontarget = scores[y == 0]
+    if target.size == 0 or nontarget.size == 0:
+        raise ValueError("auc requires at least one target and one non-target trial")
+    # Mann-Whitney U via rankdata: sum-of-ranks for target minus target-self-rank lower bound.
+    from scipy.stats import rankdata
+
+    all_scores = np.concatenate([target, nontarget])
+    ranks = rankdata(all_scores)
+    r_target = ranks[: target.size].sum()
+    n_t = target.size
+    n_n = nontarget.size
+    u = r_target - n_t * (n_t + 1) / 2
+    return float(u / (n_t * n_n))
+
+
+def c_at_1(probs: np.ndarray, y: np.ndarray, *, unanswered_margin: float = 0.0) -> float:
+    """c@1 (Peñas & Rodrigo 2011): accuracy with a credit for non-answers.
+
+    c@1 = (1 / n) * (n_correct + n_unanswered * (n_correct / n_answered))
+
+    Non-answers are defined as trials whose probability lies within
+    ``[0.5 - unanswered_margin, 0.5 + unanswered_margin]``. If ``unanswered_margin = 0``,
+    the default, there are no non-answers and c@1 reduces to raw accuracy.
+
+    Forensically principled because it rewards a system that knows when to abstain (vs.
+    forcing a coin-flip on ambiguous evidence). The PAN verification shared task has used
+    c@1 as the primary metric since 2013.
+
+    Parameters
+    ----------
+    probs : np.ndarray of shape (n,)
+        Calibrated probabilities of the target hypothesis, in [0, 1]. Decisions are taken
+        at threshold 0.5.
+    y : np.ndarray of shape (n,)
+        Binary labels.
+    unanswered_margin : float
+        Half-width of the non-decision band around 0.5. 0.0 = no abstention; common PAN
+        settings use 0.0 or a small value like 0.05.
+    """
+    probs = np.asarray(probs, dtype=float)
+    y = np.asarray(y)
+    if probs.shape != y.shape:
+        raise ValueError("probs and y must have the same shape")
+    if probs.size == 0:
+        raise ValueError("c@1 requires at least one trial")
+    if not np.all((probs >= 0) & (probs <= 1)):
+        raise ValueError("probs must lie in [0, 1]")
+    if unanswered_margin < 0:
+        raise ValueError("unanswered_margin must be >= 0")
+
+    unanswered = np.abs(probs - 0.5) <= unanswered_margin
+    predictions = (probs >= 0.5).astype(int)
+    correct = (predictions == y) & ~unanswered
+    n_correct = int(correct.sum())
+    n_unanswered = int(unanswered.sum())
+    n = probs.size
+    n_answered = n - n_unanswered
+    if n_answered == 0:
+        # All trials unanswered: by convention c@1 = 0 (prior-only).
+        return 0.0
+    return float((1.0 / n) * (n_correct + n_unanswered * (n_correct / n_answered)))
+
+
+def f05u(probs: np.ndarray, y: np.ndarray) -> float:
+    """F0.5-unanswered (Bevendorff et al. PAN 2022) — a precision-weighted F-measure that
+    penalises both wrong answers and (weakly) non-answers.
+
+    F0.5u uses the classical F-beta with beta=0.5 (weighting precision over recall), but
+    counts trials falling in the [0.4, 0.6] decision band as non-answers, which are neither
+    true positives nor false positives (they lower recall).
+
+    Parameters
+    ----------
+    probs : np.ndarray of shape (n,)
+        Probabilities of the target hypothesis, in [0, 1].
+    y : np.ndarray of shape (n,)
+        Binary labels.
+    """
+    probs = np.asarray(probs, dtype=float)
+    y = np.asarray(y)
+    if probs.shape != y.shape:
+        raise ValueError("probs and y must have the same shape")
+    if probs.size == 0:
+        raise ValueError("f0.5u requires at least one trial")
+    if not np.all((probs >= 0) & (probs <= 1)):
+        raise ValueError("probs must lie in [0, 1]")
+
+    unanswered = (probs >= 0.4) & (probs <= 0.6)
+    decision = np.where(probs > 0.6, 1, np.where(probs < 0.4, 0, -1))
+    tp = int(((decision == 1) & (y == 1)).sum())
+    fp = int(((decision == 1) & (y == 0)).sum())
+    fn = int(((decision == 0) & (y == 1)).sum()) + int(((y == 1) & unanswered).sum())
+    if tp == 0:
+        return 0.0
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    beta2 = 0.25  # 0.5^2
+    return float((1 + beta2) * precision * recall / (beta2 * precision + recall))
+
+
+@dataclass
+class PANReport:
+    """Bundled PAN-style evaluation summary for a verification system.
+
+    All metrics are computed over binary (same-author / different-author) trials. ``cllr_bits``
+    requires log-LR inputs and so is optional — set when available. Fields match the metric
+    menu reported in PAN verification-task overviews (Stamatatos et al. 2014 onward).
+    """
+
+    auc: float
+    c_at_1: float
+    f05u: float
+    brier: float
+    ece: float
+    cllr_bits: float | None = None
+    n_target: int = 0
+    n_nontarget: int = 0
+
+    def to_dict(self) -> dict[str, float | int | None]:
+        return {
+            "auc": self.auc,
+            "c_at_1": self.c_at_1,
+            "f05u": self.f05u,
+            "brier": self.brier,
+            "ece": self.ece,
+            "cllr_bits": self.cllr_bits,
+            "n_target": self.n_target,
+            "n_nontarget": self.n_nontarget,
+        }
+
+
+def compute_pan_report(
+    probs: np.ndarray,
+    y: np.ndarray,
+    *,
+    log_lrs: np.ndarray | None = None,
+    ece_bins: int = 10,
+    c_at_1_margin: float = 0.0,
+) -> PANReport:
+    """Run the full PAN evaluation suite on one set of trials.
+
+    Parameters
+    ----------
+    probs : np.ndarray of shape (n,)
+        Calibrated probabilities of the target hypothesis.
+    y : np.ndarray of shape (n,)
+        Binary labels.
+    log_lrs : np.ndarray, optional
+        log10-LRs for each trial. If provided, ``cllr_bits`` is included in the report.
+    ece_bins : int
+    c_at_1_margin : float
+    """
+    probs = np.asarray(probs, dtype=float)
+    y = np.asarray(y)
+    return PANReport(
+        auc=auc(probs, y),
+        c_at_1=c_at_1(probs, y, unanswered_margin=c_at_1_margin),
+        f05u=f05u(probs, y),
+        brier=brier(probs, y),
+        ece=ece(probs, y, n_bins=ece_bins),
+        cllr_bits=cllr(np.asarray(log_lrs, dtype=float), y) if log_lrs is not None else None,
+        n_target=int((y == 1).sum()),
+        n_nontarget=int((y == 0).sum()),
+    )
