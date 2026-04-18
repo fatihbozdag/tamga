@@ -7,6 +7,21 @@ sets, open-set rather than closed-set decisions, and reporting suitable for jour
 Linguistics*.
 """
 
+from tamga.forensic.lr import (
+    CalibratedScorer,
+    log_lr_from_probs,
+    log_lr_from_probs_with_priors,
+)
+from tamga.forensic.metrics import brier, cllr, ece, tippett
 from tamga.forensic.verify import GeneralImpostors
 
-__all__ = ["GeneralImpostors"]
+__all__ = [
+    "CalibratedScorer",
+    "GeneralImpostors",
+    "brier",
+    "cllr",
+    "ece",
+    "log_lr_from_probs",
+    "log_lr_from_probs_with_priors",
+    "tippett",
+]

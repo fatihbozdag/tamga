@@ -17,7 +17,12 @@ from tamga.features import (
     SentenceLengthExtractor,
     WordNgramExtractor,
 )
-from tamga.forensic import GeneralImpostors
+from tamga.forensic import (
+    CalibratedScorer,
+    GeneralImpostors,
+    log_lr_from_probs,
+    log_lr_from_probs_with_priors,
+)
 from tamga.io import load_corpus, load_metadata
 from tamga.methods.classify import build_classifier, cross_validate_tamga
 from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
@@ -53,6 +58,7 @@ __all__ = [
     "BaseFeatureExtractor",
     "BootstrapConsensus",
     "BurrowsDelta",
+    "CalibratedScorer",
     "CharNgramExtractor",
     "Corpus",
     "CosineDelta",
@@ -94,6 +100,8 @@ __all__ = [
     "load_config",
     "load_corpus",
     "load_metadata",
+    "log_lr_from_probs",
+    "log_lr_from_probs_with_priors",
     "plot_confusion_matrix",
     "plot_dendrogram",
     "plot_distance_heatmap",
