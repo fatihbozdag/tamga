@@ -69,3 +69,45 @@ def test_cross_validate_tamga_stratified() -> None:
         folds=5,
     )
     assert "accuracy" in report
+
+
+def test_cross_validate_seed_controls_stratified_folds() -> None:
+    """Different seeds must produce different stratified fold assignments.
+
+    Regression test for the audit finding that classify.py hardcoded random_state=42
+    regardless of study.seed, making CV non-reproducible under user-supplied seeds.
+    """
+    corpus = _corpus()
+    y = np.array(corpus.metadata_column("author"))
+    mfw = MFWExtractor(n=5, scale="zscore", lowercase=True)
+    X_fm = mfw.fit_transform(corpus)
+
+    report_a = cross_validate_tamga(
+        build_classifier("rf", random_state=0),
+        X_fm,
+        y,
+        cv_kind="stratified",
+        folds=5,
+        seed=1,
+    )
+    report_b = cross_validate_tamga(
+        build_classifier("rf", random_state=0),
+        X_fm,
+        y,
+        cv_kind="stratified",
+        folds=5,
+        seed=999,
+    )
+    # Same seed must reproduce exactly.
+    report_a2 = cross_validate_tamga(
+        build_classifier("rf", random_state=0),
+        X_fm,
+        y,
+        cv_kind="stratified",
+        folds=5,
+        seed=1,
+    )
+    assert np.array_equal(report_a["predictions"], report_a2["predictions"])
+    # Different seeds must produce different fold assignments (and thus different
+    # cross_val_predict output on this dataset).
+    assert not np.array_equal(report_a["predictions"], report_b["predictions"])

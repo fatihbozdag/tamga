@@ -32,7 +32,13 @@ def classify_command(
     fm = MFWExtractor(n=mfw, min_df=2, scale="zscore", lowercase=True).fit_transform(corpus)
     clf = build_classifier(estimator, random_state=seed)
     report = cross_validate_tamga(
-        clf, fm, y, cv_kind=cv_kind, groups_from=y if cv_kind == "loao" else None, folds=folds
+        clf,
+        fm,
+        y,
+        cv_kind=cv_kind,
+        groups_from=y if cv_kind == "loao" else None,
+        folds=folds,
+        seed=seed,
     )
     table = Table(title=f"classify — {estimator} / {cv_kind}")
     table.add_column("metric")
