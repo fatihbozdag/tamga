@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Literal
 
 import spacy
 from spacy.language import Language
 from spacy.tokens import Doc, DocBin
 
 from tamga.corpus import Corpus, Document
+from tamga.languages import get_language
 from tamga.plumbing.logging import get_logger
 from tamga.preprocess.cache import DocBinCache, cache_key
 
@@ -36,16 +38,31 @@ class ParsedCorpus:
 
 
 class SpacyPipeline:
-    """Parse a `Corpus` into spaCy `Doc`s, caching results as `DocBin` blobs on disk."""
+    """Parse a `Corpus` into spaCy `Doc`s, caching results as `DocBin` blobs on disk.
+
+    Supports two backends behind a single interface:
+      - ``backend="spacy"``        — ``spacy.load(model)``
+      - ``backend="spacy_stanza"`` — ``spacy_stanza.load_pipeline(lang=model)``
+
+    Both produce native spaCy ``Doc`` objects so downstream extractors don't care which backend
+    produced them. When ``language``/``backend``/``model`` are omitted, defaults come from the
+    ``tamga.languages`` registry — English resolves to ``backend="spacy"`` with
+    ``model="en_core_web_trf"``.
+    """
 
     def __init__(
         self,
         *,
-        model: str = "en_core_web_trf",
+        language: str = "en",
+        model: str | None = None,
+        backend: Literal["spacy", "spacy_stanza"] | None = None,
         cache_dir: Path | str = ".tamga/cache/docbin",
         exclude: list[str] | None = None,
     ) -> None:
-        self.model = model
+        spec = get_language(language)
+        self.language = spec.code
+        self.model = model if model is not None else spec.default_model
+        self.backend = backend if backend is not None else spec.backend
         self.exclude = list(exclude or [])
         self.cache = DocBinCache(Path(cache_dir))
         self._nlp: Language | None = None
@@ -53,16 +70,55 @@ class SpacyPipeline:
     @property
     def nlp(self) -> Language:
         if self._nlp is None:
-            _log.info("loading spaCy model: %s", self.model)
-            self._nlp = spacy.load(self.model, exclude=self.exclude)
+            if self.backend == "spacy_stanza":
+                if self.exclude:
+                    _log.warning(
+                        "exclude=%s ignored on spacy_stanza backend "
+                        "(Stanza attributes are set in the tokenizer, not pipeline components)",
+                        self.exclude,
+                    )
+                try:
+                    import spacy_stanza
+                except ImportError as e:
+                    raise ImportError(
+                        "tamga requires spacy-stanza for the 'spacy_stanza' backend. "
+                        "Install with: uv pip install 'tamga[turkish]'"
+                    ) from e
+                _log.info("loading Stanza pipeline via spacy-stanza: lang=%s", self.model)
+                try:
+                    self._nlp = spacy_stanza.load_pipeline(lang=self.model)
+                except FileNotFoundError as e:
+                    raise RuntimeError(
+                        f"Stanza model for language {self.model!r} not found. "
+                        f"Run: python -c \"import stanza; stanza.download('{self.model}')\""
+                    ) from e
+            else:
+                _log.info("loading spaCy model: %s", self.model)
+                self._nlp = spacy.load(self.model, exclude=self.exclude)
         return self._nlp
 
     @property
     def spacy_version(self) -> str:
         return str(spacy.__version__)
 
+    @property
+    def backend_version(self) -> str:
+        """Structured version string used in cache keys.
+
+        Native backend: ``'spacy=<version>'`` — matches prior cache-key format, preserves English
+        caches built on older tamga versions.
+        Stanza backend: ``'spacy_stanza=<v>;stanza=<v>'`` — structurally distinct from native, so
+        cross-backend cache collisions are impossible.
+        """
+        if self.backend == "spacy_stanza":
+            import spacy_stanza  # type: ignore[import-not-found]
+            import stanza  # type: ignore[import-not-found]
+
+            return f"spacy_stanza={spacy_stanza.__version__};stanza={stanza.__version__}"
+        return f"spacy={self.spacy_version}"
+
     def _key(self, doc: Document) -> str:
-        return cache_key(doc.hash, self.model, f"spacy={self.spacy_version}", self.exclude)
+        return cache_key(doc.hash, self.model, self.backend_version, self.exclude)
 
     def parse(self, corpus: Corpus) -> ParsedCorpus:
         parsed: list[Doc | None] = []
