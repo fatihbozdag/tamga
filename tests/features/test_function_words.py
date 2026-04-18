@@ -34,3 +34,37 @@ def test_function_word_accepts_custom_list() -> None:
     ex = FunctionWordExtractor(wordlist=["custom"], scale="none")
     fm = ex.fit_transform(_corpus("a custom word"))
     assert list(fm.feature_names) == ["custom"]
+
+
+def test_function_word_uses_corpus_language_when_unspecified() -> None:
+    # Create a Turkish corpus; ensure the extractor tries to load the Turkish list.
+    # (Turkish list won't exist yet; this test is marked xfail until Task 5.5 ships.)
+    import pytest
+
+    from tamga.corpus import Corpus, Document
+    from tamga.features.function_words import FunctionWordExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="merhaba")], language="tr")
+    ex = FunctionWordExtractor(scale="none")
+    with pytest.raises(FileNotFoundError, match="function word list"):
+        ex.fit_transform(c)
+
+
+def test_function_word_explicit_language_overrides_corpus() -> None:
+    from tamga.corpus import Corpus, Document
+    from tamga.features.function_words import FunctionWordExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="the cat")], language="tr")
+    ex = FunctionWordExtractor(scale="none", language="en")
+    fm = ex.fit_transform(c)
+    assert "the" in fm.feature_names
+
+
+def test_function_word_wordlist_overrides_everything() -> None:
+    from tamga.corpus import Corpus, Document
+    from tamga.features.function_words import FunctionWordExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="foo bar")], language="tr")
+    ex = FunctionWordExtractor(wordlist=["foo"], language="en", scale="none")
+    fm = ex.fit_transform(c)
+    assert list(fm.feature_names) == ["foo"]

@@ -1,4 +1,4 @@
-"""Function-word frequency extractor with a bundled English word list."""
+"""Function-word frequency extractor with per-language bundled word lists."""
 
 from __future__ import annotations
 
@@ -10,14 +10,34 @@ import numpy as np
 
 from tamga.corpus import Corpus
 from tamga.features.base import BaseFeatureExtractor
+from tamga.languages import LANGUAGES
 
 Scale = Literal["none", "zscore", "l1", "l2"]
 
 _WORD_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
 
 
-def _load_bundled_list() -> list[str]:
-    path = resources.files("tamga.resources.languages.en") / "function_words.txt"
+def _load_bundled_list(language: str) -> list[str]:
+    """Load resources/languages/<lang>/function_words.txt.
+
+    Raises FileNotFoundError with a helpful message listing supported languages if no list is
+    bundled for `language`.
+    """
+    pkg = f"tamga.resources.languages.{language}"
+    try:
+        path = resources.files(pkg) / "function_words.txt"
+    except (ModuleNotFoundError, FileNotFoundError) as e:
+        supported = sorted(LANGUAGES)
+        raise FileNotFoundError(
+            f"No bundled function word list for language {language!r}. "
+            f"Supported: {supported}. Pass wordlist=[...] to override."
+        ) from e
+    if not path.is_file():
+        supported = sorted(LANGUAGES)
+        raise FileNotFoundError(
+            f"No bundled function word list for language {language!r} "
+            f"(expected at {path}). Supported: {supported}. Pass wordlist=[...] to override."
+        )
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
@@ -28,16 +48,20 @@ class FunctionWordExtractor(BaseFeatureExtractor):
         self,
         *,
         wordlist: list[str] | None = None,
+        language: str | None = None,
         scale: Scale = "none",
     ) -> None:
         self.wordlist = wordlist
+        self.language = language
         self.scale = scale
         self._words: list[str] = []
 
     def _fit(self, corpus: Corpus) -> None:
-        # Vocabulary comes from the wordlist, not the corpus.
-        del corpus
-        self._words = list(self.wordlist) if self.wordlist is not None else _load_bundled_list()
+        if self.wordlist is not None:
+            self._words = list(self.wordlist)
+            return
+        lang = self.language or corpus.language
+        self._words = _load_bundled_list(lang)
 
     def _transform(self, corpus: Corpus) -> tuple[np.ndarray, list[str]]:
         index = {w: i for i, w in enumerate(self._words)}
