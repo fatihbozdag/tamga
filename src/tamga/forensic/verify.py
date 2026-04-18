@@ -137,7 +137,7 @@ class GeneralImpostors:
 
         n_features = q.shape[0]
         n_impostors = i_pool.shape[0]
-        k_per_iter = max(1, int(round(self.feature_subsample_rate * n_features)))
+        k_per_iter = max(1, round(self.feature_subsample_rate * n_features))
         m_per_iter = self.impostor_sample_size or max(1, int(np.ceil(np.sqrt(n_impostors))))
         m_per_iter = min(m_per_iter, n_impostors)
 
