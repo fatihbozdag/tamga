@@ -35,6 +35,9 @@ htmlcov/
 results/
 reports/
 
+# mkdocs build output
+/site/
+
 # ad-hoc setup scripts
 scratch/
 

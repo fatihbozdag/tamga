@@ -119,15 +119,17 @@ class GeneralImpostors:
             Pool of documents from other authors (>= 2 rows so each iteration can sample
             distinct impostors even with the smallest default ``impostor_sample_size``).
 
-        All three FeatureMatrix inputs must share the same feature space — i.e., identical
-        ``feature_names`` in the same order. Callers that build features independently should
-        use a single ``fit_transform`` on the pooled corpus and then slice by document id.
-
         Returns
         -------
         Result
             With ``values["score"]`` in [0, 1] (higher = more likely same author),
             ``values["wins"]`` raw iteration-win count, and sampling counts in ``params``.
+
+        Notes
+        -----
+        All three FeatureMatrix inputs must share the same feature space — i.e., identical
+        ``feature_names`` in the same order. Callers that build features independently should
+        use a single ``fit_transform`` on the pooled corpus and then slice by document id.
         """
         self._validate_inputs(questioned, known, impostors)
 

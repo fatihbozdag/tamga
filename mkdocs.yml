@@ -1,0 +1,104 @@
+site_name: tamga
+site_description: Computational stylometry — a Python replacement for R's Stylo, with a forensic toolkit on top.
+site_author: Fatih Bozdağ
+site_url: https://fatihbozdag.github.io/tamga/
+repo_url: https://github.com/fatihbozdag/tamga
+repo_name: fatihbozdag/tamga
+edit_uri: edit/main/docs/
+copyright: BSD-3-Clause
+
+docs_dir: docs/site
+site_dir: site
+
+theme:
+  name: material
+  logo: assets/tamga-banner.svg
+  favicon: assets/favicon.svg
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - search.highlight
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: false
+            show_root_heading: true
+            heading_level: 3
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: [., docs/site]
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Concepts:
+      - concepts/index.md
+      - Corpus: concepts/corpus.md
+      - Features: concepts/features.md
+      - Methods: concepts/methods.md
+      - Results & provenance: concepts/results.md
+  - Forensic toolkit:
+      - forensic/index.md
+      - Verification: forensic/verification.md
+      - Calibration & LR output: forensic/calibration.md
+      - Topic-invariant features: forensic/topic-invariance.md
+      - Evaluation (PAN suite): forensic/evaluation.md
+      - Reporting: forensic/reporting.md
+  - Tutorials:
+      - tutorials/index.md
+      - Federalist Papers: tutorials/federalist.md
+      - PAN-CLEF verification: tutorials/pan-clef.md
+  - Reference:
+      - reference/index.md
+      - CLI: reference/cli.md
+      - study.yaml schema: reference/config.md
+      - Python API: reference/api.md

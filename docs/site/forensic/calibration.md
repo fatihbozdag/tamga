@@ -1,0 +1,87 @@
+# Calibration & LR output
+
+Verification systems produce raw scores. Forensic reporting expects **calibrated
+posteriors** converted to **likelihood ratios** — the evidential semantics courts
+understand. `tamga.forensic` provides both steps.
+
+## The workflow
+
+```mermaid
+flowchart LR
+  S["raw score<br>(GI, Delta, SVM, ...)"] --> C["CalibratedScorer<br>fit on (cal_scores, cal_labels)"]
+  C --> P["calibrated p(H1|E)"]
+  P --> L["log<sub>10</sub>(LR)"]
+
+  style C fill:#FBF3DE,stroke:#C9A34A
+  style L fill:#FBF3DE,stroke:#C9A34A
+```
+
+The calibration fold must be **separate** from the test fold. Overfitting the calibrator
+on the test set gives optimistic C_llr and ECE.
+
+## CalibratedScorer
+
+Wraps a 1-D monotone calibrator — either Platt (logistic) or isotonic.
+
+```python
+from tamga.forensic import CalibratedScorer
+
+scorer = CalibratedScorer(method="platt").fit(calibration_scores, calibration_labels)
+probs   = scorer.predict_proba(test_scores)
+log_lrs = scorer.predict_log_lr(test_scores, base=10.0)
+```
+
+### Choosing the method
+
+| Method | When |
+|---|---|
+| `"platt"` | Small calibration sets (< 100 / class). Parametric; assumes sigmoidal mapping. Robust. |
+| `"isotonic"` | Larger calibration sets (≥ 100 / class). Non-parametric; flexible. |
+
+Both are monotone — rank order of inputs is preserved, so AUC is unchanged.
+
+## Log-LR conversion
+
+Under flat priors ($p(H_1) = p(H_0) = 0.5$), log-LR is just the logit of the calibrated
+posterior:
+
+$$
+\log_{10}(\text{LR}) = \log_{10}\left(\frac{p(H_1 \mid E)}{1 - p(H_1 \mid E)}\right)
+$$
+
+```python
+from tamga.forensic import log_lr_from_probs, log_lr_from_probs_with_priors
+
+log_lrs = log_lr_from_probs(probs)                                # flat priors
+log_lrs = log_lr_from_probs_with_priors(probs, prior_target=0.3)  # non-flat
+```
+
+Use `log_lr_from_probs_with_priors` when the calibration set was NOT balanced — the
+function corrects the reported LR back to prior-free magnitudes.
+
+## Verbal scale
+
+Report log-LR magnitudes alongside the six-band Nordgaard et al. (2012) / ENFSI (2015)
+scale:
+
+| log₁₀(LR) | Verbal support |
+|---|---|
+| 0 – 1 | weak |
+| 1 – 2 | moderate |
+| 2 – 3 | moderately strong |
+| 3 – 4 | strong |
+| 4 – 5 | very strong |
+| > 5 | extremely strong |
+
+The `build_forensic_report` template renders this scale automatically beside each
+method's LR value. See [Reporting](reporting.md).
+
+## Reference
+
+::: tamga.forensic.lr.CalibratedScorer
+    options:
+      show_root_full_path: false
+
+::: tamga.forensic.lr.log_lr_from_probs
+
+::: tamga.forensic.lr.log_lr_from_probs_with_priors
