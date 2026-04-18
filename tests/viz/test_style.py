@@ -13,7 +13,7 @@ def test_apply_publication_style_sets_dpi():
 
 
 def test_figure_size_single_column_is_3_5_inches():
-    w, h = figure_size("single")
+    w, _ = figure_size("single")
     assert w == 3.5
 
 
