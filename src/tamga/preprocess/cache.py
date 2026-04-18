@@ -1,6 +1,6 @@
 """Content-addressable cache for spaCy `DocBin` blobs.
 
-Keyed by `(document_hash, spacy_model, spacy_version, sorted_excluded_components)`. At this stage
+Keyed by `(document_hash, spacy_model, backend_version, sorted_excluded_components)`. At this stage
 the cache stores raw bytes — Task 13 will wire up `DocBin` serialisation on top.
 """
 
@@ -14,15 +14,20 @@ from tamga.plumbing.hashing import hash_mapping
 def cache_key(
     document_hash: str,
     spacy_model: str,
-    spacy_version: str,
+    backend_version: str,
     excluded_components: list[str],
 ) -> str:
-    """Return a stable cache key for a (document, spaCy configuration) pair."""
+    """Return a stable cache key for a (document, backend configuration) pair.
+
+    `backend_version` is a structured string like 'spacy=3.7.2' (native spaCy backend) or
+    'spacy_stanza=1.0.4;stanza=1.8.0' (Stanza-via-spacy-stanza backend). The native branch
+    preserves the prior format so English caches built on older tamga versions remain valid.
+    """
     return hash_mapping(
         {
             "doc": document_hash,
             "model": spacy_model,
-            "version": spacy_version,
+            "version": backend_version,
             "exclude": sorted(excluded_components),
         }
     )

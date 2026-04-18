@@ -62,7 +62,7 @@ class SpacyPipeline:
         return str(spacy.__version__)
 
     def _key(self, doc: Document) -> str:
-        return cache_key(doc.hash, self.model, self.spacy_version, self.exclude)
+        return cache_key(doc.hash, self.model, f"spacy={self.spacy_version}", self.exclude)
 
     def parse(self, corpus: Corpus) -> ParsedCorpus:
         parsed: list[Doc | None] = []
