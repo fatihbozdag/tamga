@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quickstart — Who wrote the mystery essay?</title>
+<style>
+body { font-family: Source Serif Pro, Georgia, serif; max-width: 900px; margin: 2em auto; padding: 0 1em; line-height: 1.6; color: #222; }
+h1, h2, h3 { color: #0b3d66; }
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid #ccc; padding: 0.3em 0.8em; }
+th { background: #f2f4f8; }
+pre { background: #f6f8fa; padding: 0.6em; border-radius: 4px; overflow-x: auto; font-size: 0.85em; }
+img.figure { max-width: 100%; display: block; margin: 1em 0; }
+code.inline { background: #f6f8fa; padding: 0.1em 0.3em; border-radius: 3px; }
+.provenance { font-size: 0.85em; color: #666; margin-top: 3em; border-top: 1px solid #ccc; padding-top: 1em; }
+</style>
+</head>
+<body>
+<h1>Quickstart — Who wrote the mystery essay?</h1>
+<p><strong>Generated:</strong> 2026-04-17 22:09 &middot; <strong>tamga:</strong> 0.1.0.dev0</p>
+
+
+
+
+<h2>Resolved config</h2>
+<pre><code>{
+  "name": "quickstart",
+  "seed": 42,
+  "corpus": {
+    "path": "examples/quickstart/corpus",
+    "metadata": "examples/quickstart/metadata.tsv",
+    "filter": {
+      "role": [
+        "train"
+      ]
+    }
+  },
+  "preprocess": {
+    "spacy": {
+      "model": "en_core_web_trf",
+      "device": "auto",
+      "exclude": []
+    },
+    "normalize": {
+      "lowercase": false,
+      "strip_punct": false,
+      "collapse_numerals": false,
+      "expand_contractions": false
+    }
+  },
+  "features": [
+    {
+      "id": "mfw200",
+      "type": "mfw",
+      "params": {
+        "n": 200,
+        "min_df": 2,
+        "scale": "zscore",
+        "lowercase": true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "id": "burrows",
+      "kind": "delta",
+      "features": "mfw200",
+      "group_by": "author",
+      "cv": null,
+      "params": {
+        "method": "burrows"
+      }
+    },
+    {
+      "id": "pca",
+      "kind": "reduce",
+      "features": "mfw200",
+      "group_by": null,
+      "cv": null,
+      "params": {
+        "n_components": 2
+      }
+    },
+    {
+      "id": "zeta",
+      "kind": "zeta",
+      "features": null,
+      "group_by": "author",
+      "cv": null,
+      "params": {
+        "group_a": "Hamilton",
+        "group_b": "Madison",
+        "top_k": 20
+      }
+    }
+  ],
+  "viz": {
+    "format": [
+      "png"
+    ],
+    "dpi": 200,
+    "style": "default",
+    "palette": "colorblind"
+  },
+  "report": {
+    "format": "html",
+    "offline": false,
+    "include": [
+      "corpus",
+      "config",
+      "provenance",
+      "results"
+    ],
+    "title": "Quickstart \u2014 Who wrote the mystery essay?"
+  },
+  "cache": {
+    "dir": ".tamga/cache",
+    "reuse": true
+  },
+  "output": {
+    "dir": "examples/quickstart/results",
+    "timestamp": false
+  }
+}</code></pre>
+
+
+
+<h2>burrows_delta</h2>
+
+
+
+
+<h3>Parameters</h3>
+<pre><code>{
+  "method": "burrows"
+}</code></pre>
+
+
+
+
+
+
+
+<h2>pca</h2>
+
+
+
+<img class="figure" src="/Users/fatihbozdag/Downloads/Cursor-Projects/Stylometry/examples/quickstart/results/demo/pca/pca.png" alt="pca figure">
+
+
+
+
+<h3>Parameters</h3>
+<pre><code>{
+  "n_components": 2
+}</code></pre>
+
+
+
+
+
+
+
+<h2>ZetaClassic</h2>
+
+
+
+<img class="figure" src="/Users/fatihbozdag/Downloads/Cursor-Projects/Stylometry/examples/quickstart/results/demo/zeta/zeta.png" alt="ZetaClassic figure">
+
+
+
+
+<h3>Parameters</h3>
+<pre><code>{
+  "group_by": "author",
+  "top_k": 20,
+  "min_df": 2,
+  "group_a": "Hamilton",
+  "group_b": "Madison"
+}</code></pre>
+
+
+
+
+
+
+
+
+<div class="provenance">
+<h3>Provenance</h3>
+<pre><code>{
+  "tamga_version": "0.1.0.dev0",
+  "python_version": "3.11.13",
+  "spacy_model": "en_core_web_trf",
+  "spacy_version": "",
+  "corpus_hash": "dc578692c710fbb2279adb98adb9ae7d804436fb78d3ce66d7ecbe0ff7401c0d",
+  "feature_hash": null,
+  "seed": 42,
+  "timestamp": "2026-04-17T22:07:14.926776",
+  "resolved_config": {
+    "name": "quickstart",
+    "seed": 42,
+    "corpus": {
+      "path": "examples/quickstart/corpus",
+      "metadata": "examples/quickstart/metadata.tsv",
+      "filter": {
+        "role": [
+          "train"
+        ]
+      }
+    },
+    "preprocess": {
+      "spacy": {
+        "model": "en_core_web_trf",
+        "device": "auto",
+        "exclude": []
+      },
+      "normalize": {
+        "lowercase": false,
+        "strip_punct": false,
+        "collapse_numerals": false,
+        "expand_contractions": false
+      }
+    },
+    "features": [
+      {
+        "id": "mfw200",
+        "type": "mfw",
+        "params": {
+          "n": 200,
+          "min_df": 2,
+          "scale": "zscore",
+          "lowercase": true
+        }
+      }
+    ],
+    "methods": [
+      {
+        "id": "burrows",
+        "kind": "delta",
+        "features": "mfw200",
+        "group_by": "author",
+        "cv": null,
+        "params": {
+          "method": "burrows"
+        }
+      },
+      {
+        "id": "pca",
+        "kind": "reduce",
+        "features": "mfw200",
+        "group_by": null,
+        "cv": null,
+        "params": {
+          "n_components": 2
+        }
+      },
+      {
+        "id": "zeta",
+        "kind": "zeta",
+        "features": null,
+        "group_by": "author",
+        "cv": null,
+        "params": {
+          "group_a": "Hamilton",
+          "group_b": "Madison",
+          "top_k": 20
+        }
+      }
+    ],
+    "viz": {
+      "format": [
+        "png"
+      ],
+      "dpi": 200,
+      "style": "default",
+      "palette": "colorblind"
+    },
+    "report": {
+      "format": "html",
+      "offline": false,
+      "include": [
+        "corpus",
+        "config",
+        "provenance",
+        "results"
+      ],
+      "title": "Quickstart \u2014 Who wrote the mystery essay?"
+    },
+    "cache": {
+      "dir": ".tamga/cache",
+      "reuse": true
+    },
+    "output": {
+      "dir": "examples/quickstart/results",
+      "timestamp": false
+    }
+  }
+}</code></pre>
+</div>
+</body>
+</html>
