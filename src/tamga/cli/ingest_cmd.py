@@ -29,20 +29,40 @@ def ingest_command(
     cache_dir: Path = typer.Option(  # noqa: B008
         Path(".tamga/cache"), "--cache-dir", help="Directory for the DocBin cache."
     ),
-    spacy_model: str = typer.Option("en_core_web_trf", "--spacy-model", help="spaCy model name."),
+    spacy_model: str | None = typer.Option(
+        None,
+        "--spacy-model",
+        help="spaCy model name. Default: resolved from --language.",
+    ),
     exclude: list[str] | None = typer.Option(  # noqa: B008
         None, "--exclude", help="spaCy pipeline components to skip."
     ),
+    language: str = typer.Option(
+        "en",
+        "--language",
+        "-l",
+        help="Corpus language code (en, tr, de, es, fr). Default: en.",
+    ),
 ) -> None:
     """Parse a corpus directory and cache spaCy parses."""
-    corpus = load_corpus(path, metadata=metadata, strict=strict)
-    console.print(f"[green]loaded[/green] {len(corpus)} documents from {path}")
-
-    pipe = SpacyPipeline(
-        model=spacy_model,
-        cache_dir=cache_dir / "docbin",
-        exclude=exclude or [],
+    corpus = load_corpus(path, metadata=metadata, strict=strict, language=language)
+    console.print(
+        f"[green]loaded[/green] {len(corpus)} documents from {path} (language={language})"
     )
+
+    # Task 3.3: wire language→SpacyPipeline (backend dispatch, default-model resolution).
+    # For now pass spacy_model if provided; otherwise SpacyPipeline's current default applies.
+    if spacy_model is not None:
+        pipe = SpacyPipeline(
+            model=spacy_model,
+            cache_dir=cache_dir / "docbin",
+            exclude=exclude or [],
+        )
+    else:
+        pipe = SpacyPipeline(
+            cache_dir=cache_dir / "docbin",
+            exclude=exclude or [],
+        )
 
     docbin_before = set(pipe.cache.keys())
     pipe.parse(corpus)
