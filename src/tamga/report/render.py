@@ -38,7 +38,13 @@ def build_report(
     provenance = _first_provenance(results) or {}
 
     template_name = f"report.{format}.j2"
-    env = Environment(keep_trailing_newline=True)
+    env = Environment(
+        keep_trailing_newline=True,
+        # Autoescape every template variable when the output target is HTML, so
+        # user-supplied strings (titles, corpus_summary values, config blobs) cannot
+        # inject script content. Markdown output is plain text; no HTML escaping.
+        autoescape=(format == "html"),
+    )
     template = env.from_string(
         (resources.files(_TEMPLATE_PKG) / template_name).read_text(encoding="utf-8")
     )
@@ -125,7 +131,7 @@ def build_forensic_report(
             if summary:
                 r["lr_summary"] = summary
 
-    env = Environment(keep_trailing_newline=True)
+    env = Environment(keep_trailing_newline=True, autoescape=True)
     template = env.from_string(
         (resources.files(_TEMPLATE_PKG) / "forensic_lr.html.j2").read_text(encoding="utf-8")
     )

@@ -163,3 +163,71 @@ def test_forensic_report_includes_lr_summary_when_provided(tmp_path: Path) -> No
     assert "1.34" in text
     assert "21.9" in text
     assert "Log" in text
+
+
+def test_forensic_report_escapes_html_in_user_fields(tmp_path: Path) -> None:
+    """User-supplied strings in chain-of-custody metadata must be HTML-escaped.
+
+    Forensic reports are written by whoever prepares the case file; any of the six
+    metadata fields could contain attacker-controlled content. Without autoescape,
+    `<script>` in custody_notes would execute when the HTML is opened in a browser —
+    unacceptable for reports destined for court proceedings.
+    """
+    d = tmp_path / "gi"
+    d.mkdir()
+    (d / "result.json").write_text(
+        json.dumps(
+            {
+                "method_name": "general_impostors",
+                "params": {},
+                "values": {},
+                "provenance": {
+                    "tamga_version": "0.1.0.dev0",
+                    "python_version": "3.11",
+                    "spacy_model": "en",
+                    "spacy_version": "3.7",
+                    "corpus_hash": "x",
+                    "feature_hash": None,
+                    "seed": 42,
+                    "timestamp": datetime.now().isoformat(),
+                    "resolved_config": {},
+                    "custody_notes": "<script>alert('xss')</script>",
+                    "hypothesis_pair": "H1 & H0 <test>",
+                },
+            }
+        )
+    )
+    out = tmp_path / "forensic.html"
+    build_forensic_report(d, output=out, title="Escape check")
+    text = out.read_text()
+    assert "<script>alert" not in text
+    assert "&lt;script&gt;" in text
+    assert "H1 &amp; H0" in text
+
+
+def test_build_report_html_escapes_untrusted_corpus_summary(tmp_path: Path) -> None:
+    """build_report (non-forensic) also autoescapes HTML output."""
+    result_dir = _make_result_dir(tmp_path)
+    out = tmp_path / "report.html"
+    build_report(
+        result_dir,
+        output=out,
+        format="html",
+        title="<script>alert('t')</script>",
+        corpus_summary={"evil": "<img onerror=alert(1)>"},
+    )
+    text = out.read_text()
+    assert "<script>alert" not in text
+    assert "&lt;script&gt;" in text
+    assert "<img onerror" not in text
+
+
+def test_build_report_md_does_not_autoescape(tmp_path: Path) -> None:
+    """Markdown output is plain text — no HTML escaping. Confirms autoescape is HTML-only."""
+    result_dir = _make_result_dir(tmp_path)
+    out = tmp_path / "report.md"
+    build_report(result_dir, output=out, format="md", title="Plain & simple")
+    text = out.read_text()
+    # The literal ampersand survives as '&' in markdown; no HTML entity conversion.
+    assert "Plain & simple" in text
+    assert "&amp;" not in text
