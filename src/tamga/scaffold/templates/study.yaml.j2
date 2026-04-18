@@ -7,8 +7,9 @@ corpus:
   # metadata: corpus/metadata.tsv    # uncomment when you provide a metadata TSV
 
 preprocess:
+  language: {{ language | default("en") }}
   spacy:
-    model: en_core_web_trf
+    model: {{ spacy_model | default("en_core_web_trf") }}
     device: auto                     # auto | cpu | mps | cuda
 
 features:
