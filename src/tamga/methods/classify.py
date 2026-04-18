@@ -42,16 +42,17 @@ def cross_validate_tamga(
     cv_kind: str = "stratified",
     groups_from: np.ndarray | None = None,
     folds: int = 5,
+    seed: int = 42,
 ) -> dict[str, Any]:
     """Run cross-validation with a stylometry-aware CV strategy.
 
     cv_kind:
-      - "stratified": StratifiedKFold(folds)
-      - "loao":       LeaveOneGroupOut (requires groups_from)
-      - "leave_one_text_out": LeaveOneOut
+      - "stratified": StratifiedKFold(folds) — uses `seed` for the shuffle
+      - "loao":       LeaveOneGroupOut (requires groups_from; deterministic)
+      - "leave_one_text_out": LeaveOneOut (deterministic)
     """
     if cv_kind == "stratified":
-        cv = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
+        cv = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
         groups = None
     elif cv_kind == "loao":
         if groups_from is None:

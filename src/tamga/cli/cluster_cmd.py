@@ -25,6 +25,7 @@ def cluster_command(
         "ward", "--linkage", help="For hierarchical: ward | average | complete | single"
     ),
     mfw: int = typer.Option(500, "--mfw"),
+    seed: int = typer.Option(42, "--seed", help="Random seed for kmeans initialisation."),
     output: Path = typer.Option(Path("cluster.parquet"), "--output", "-o"),  # noqa: B008
 ) -> None:
     """Cluster corpus MFW matrix; save per-document labels to parquet + print a summary."""
@@ -33,7 +34,7 @@ def cluster_command(
     if method == "hierarchical":
         result = HierarchicalCluster(n_clusters=n_clusters, linkage=linkage).fit_transform(fm)
     elif method == "kmeans":
-        result = KMeansCluster(n_clusters=n_clusters, random_state=42).fit_transform(fm)
+        result = KMeansCluster(n_clusters=n_clusters, random_state=seed).fit_transform(fm)
     elif method == "hdbscan":
         result = HDBSCANCluster(min_cluster_size=max(2, n_clusters)).fit_transform(fm)
     else:

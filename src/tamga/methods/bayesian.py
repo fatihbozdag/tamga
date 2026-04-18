@@ -40,6 +40,34 @@ def _as_array(X: FeatureMatrix | np.ndarray) -> np.ndarray:  # noqa: N803 (sklea
     return X.X if isinstance(X, FeatureMatrix) else np.asarray(X)
 
 
+def _build_author_to_group_idx(
+    y: np.ndarray,
+    groups: np.ndarray,
+    unique_authors: np.ndarray,
+    unique_groups: np.ndarray,
+) -> np.ndarray:
+    """Map each unique author to its group index.
+
+    An author is expected to belong to exactly one group across the corpus; if any author
+    appears under conflicting group labels (which would make the hierarchical model
+    ill-defined for that author), raise ValueError with the offending author name.
+    """
+    author_to_group: dict[Any, int] = {}
+    group_label_to_idx = {g: i for i, g in enumerate(unique_groups)}
+    for a, g in zip(y, groups, strict=True):
+        gi = group_label_to_idx[g]
+        existing = author_to_group.get(a)
+        if existing is None:
+            author_to_group[a] = gi
+        elif existing != gi:
+            raise ValueError(
+                f"author {a!r} appears under multiple groups "
+                f"({unique_groups[existing]!r} and {g!r}); hierarchical model requires each "
+                "author to belong to exactly one group"
+            )
+    return np.array([author_to_group[a] for a in unique_authors])
+
+
 class BayesianAuthorshipAttributor(ClassifierMixin, BaseEstimator):
     """Wallace-Mosteller-style Bayesian authorship attribution.
 
@@ -80,13 +108,13 @@ class BayesianAuthorshipAttributor(ClassifierMixin, BaseEstimator):
 
     def predict(self, X: FeatureMatrix | np.ndarray) -> np.ndarray:  # noqa: N803
         scores = self.decision_function(X)
-        return self.classes_[np.argmax(scores, axis=1)]
+        return self.classes_[np.argmax(scores, axis=1)]  # type: ignore[no-any-return]
 
     def predict_proba(self, X: FeatureMatrix | np.ndarray) -> np.ndarray:  # noqa: N803
         scores = self.decision_function(X)
         scores_shift = scores - scores.max(axis=1, keepdims=True)
         exp = np.exp(scores_shift)
-        return exp / exp.sum(axis=1, keepdims=True)
+        return exp / exp.sum(axis=1, keepdims=True)  # type: ignore[no-any-return]
 
 
 class HierarchicalGroupComparison:
@@ -136,10 +164,17 @@ class HierarchicalGroupComparison:
         import pymc as pm
 
         X = fm.X  # noqa: N806 (sklearn convention)
-        unique_groups = np.unique(groups)
-        unique_authors = np.unique(y)
-        group_idx = np.array([list(unique_groups).index(g) for g in groups])
-        author_idx = np.array([list(unique_authors).index(a) for a in y])
+        y_arr = np.asarray(y)
+        groups_arr = np.asarray(groups)
+        if len(y_arr) != len(groups_arr) or len(y_arr) != X.shape[0]:
+            raise ValueError("y, groups, and fm must all have the same length along axis 0")
+
+        unique_groups = np.unique(groups_arr)
+        unique_authors = np.unique(y_arr)
+        author_idx = np.array([list(unique_authors).index(a) for a in y_arr])
+        author_to_group_idx = _build_author_to_group_idx(
+            y_arr, groups_arr, unique_authors, unique_groups
+        )
 
         results = []
         for col in range(X.shape[1]):
@@ -149,9 +184,7 @@ class HierarchicalGroupComparison:
                 pm.HalfNormal("sigma_group", sigma=1, shape=len(unique_groups))
                 theta_author = pm.Normal(
                     "theta_author",
-                    mu=mu_group[group_idx[np.arange(len(unique_authors))]]
-                    if len(unique_authors) == len(groups)
-                    else 0,
+                    mu=mu_group[author_to_group_idx],
                     sigma=1,
                     shape=len(unique_authors),
                 )
@@ -166,7 +199,7 @@ class HierarchicalGroupComparison:
                     self.samples,
                     tune=self.tune,
                     chains=self.chains,
-                    random_seed=self.seed,
+                    random_seed=self.seed + col,
                     progressbar=False,
                     return_inferencedata=True,
                 )

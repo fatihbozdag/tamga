@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import spacy
 
 from tamga.config import StudyConfig, load_config
 from tamga.features import (
@@ -85,10 +86,10 @@ def run_study(
         method_dir = run_dir / method_cfg.id
         method_dir.mkdir(parents=True, exist_ok=True)
         try:
-            result = _dispatch_method(method_cfg, corpus, features_by_id)
+            result = _dispatch_method(method_cfg, corpus, features_by_id, seed=cfg.seed)
             result.provenance = Provenance.current(
                 spacy_model=cfg.preprocess.spacy.model,
-                spacy_version="",
+                spacy_version=spacy.__version__,
                 corpus_hash=corpus.hash(),
                 feature_hash=None,
                 seed=cfg.seed,
@@ -122,6 +123,8 @@ def _dispatch_method(
     method_cfg: Any,
     corpus: Any,
     features_by_id: dict[str, FeatureMatrix],
+    *,
+    seed: int,
 ) -> Result:
     kind = method_cfg.kind
 
@@ -185,6 +188,7 @@ def _dispatch_method(
             y,
             cv_kind=cv_kind,
             groups_from=y if cv_kind == "loao" else None,
+            seed=seed,
         )
         return Result(
             method_name=f"classify_{method_cfg.params.get('estimator', 'logreg')}",
