@@ -28,6 +28,7 @@ from tamga.forensic import (
     log_lr_from_probs_with_priors,
 )
 from tamga.io import load_corpus, load_metadata
+from tamga.languages import LANGUAGES, LanguageSpec, get_language
 from tamga.methods.classify import build_classifier, cross_validate_tamga
 from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
 from tamga.methods.consensus import BootstrapConsensus
@@ -58,6 +59,7 @@ from tamga.viz import (
 )
 
 __all__ = [
+    "LANGUAGES",
     "ArgamonLinearDelta",
     "BaseFeatureExtractor",
     "BootstrapConsensus",
@@ -77,6 +79,7 @@ __all__ = [
     "HDBSCANCluster",
     "HierarchicalCluster",
     "KMeansCluster",
+    "LanguageSpec",
     "LexicalDiversityExtractor",
     "MDSReducer",
     "MFWExtractor",
@@ -105,6 +108,7 @@ __all__ = [
     "distort_corpus",
     "distort_text",
     "figure_size",
+    "get_language",
     "load_config",
     "load_corpus",
     "load_metadata",
