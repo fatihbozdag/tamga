@@ -22,6 +22,7 @@ from tamga.features import (
     WordNgramExtractor,
 )
 from tamga.io import load_corpus
+from tamga.languages import get_language
 from tamga.methods.classify import build_classifier, cross_validate_tamga
 from tamga.methods.cluster import HierarchicalCluster
 from tamga.methods.consensus import BootstrapConsensus
@@ -81,6 +82,12 @@ def run_study(
         features_by_id[feat_cfg.id] = extractor.fit_transform(corpus)
         _log.info("built features %s: %s", feat_cfg.id, features_by_id[feat_cfg.id].X.shape)
 
+    # Resolve the spaCy model name: explicit override, else the language's default_model.
+    # Task 3.3 will push this resolution into SpacyPipeline itself.
+    resolved_spacy_model = (
+        cfg.preprocess.spacy.model or get_language(cfg.preprocess.language).default_model
+    )
+
     # Execute each method.
     for method_cfg in cfg.methods:
         method_dir = run_dir / method_cfg.id
@@ -88,7 +95,7 @@ def run_study(
         try:
             result = _dispatch_method(method_cfg, corpus, features_by_id, seed=cfg.seed)
             result.provenance = Provenance.current(
-                spacy_model=cfg.preprocess.spacy.model,
+                spacy_model=resolved_spacy_model,
                 spacy_version=spacy.__version__,
                 corpus_hash=corpus.hash(),
                 feature_hash=None,
