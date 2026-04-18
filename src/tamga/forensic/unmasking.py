@@ -87,9 +87,10 @@ class Unmasking:
         Number of iteration rounds (each round eliminates ``n_eliminate`` features and
         retrains). 10 is the standard setting.
     n_eliminate : int
-        Top-N features (by absolute coefficient) to remove each round. 3 per side (so
-        2 * 3 = 6 features total) is a typical literature default; we eliminate the
-        top-N by absolute coefficient in a single direction here for simplicity.
+        Per-class top-N features to remove each round, following Koppel & Schler 2004:
+        the N most Q-discriminating (top positive coefficients) *and* the N most
+        K-discriminating (top negative coefficients), so up to 2 * N features drop per
+        round. Default 3 (6 features per round), matching the classical literature setup.
     n_folds : int
         CV folds for accuracy estimation per round. Must be >= 2 and <= min(#Q chunks,
         #K chunks).
@@ -193,13 +194,17 @@ class Unmasking:
         folds = min(self.n_folds, len(q_chunks), len(k_chunks))
         cv = StratifiedKFold(n_splits=folds, shuffle=True, random_state=self.seed)
 
+        # Majority-class baseline once features are exhausted. For imbalanced Q/K chunks
+        # the "random" floor is not 0.5 but max(n_q, n_k) / (n_q + n_k).
+        majority_baseline = max(len(q_chunks), len(k_chunks)) / (len(q_chunks) + len(k_chunks))
+
         accuracies: list[float] = []
         eliminated_per_round: list[list[str]] = []
 
         for round_idx in range(self.n_rounds):
             if X.shape[1] == 0:
-                # No features left — classifier collapses to prior, accuracy ≈ 0.5.
-                accuracies.extend([0.5] * (self.n_rounds - round_idx))
+                # No features left — classifier collapses to majority-class prediction.
+                accuracies.extend([majority_baseline] * (self.n_rounds - round_idx))
                 eliminated_per_round.extend([[]] * (self.n_rounds - round_idx))
                 break
             clf = LogisticRegression(solver="lbfgs", max_iter=2000)
@@ -207,11 +212,15 @@ class Unmasking:
             accuracies.append(float(scores.mean()))
 
             # Refit on all data to pick features to eliminate this round.
+            # Per Koppel & Schler 2004: eliminate top-N features most discriminative for EACH
+            # class — the N features with the most-positive coefficients (most "Q-like") and
+            # the N with the most-negative ("K-like"), giving up to 2N eliminations per round.
             clf.fit(X, y)
-            # Absolute coefficient magnitude across the single class in binary LR.
-            coefs = np.abs(clf.coef_.ravel())
-            to_drop_count = min(self.n_eliminate, X.shape[1])
-            drop_idx = np.argsort(coefs)[-to_drop_count:]
+            coefs = clf.coef_.ravel()
+            half = min(self.n_eliminate, X.shape[1])
+            top_positive = np.argsort(coefs)[-half:]  # most Q-discriminating
+            top_negative = np.argsort(coefs)[:half]  # most K-discriminating
+            drop_idx = np.unique(np.concatenate([top_positive, top_negative]))
             eliminated = [feature_names[i] for i in drop_idx]
             keep = np.ones(X.shape[1], dtype=bool)
             keep[drop_idx] = False
