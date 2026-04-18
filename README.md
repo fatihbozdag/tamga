@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="BSD-3-Clause" src="https://img.shields.io/badge/license-BSD--3--Clause-0F1A2B?style=flat-square"></a>
   <a href="pyproject.toml"><img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-0F1A2B?style=flat-square"></a>
-  <a href="https://fatihbozdag.github.io/tamga/"><img alt="docs" src="https://img.shields.io/badge/docs-mkdocs%20material-0F1A2B?style=flat-square"></a>
+  <a href="docs/site/"><img alt="docs" src="https://img.shields.io/badge/docs-mkdocs%20material-0F1A2B?style=flat-square"></a>
   <img alt="status" src="https://img.shields.io/badge/status-phase%205%20%2B%20forensic%20phase%20landed-C9A34A?style=flat-square">
   <img alt="tests" src="https://img.shields.io/badge/tests-358%20passing-0F1A2B?style=flat-square">
 </p>
@@ -110,13 +110,26 @@ material. See [`src/tamga/forensic/`](src/tamga/forensic/) for the full surface.
 
 ## Documentation
 
-Full documentation site (MkDocs Material): **https://fatihbozdag.github.io/tamga/**
+Full MkDocs Material site under [`docs/site/`](docs/site/). Serve locally:
 
-- [Getting started](https://fatihbozdag.github.io/tamga/getting-started/)
-- [Concepts](https://fatihbozdag.github.io/tamga/concepts/) — Corpus / Features / Methods / Results
-- [Forensic toolkit](https://fatihbozdag.github.io/tamga/forensic/)
-- [PAN-CLEF verification tutorial](https://fatihbozdag.github.io/tamga/tutorials/pan-clef/)
-- [CLI + API reference](https://fatihbozdag.github.io/tamga/reference/)
+```bash
+uv pip install "tamga[docs]"
+mkdocs serve             # browse http://127.0.0.1:8000
+# or:
+mkdocs build --strict    # builds to ./site/
+```
+
+Pages:
+
+- [Getting started](docs/site/getting-started.md) — install, five-command quickstart
+- [Concepts](docs/site/concepts/index.md) — Corpus / Features / Methods / Results & provenance
+- [Forensic toolkit](docs/site/forensic/index.md) — verification, calibration, topic-invariance, PAN evaluation, reporting
+- [PAN-CLEF verification tutorial](docs/site/tutorials/pan-clef.md) — end-to-end runnable pipeline
+- [Federalist tutorial](docs/site/tutorials/federalist.md) — reproduce Mosteller & Wallace (1964)
+- [CLI + API reference](docs/site/reference/index.md)
+
+CI (`.github/workflows/docs.yml`) builds the site strictly on every push + PR and uploads it
+as a workflow artifact.
 
 ## Status
 
