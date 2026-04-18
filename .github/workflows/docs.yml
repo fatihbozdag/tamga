@@ -1,23 +1,5 @@
 name: Docs
 
-# Builds the MkDocs site on every push that touches docs/ or src/ and uploads the
-# rendered HTML as a workflow artifact. The deploy-to-Pages step is intentionally
-# omitted: GitHub Pages is unavailable on private repositories below the Pro tier.
-# When the repo is made public (or upgraded), add a deploy job back:
-#
-#   deploy:
-#     needs: build
-#     runs-on: ubuntu-latest
-#     environment:
-#       name: github-pages
-#       url: ${{ steps.deployment.outputs.page_url }}
-#     steps:
-#       - id: deployment
-#         uses: actions/deploy-pages@v4
-#
-# and re-grant `pages: write` + `id-token: write` at the workflow level, plus swap
-# `actions/upload-artifact` below for `actions/upload-pages-artifact`.
-
 on:
   push:
     branches: [main]
@@ -36,10 +18,12 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: docs-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -52,8 +36,18 @@ jobs:
           python-version: "3.11"
       - run: uv pip install --system -e ".[docs]"
       - run: mkdocs build --strict
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-pages-artifact@v3
         with:
-          name: docs-site
           path: site
-          retention-days: 14
+
+  deploy:
+    # Only deploy from pushes to main — not from PR builds.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
