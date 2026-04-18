@@ -7,6 +7,8 @@ sets, open-set rather than closed-set decisions, and reporting suitable for jour
 Linguistics*.
 """
 
+from tamga.forensic.char_ngrams import CategorizedCharNgramExtractor, classify_ngram
+from tamga.forensic.distortion import distort_corpus, distort_text
 from tamga.forensic.lr import (
     CalibratedScorer,
     log_lr_from_probs,
@@ -17,9 +19,13 @@ from tamga.forensic.verify import GeneralImpostors
 
 __all__ = [
     "CalibratedScorer",
+    "CategorizedCharNgramExtractor",
     "GeneralImpostors",
     "brier",
+    "classify_ngram",
     "cllr",
+    "distort_corpus",
+    "distort_text",
     "ece",
     "log_lr_from_probs",
     "log_lr_from_probs_with_priors",
