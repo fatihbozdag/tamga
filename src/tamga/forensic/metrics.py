@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from itertools import pairwise
 
 import numpy as np
+from scipy.stats import rankdata
 
 
 def cllr(log_lrs: np.ndarray, y: np.ndarray) -> float:
@@ -191,8 +192,6 @@ def auc(scores: np.ndarray, y: np.ndarray) -> float:
     if target.size == 0 or nontarget.size == 0:
         raise ValueError("auc requires at least one target and one non-target trial")
     # Mann-Whitney U via rankdata: sum-of-ranks for target minus target-self-rank lower bound.
-    from scipy.stats import rankdata
-
     all_scores = np.concatenate([target, nontarget])
     ranks = rankdata(all_scores)
     r_target = ranks[: target.size].sum()
@@ -205,7 +204,15 @@ def auc(scores: np.ndarray, y: np.ndarray) -> float:
 def c_at_1(probs: np.ndarray, y: np.ndarray, *, unanswered_margin: float = 0.0) -> float:
     """c@1 (Peñas & Rodrigo 2011): accuracy with a credit for non-answers.
 
-    c@1 = (1 / n) * (n_correct + n_unanswered * (n_correct / n_answered))
+    Canonical formula (Peñas & Rodrigo 2011, eq. 1):
+
+        c@1 = (1 / n) * (n_correct + n_unanswered * (n_correct / n))
+
+    where ``n`` is the total number of trials, ``n_correct`` is the number of correct
+    answered trials, and ``n_unanswered`` is the number of abstentions. The bonus for
+    abstention scales with the *overall* accuracy of the system (n_correct / n), not with
+    its accuracy on the answered subset — so a system that abstains frequently but is
+    also inaccurate on its answers does not get rewarded.
 
     Non-answers are defined as trials whose probability lies within
     ``[0.5 - unanswered_margin, 0.5 + unanswered_margin]``. If ``unanswered_margin = 0``,
@@ -243,11 +250,10 @@ def c_at_1(probs: np.ndarray, y: np.ndarray, *, unanswered_margin: float = 0.0) 
     n_correct = int(correct.sum())
     n_unanswered = int(unanswered.sum())
     n = probs.size
-    n_answered = n - n_unanswered
-    if n_answered == 0:
+    if n - n_unanswered == 0:
         # All trials unanswered: by convention c@1 = 0 (prior-only).
         return 0.0
-    return float((1.0 / n) * (n_correct + n_unanswered * (n_correct / n_answered)))
+    return float((1.0 / n) * (n_correct + n_unanswered * (n_correct / n)))
 
 
 def f05u(probs: np.ndarray, y: np.ndarray) -> float:

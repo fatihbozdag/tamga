@@ -57,14 +57,30 @@ class TestCAt1:
         assert c_at_1(probs2, y) == pytest.approx(0.75)
 
     def test_unanswered_trials_get_proportional_credit(self) -> None:
-        """c@1 = (1/n)(n_correct + n_unanswered * n_correct/n_answered).
+        """Peñas & Rodrigo (2011) eq. 1: c@1 = (1/n) * (n_correct + n_unanswered * n_correct/n).
 
-        3 correct answered + 1 unanswered with margin 0.05:
-          c@1 = (1/4)(3 + 1 * 3/3) = (1/4)(3 + 1) = 1.0
+        3 correct answered + 1 unanswered out of 4:
+          c@1 = (1/4) * (3 + 1 * 3/4) = (1/4) * 3.75 = 0.9375
+
+        A high-accuracy system gains a credit for abstaining that scales with its overall
+        accuracy — not with its answered-only accuracy, which would reward systems that
+        abstain a lot but are also inaccurate on the answers they do give.
         """
         probs = np.array([0.9, 0.9, 0.1, 0.5])
         y = np.array([1, 1, 0, 1])  # the last trial is unanswered (prob exactly 0.5)
-        assert c_at_1(probs, y, unanswered_margin=0.001) == pytest.approx(1.0)
+        assert c_at_1(probs, y, unanswered_margin=0.001) == pytest.approx(0.9375)
+
+    def test_unanswered_bonus_scales_with_overall_accuracy(self) -> None:
+        """A system with 2 correct + 1 unanswered + 1 wrong (n=4): overall accuracy is 0.5
+        (2/4). Paper formula: c@1 = (1/4) * (2 + 1 * 2/4) = (1/4) * 2.5 = 0.625.
+
+        This is strictly less than under the pre-fix (wrong) denominator (n_answered=3),
+        which would have given (1/4)(2 + 1 * 2/3) = 0.667. The test locks in the paper's
+        version of the metric so the fix doesn't silently regress.
+        """
+        probs = np.array([0.9, 0.9, 0.9, 0.5])
+        y = np.array([1, 1, 0, 1])  # 2 correct (idx 0, 1), 1 wrong (idx 2), 1 unanswered
+        assert c_at_1(probs, y, unanswered_margin=0.001) == pytest.approx(0.625)
 
     def test_c_at_1_requires_valid_probs(self) -> None:
         with pytest.raises(ValueError, match=r"\[0, 1\]"):
