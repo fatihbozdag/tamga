@@ -14,7 +14,17 @@ from tamga.forensic.lr import (
     log_lr_from_probs,
     log_lr_from_probs_with_priors,
 )
-from tamga.forensic.metrics import brier, cllr, ece, tippett
+from tamga.forensic.metrics import (
+    PANReport,
+    auc,
+    brier,
+    c_at_1,
+    cllr,
+    compute_pan_report,
+    ece,
+    f05u,
+    tippett,
+)
 from tamga.forensic.unmasking import Unmasking
 from tamga.forensic.verify import GeneralImpostors
 
@@ -22,13 +32,18 @@ __all__ = [
     "CalibratedScorer",
     "CategorizedCharNgramExtractor",
     "GeneralImpostors",
+    "PANReport",
     "Unmasking",
+    "auc",
     "brier",
+    "c_at_1",
     "classify_ngram",
     "cllr",
+    "compute_pan_report",
     "distort_corpus",
     "distort_text",
     "ece",
+    "f05u",
     "log_lr_from_probs",
     "log_lr_from_probs_with_priors",
     "tippett",
