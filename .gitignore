@@ -38,6 +38,10 @@ reports/
 # ad-hoc setup scripts
 scratch/
 
+# Local raw-corpus artifacts (cleaned copies live under examples/*/corpus/)
+/data/
+/stylometry-federalist.zip
+
 # OS / editor
 .DS_Store
 .idea/
