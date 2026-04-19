@@ -68,7 +68,8 @@ feature hash, seed, spaCy version, timestamp, resolved config) so a study writte
 | Layer | Highlights |
 |---|---|
 | **Corpus** | `.txt` + TSV metadata ingestion, filter / groupby, content-addressed hashing |
-| **Features** | MFW, char / word / POS n-grams, dependency bigrams, function words, punctuation, readability, sentence length, lexical diversity, sentence + contextual embeddings |
+| **Languages** | EN / TR / DE / ES / FR first-class — per-language function words, readability formulas, contextual/sentence embedding defaults. Turkish via Stanford Stanza (BOUN) through `spacy-stanza` |
+| **Features** | MFW, char / word / POS n-grams, dependency bigrams, function words, punctuation, readability (EN + TR/DE/ES/FR native formulas), sentence length, lexical diversity, sentence + contextual embeddings |
 | **Methods** | Burrows / Eder / Argamon / Cosine / Quadratic Delta; Zeta; PCA / UMAP / t-SNE / MDS; Ward / k-means / HDBSCAN; bootstrap consensus; sklearn classify + CV; Wallace–Mosteller Bayesian |
 | **Forensic** | General Impostors, Unmasking, Stamatatos distortion, Sapkota n-gram categories, Platt / isotonic calibration, log-LR + C_llr + AUC + c@1 + F0.5u + ECE + Brier + Tippett, PANReport, chain-of-custody Provenance, LR-framed HTML report |
 
@@ -79,10 +80,20 @@ Rich-based interactive `tamga shell`.
 
 **Forensic phase landed** — six additions (General Impostors, LR + calibration + evaluation
 metrics, Sapkota categories + Stamatatos distortion, Unmasking, chain-of-custody + forensic
-report template, PAN harness). **123 new tests, 358 total passing.**
+report template, PAN harness).
 
-**Phase 6 (in progress)** — this MkDocs documentation site; a PAN-CLEF verification
-tutorial; PyPI publish.
+**Multi-language phase landed** — first-class support for English, Turkish, German, Spanish,
+French behind a `tamga.languages` registry. Turkish parses through Stanford Stanza (BOUN
+treebank) via `spacy-stanza`, returning native spaCy `Doc` objects so every feature extractor
+works unchanged. Native readability formulas per language (Ateşman + Bezirci–Yılmaz for Turkish,
+Flesch-Amstad + Wiener Sachtextformel for German, Fernández-Huerta + Szigriszt-Pazos for
+Spanish, Kandel–Moles + LIX for French). Function-word lists generated reproducibly from
+UD closed-class tokens.
+
+**Docs site landed** — this MkDocs Material site with Concepts, Forensic toolkit, Federalist +
+PAN-CLEF + Turkish tutorials, and CLI/API reference. **417 tests passing.**
+
+**Remaining** — PyPI publish.
 
 ## License & citation
 
