@@ -91,6 +91,7 @@ nav:
       - concepts/index.md
       - Corpus: concepts/corpus.md
       - Features: concepts/features.md
+      - Languages: concepts/languages.md
       - Methods: concepts/methods.md
       - Results & provenance: concepts/results.md
   - Forensic toolkit:
@@ -104,6 +105,7 @@ nav:
       - tutorials/index.md
       - Federalist Papers: tutorials/federalist.md
       - PAN-CLEF verification: tutorials/pan-clef.md
+      - Turkish stylometry: tutorials/turkish.md
   - Reference:
       - reference/index.md
       - CLI: reference/cli.md

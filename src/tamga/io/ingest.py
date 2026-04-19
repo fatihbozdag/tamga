@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from tamga.corpus import Corpus, Document
+from tamga.languages import get_language
 from tamga.plumbing.logging import get_logger
 
 _log = get_logger(__name__)
@@ -42,13 +43,17 @@ def load_corpus(
     strict: bool = True,
     glob: str = _TEXT_GLOB,
     encoding: str = "utf-8",
+    language: str = "en",
 ) -> Corpus:
     """Load every text file under `path` into a Corpus, sorted by filename.
 
     If `metadata` is provided it must be a TSV readable by `load_metadata`. When `strict` is True
     (default), every file must have a matching metadata row; otherwise, files without metadata
     are included with an empty metadata dict and a warning.
+
+    `language` must be a registered code (see tamga.LANGUAGES). Defaults to 'en'.
     """
+    get_language(language)  # validates early; raises ValueError if unknown
     path = Path(path)
     if not path.is_dir():
         raise NotADirectoryError(path)
@@ -72,4 +77,4 @@ def load_corpus(
         raise ValueError(f"strict=True: missing metadata for {len(missing)} file(s): {missing}")
 
     _log.info("loaded corpus: %d documents from %s", len(documents), path)
-    return Corpus(documents=documents)
+    return Corpus(documents=documents, language=language.lower())

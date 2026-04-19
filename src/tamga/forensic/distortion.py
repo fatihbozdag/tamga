@@ -43,7 +43,7 @@ _TOKEN_RE = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)*", flags=re.UNICODE)
 
 
 def _load_bundled_function_words() -> frozenset[str]:
-    path = resources.files("tamga.resources") / "function_words_en.txt"
+    path = resources.files("tamga.resources.languages.en") / "function_words.txt"
     words = (line.strip().lower() for line in path.read_text(encoding="utf-8").splitlines())
     return frozenset(w for w in words if w)
 

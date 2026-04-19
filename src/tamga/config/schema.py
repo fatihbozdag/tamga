@@ -11,6 +11,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from tamga.languages import LANGUAGES
+
 CvKind = Literal["stratified", "loao", "group_kfold", "leave_one_text_out"]
 MethodKind = Literal["delta", "zeta", "reduce", "cluster", "consensus", "classify", "bayesian"]
 FeatureType = Literal[
@@ -56,7 +58,8 @@ class CorpusConfig(BaseModel):
 
 class SpacyConfig(BaseModel):
     model_config = _STRICT_MODEL
-    model: str = "en_core_web_trf"
+    model: str | None = None
+    backend: Literal["spacy", "spacy_stanza"] | None = None
     device: Literal["auto", "cpu", "mps", "cuda"] = "auto"
     exclude: list[str] = Field(default_factory=list)
 
@@ -71,8 +74,20 @@ class NormalizeConfig(BaseModel):
 
 class PreprocessConfig(BaseModel):
     model_config = _STRICT_MODEL
+    language: str = "en"
     spacy: SpacyConfig = Field(default_factory=SpacyConfig)
     normalize: NormalizeConfig = Field(default_factory=NormalizeConfig)
+
+    @field_validator("language", mode="before")
+    @classmethod
+    def _normalize_and_validate(cls, v: Any) -> str:
+        if not isinstance(v, str):
+            raise ValueError(f"language must be a string, got {type(v).__name__}")
+        normalized = v.lower()
+        if normalized not in LANGUAGES:
+            supported = sorted(LANGUAGES)
+            raise ValueError(f"Unknown language code: {v!r}. Supported: {supported}.")
+        return normalized
 
 
 class FeatureConfig(BaseModel):

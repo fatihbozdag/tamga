@@ -29,6 +29,7 @@ from tamga.methods.delta import BurrowsDelta
 from tamga.methods.reduce import PCAReducer
 from tamga.methods.zeta import ZetaClassic
 from tamga.plumbing.logging import get_logger
+from tamga.preprocess.pipeline import SpacyPipeline
 from tamga.provenance import Provenance
 from tamga.result import Result
 
@@ -81,6 +82,15 @@ def run_study(
         features_by_id[feat_cfg.id] = extractor.fit_transform(corpus)
         _log.info("built features %s: %s", feat_cfg.id, features_by_id[feat_cfg.id].X.shape)
 
+    # SpacyPipeline resolves `language` → default model/backend via the languages registry.
+    # Explicit model/backend on SpacyConfig override the registry defaults.
+    pipe = SpacyPipeline(
+        language=cfg.preprocess.language,
+        model=cfg.preprocess.spacy.model,
+        backend=cfg.preprocess.spacy.backend,
+        exclude=list(cfg.preprocess.spacy.exclude),
+    )
+
     # Execute each method.
     for method_cfg in cfg.methods:
         method_dir = run_dir / method_cfg.id
@@ -88,7 +98,7 @@ def run_study(
         try:
             result = _dispatch_method(method_cfg, corpus, features_by_id, seed=cfg.seed)
             result.provenance = Provenance.current(
-                spacy_model=cfg.preprocess.spacy.model,
+                spacy_model=pipe.model,
                 spacy_version=spacy.__version__,
                 corpus_hash=corpus.hash(),
                 feature_hash=None,

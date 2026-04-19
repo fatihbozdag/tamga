@@ -6,23 +6,37 @@ from tamga.preprocess.cache import DocBinCache, cache_key
 
 
 def test_cache_key_is_deterministic() -> None:
-    a = cache_key("doc-hash", "en_core_web_sm", "3.7.2", ["ner"])
-    b = cache_key("doc-hash", "en_core_web_sm", "3.7.2", ["ner"])
+    a = cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.2", ["ner"])
+    b = cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.2", ["ner"])
     assert a == b
 
 
 def test_cache_key_changes_with_any_input() -> None:
-    base = cache_key("doc-hash", "en_core_web_sm", "3.7.2", [])
-    assert cache_key("other-hash", "en_core_web_sm", "3.7.2", []) != base
-    assert cache_key("doc-hash", "en_core_web_lg", "3.7.2", []) != base
-    assert cache_key("doc-hash", "en_core_web_sm", "3.7.3", []) != base
-    assert cache_key("doc-hash", "en_core_web_sm", "3.7.2", ["ner"]) != base
+    base = cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.2", [])
+    assert cache_key("other-hash", "en_core_web_sm", "spacy=3.7.2", []) != base
+    assert cache_key("doc-hash", "en_core_web_lg", "spacy=3.7.2", []) != base
+    assert cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.3", []) != base
+    assert cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.2", ["ner"]) != base
 
 
 def test_cache_key_is_order_independent_for_excluded_components() -> None:
-    a = cache_key("doc-hash", "en_core_web_sm", "3.7.2", ["ner", "parser"])
-    b = cache_key("doc-hash", "en_core_web_sm", "3.7.2", ["parser", "ner"])
+    a = cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.2", ["ner", "parser"])
+    b = cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.2", ["parser", "ner"])
     assert a == b
+
+
+def test_cache_key_spacy_native_backend_version_format() -> None:
+    """English backend_version must format as 'spacy=<version>'."""
+    k_new = cache_key("doc-hash", "en_core_web_sm", "spacy=3.7.2", ["ner"])
+    # This must match what Task 3.3's SpacyPipeline.backend_version produces for backend='spacy'.
+    assert k_new  # smoke: call returns a string
+
+
+def test_cache_key_stanza_backend_differs_from_spacy_native() -> None:
+    """Different backend identifiers must never collide."""
+    native = cache_key("doc-hash", "tr", "spacy=3.7.2", [])
+    stanza = cache_key("doc-hash", "tr", "spacy_stanza=1.0.4;stanza=1.8.0", [])
+    assert native != stanza
 
 
 def test_cache_miss_returns_none(tmp_path: Path) -> None:

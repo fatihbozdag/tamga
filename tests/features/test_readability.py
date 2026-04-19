@@ -25,3 +25,36 @@ def test_readability_per_document() -> None:
     ex = ReadabilityExtractor(indices=["flesch"])
     fm = ex.fit_transform(_corpus("Simple text.", "Another text."))
     assert fm.X.shape == (2, 1)
+
+
+def test_readability_resolves_english_defaults_from_registry() -> None:
+    from tamga.corpus import Corpus, Document
+    from tamga.features.readability import ReadabilityExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="A short simple sentence.")], language="en")
+    ex = ReadabilityExtractor()  # indices=None
+    fm = ex.fit_transform(c)
+    assert set(fm.feature_names) == {"flesch", "flesch_kincaid", "gunning_fog"}
+
+
+def test_readability_rejects_unsupported_index_for_language() -> None:
+    import pytest
+
+    from tamga.corpus import Corpus, Document
+    from tamga.features.readability import ReadabilityExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="x")], language="en")
+    ex = ReadabilityExtractor(indices=["atesman"])  # Turkish index on English corpus
+    with pytest.raises(ValueError, match="not available for language 'en'"):
+        ex.fit_transform(c)
+
+
+def test_readability_explicit_language_overrides_corpus() -> None:
+    from tamga.corpus import Corpus, Document
+    from tamga.features.readability import ReadabilityExtractor
+
+    # Even if corpus is stamped 'tr', a user may override by passing language='en'.
+    c = Corpus(documents=[Document(id="d0", text="A simple sentence.")], language="tr")
+    ex = ReadabilityExtractor(indices=["flesch"], language="en")
+    fm = ex.fit_transform(c)
+    assert "flesch" in fm.feature_names

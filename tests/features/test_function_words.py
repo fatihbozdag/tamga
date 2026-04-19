@@ -34,3 +34,43 @@ def test_function_word_accepts_custom_list() -> None:
     ex = FunctionWordExtractor(wordlist=["custom"], scale="none")
     fm = ex.fit_transform(_corpus("a custom word"))
     assert list(fm.feature_names) == ["custom"]
+
+
+def test_function_word_uses_corpus_language_turkish() -> None:
+    """Turkish corpus → Turkish function-word list loaded."""
+    from tamga.corpus import Corpus, Document
+    from tamga.features.function_words import FunctionWordExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="Ben ve sen gittik.")], language="tr")
+    ex = FunctionWordExtractor(scale="none")
+    fm = ex.fit_transform(c)
+    # "ve" is among the most frequent Turkish function words — must appear.
+    assert "ve" in fm.feature_names
+
+
+def test_function_word_list_bundled_for_all_five_languages() -> None:
+    from tamga.features.function_words import _load_bundled_list
+
+    for lang in ["en", "tr", "de", "es", "fr"]:
+        words = _load_bundled_list(lang)
+        assert len(words) >= 50, f"{lang} list has only {len(words)} entries"
+
+
+def test_function_word_explicit_language_overrides_corpus() -> None:
+    from tamga.corpus import Corpus, Document
+    from tamga.features.function_words import FunctionWordExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="the cat")], language="tr")
+    ex = FunctionWordExtractor(scale="none", language="en")
+    fm = ex.fit_transform(c)
+    assert "the" in fm.feature_names
+
+
+def test_function_word_wordlist_overrides_everything() -> None:
+    from tamga.corpus import Corpus, Document
+    from tamga.features.function_words import FunctionWordExtractor
+
+    c = Corpus(documents=[Document(id="d0", text="foo bar")], language="tr")
+    ex = FunctionWordExtractor(wordlist=["foo"], language="en", scale="none")
+    fm = ex.fit_transform(c)
+    assert list(fm.feature_names) == ["foo"]

@@ -66,3 +66,32 @@ def test_ingest_reports_cache_hits_on_rerun(tmp_path: Path) -> None:
     )
     assert second.exit_code == 0
     assert "cached" in second.stdout.lower() or "cache" in second.stdout.lower()
+
+
+def test_ingest_cli_accepts_language_flag(tmp_path, monkeypatch) -> None:
+    from typer.testing import CliRunner
+
+    from tamga.cli import app
+
+    corpus_dir = tmp_path / "corpus"
+    corpus_dir.mkdir()
+    (corpus_dir / "a.txt").write_text("merhaba dünya")
+
+    # Stub out SpacyPipeline to avoid model loads during unit tests.
+    recorded: dict[str, object] = {}
+    from tamga.cli import ingest_cmd
+
+    class _StubPipe:
+        def __init__(self, **kwargs: object) -> None:
+            recorded["pipe_kwargs"] = kwargs
+            self.cache = type("C", (), {"keys": lambda self: [], "size_bytes": lambda self: 0})()
+
+        def parse(self, corpus) -> None:
+            recorded["corpus_language"] = corpus.language
+
+    monkeypatch.setattr(ingest_cmd, "SpacyPipeline", _StubPipe)
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["ingest", str(corpus_dir), "--language", "tr", "--no-strict"])
+    assert result.exit_code == 0, result.stdout
+    assert recorded["corpus_language"] == "tr"

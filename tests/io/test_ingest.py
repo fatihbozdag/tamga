@@ -68,3 +68,29 @@ def test_load_corpus_non_strict_allows_missing_metadata(tmp_path: Path):
     (tmp_path / "meta.tsv").write_text("filename\tauthor\na.txt\tAlice\n")
     corpus = load_corpus(tmp_path, metadata=tmp_path / "meta.tsv", strict=False)
     assert len(corpus) == 2
+
+
+def test_load_corpus_stamps_language_argument(tmp_path) -> None:
+    from tamga.io import load_corpus
+
+    (tmp_path / "d.txt").write_text("hola mundo")
+    corpus = load_corpus(tmp_path, language="es", strict=False)
+    assert corpus.language == "es"
+
+
+def test_load_corpus_defaults_to_english(tmp_path) -> None:
+    from tamga.io import load_corpus
+
+    (tmp_path / "d.txt").write_text("hello")
+    corpus = load_corpus(tmp_path, strict=False)
+    assert corpus.language == "en"
+
+
+def test_load_corpus_rejects_unknown_language_code(tmp_path) -> None:
+    import pytest
+
+    from tamga.io import load_corpus
+
+    (tmp_path / "d.txt").write_text("x")
+    with pytest.raises(ValueError, match="Unknown language code"):
+        load_corpus(tmp_path, language="xx", strict=False)
