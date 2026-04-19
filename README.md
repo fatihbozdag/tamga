@@ -159,11 +159,25 @@ deploys to GitHub Pages on every merge to `main`.
 
 ## Status
 
-**Phase 5 landed** — viz, reports, runner, and CLI shell — plus the **forensic-linguistics
-phase** (six additions, 123 new tests, 358 total passing).
+**Phase 5 landed** — visualisation, Jinja2 reports, declarative runner (`tamga run`), and a
+Rich-based interactive `tamga shell`.
 
-**Phase 6 in progress** — MkDocs documentation site and a PAN-CLEF verification tutorial
-(shipping now). PyPI publish remains.
+**Forensic phase landed** — six additions (General Impostors, LR + calibration + evaluation
+metrics, Sapkota categories + Stamatatos distortion, Unmasking, chain-of-custody + forensic
+report template, PAN harness).
+
+**Multi-language phase landed** — first-class support for English, Turkish, German, Spanish,
+French behind a `tamga.languages` registry. Turkish parses through Stanford Stanza (BOUN
+treebank) via `spacy-stanza`, returning native spaCy `Doc` objects so every feature extractor
+works unchanged. Native readability formulas per language (Ateşman + Bezirci–Yılmaz for
+Turkish, Flesch-Amstad + Wiener Sachtextformel for German, Fernández-Huerta + Szigriszt-Pazos
+for Spanish, Kandel–Moles + LIX for French). Function-word lists generated reproducibly from
+UD closed-class tokens.
+
+**Docs site landed** — MkDocs Material site with Concepts, Forensic toolkit, Federalist +
+PAN-CLEF + Turkish tutorials, and CLI/API reference. **417 tests passing.**
+
+**Remaining** — PyPI publish.
 
 See [`docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`](docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md) for the full design.
 
