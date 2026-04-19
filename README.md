@@ -6,8 +6,9 @@
   <a href="LICENSE"><img alt="BSD-3-Clause" src="https://img.shields.io/badge/license-BSD--3--Clause-0F1A2B?style=flat-square"></a>
   <a href="pyproject.toml"><img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-0F1A2B?style=flat-square"></a>
   <a href="https://fatihbozdag.github.io/tamga/"><img alt="docs" src="https://img.shields.io/badge/docs-mkdocs%20material-0F1A2B?style=flat-square"></a>
-  <img alt="status" src="https://img.shields.io/badge/status-phase%205%20%2B%20forensic%20phase%20landed-C9A34A?style=flat-square">
-  <img alt="tests" src="https://img.shields.io/badge/tests-358%20passing-0F1A2B?style=flat-square">
+  <img alt="status" src="https://img.shields.io/badge/status-multi--language%20%7C%20forensic%20%7C%20phase%205-C9A34A?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/tests-417%20passing-0F1A2B?style=flat-square">
+  <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20TR%20%7C%20DE%20%7C%20ES%20%7C%20FR-0F1A2B?style=flat-square">
 </p>
 
 ---
@@ -45,6 +46,7 @@ uv pip install "tamga[bayesian]"    # PyMC + arviz for hierarchical models
 uv pip install "tamga[embeddings]"  # sentence-transformers + contextual BERT
 uv pip install "tamga[viz]"         # plotly, kaleido, ete3
 uv pip install "tamga[reports]"     # weasyprint for PDF export
+uv pip install "tamga[turkish]"     # spacy-stanza + Stanza for Turkish pipelines
 ```
 
 ## Quickstart
@@ -78,11 +80,35 @@ into the same space and lands among the Madison cluster — matching the histori
 
 | Layer | What's included |
 |---|---|
-| **Corpus** | `.txt` ingestion + TSV metadata, strict/lenient mode, `filter`, `groupby`, content-addressed hashing |
-| **Features** | MFW, char n-grams, word n-grams, POS n-grams, dependency bigrams, function words, punctuation, readability (six indices), sentence length, lexical diversity (eight indices), sentence + contextual embeddings |
+| **Languages** | EN, TR, DE, ES, FR — first-class. Turkish via Stanford Stanza (BOUN) through `spacy-stanza`; the rest via official spaCy `_trf` pipelines. Per-language function words, readability formulas, and contextual/sentence embedding defaults |
+| **Corpus** | `.txt` ingestion + TSV metadata, strict/lenient mode, `filter`, `groupby`, content-addressed hashing, language-stamped |
+| **Features** | MFW, char n-grams, word n-grams, POS n-grams, dependency bigrams, function words, punctuation, readability (English 6 + TR/DE/ES/FR native), sentence length, lexical diversity (eight indices), sentence + contextual embeddings |
 | **Methods** | Burrows / Eder / Argamon / Cosine / Quadratic Delta; Zeta (classic + Eder); PCA / MDS / UMAP / t-SNE; Ward / k-means / HDBSCAN; bootstrap consensus trees; sklearn classify with stylometry-aware CV; Bayesian Wallace-Mosteller + hierarchical group comparison |
 | **Forensic** | General Impostors verification, Unmasking, Stamatatos distortion, Sapkota char-n-gram categories, CalibratedScorer, log-LR + C_llr + AUC + c@1 + F0.5u + ECE + Brier + Tippett, PANReport, chain-of-custody Provenance, LR-framed HTML report (ENFSI / Nordgaard verbal scale) |
 | **Output** | Uniform `Result` record → JSON + Parquet + figures; Jinja2 HTML / Markdown report; publication-grade matplotlib with 300-DPI colourblind palette |
+
+## Multi-language support
+
+Five first-class languages behind a single `tamga.languages` registry — English, Turkish,
+German, Spanish, French. Language flows through `Corpus.language` and drives per-language
+defaults for function words, readability formulas, and embedding models:
+
+```bash
+uv pip install "tamga[turkish]"
+python -c "import stanza; stanza.download('tr')"
+tamga init demo-tr --language tr
+tamga ingest corpus/ --language tr --metadata corpus/metadata.tsv
+tamga run study.yaml --name first-run
+```
+
+Turkish parsing goes through Stanford Stanza (BOUN treebank) wrapped by `spacy-stanza` — it
+returns native spaCy `Doc` objects, so every tamga feature extractor works unchanged. Native
+readability formulas are implemented for each language (Ateşman + Bezirci–Yılmaz for Turkish,
+Flesch-Amstad + Wiener Sachtextformel for German, Fernández-Huerta + Szigriszt-Pazos for
+Spanish, Kandel–Moles + LIX for French). Function-word lists are regenerated reproducibly from
+Universal Dependencies treebanks via `scripts/regenerate_function_words.py`. See
+[`docs/site/concepts/languages.md`](docs/site/concepts/languages.md) and the
+[Turkish tutorial](docs/site/tutorials/turkish.md).
 
 ## Forensic toolkit
 
@@ -113,8 +139,10 @@ material. See [`src/tamga/forensic/`](src/tamga/forensic/) for the full surface.
 Full MkDocs Material site — **<https://fatihbozdag.github.io/tamga/>**
 
 - [Getting started](https://fatihbozdag.github.io/tamga/getting-started/) — install, five-command quickstart
-- [Concepts](https://fatihbozdag.github.io/tamga/concepts/) — Corpus / Features / Methods / Results & provenance
+- [Concepts](https://fatihbozdag.github.io/tamga/concepts/) — Corpus / Features / Languages / Methods / Results & provenance
+- [Languages](https://fatihbozdag.github.io/tamga/concepts/languages/) — EN / TR / DE / ES / FR registry, adding a sixth language
 - [Forensic toolkit](https://fatihbozdag.github.io/tamga/forensic/) — verification, calibration, topic-invariance, PAN evaluation, reporting
+- [Turkish tutorial](https://fatihbozdag.github.io/tamga/tutorials/turkish/) — end-to-end Turkish authorship walkthrough
 - [PAN-CLEF verification tutorial](https://fatihbozdag.github.io/tamga/tutorials/pan-clef/) — end-to-end runnable pipeline
 - [Federalist tutorial](https://fatihbozdag.github.io/tamga/tutorials/federalist/) — reproduce Mosteller & Wallace (1964)
 - [CLI + API reference](https://fatihbozdag.github.io/tamga/reference/)
