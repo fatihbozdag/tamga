@@ -100,12 +100,11 @@ def test_pipeline_backend_version_stanza_format(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Stanza backend_version is structurally different from native — no cache collisions."""
-    import sys
 
-    fake_spacy_stanza = type("M", (), {"__version__": "1.0.4"})
-    fake_stanza = type("M", (), {"__version__": "1.8.0"})
-    monkeypatch.setitem(sys.modules, "spacy_stanza", fake_spacy_stanza)
-    monkeypatch.setitem(sys.modules, "stanza", fake_stanza)
+    def fake_version(pkg: str) -> str:
+        return {"spacy_stanza": "1.0.4", "stanza": "1.8.0"}[pkg]
+
+    monkeypatch.setattr("importlib.metadata.version", fake_version)
 
     pipe = SpacyPipeline(language="tr", cache_dir=tmp_path)
     assert pipe.backend_version == "spacy_stanza=1.0.4;stanza=1.8.0"

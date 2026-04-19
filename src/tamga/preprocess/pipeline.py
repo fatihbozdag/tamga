@@ -86,7 +86,7 @@ class SpacyPipeline:
                     ) from e
                 _log.info("loading Stanza pipeline via spacy-stanza: lang=%s", self.model)
                 try:
-                    self._nlp = spacy_stanza.load_pipeline(lang=self.model)
+                    self._nlp = spacy_stanza.load_pipeline(self.model)
                 except FileNotFoundError as e:
                     raise RuntimeError(
                         f"Stanza model for language {self.model!r} not found. "
@@ -111,10 +111,9 @@ class SpacyPipeline:
         cross-backend cache collisions are impossible.
         """
         if self.backend == "spacy_stanza":
-            import spacy_stanza  # type: ignore[import-not-found]
-            import stanza  # type: ignore[import-not-found]
+            from importlib.metadata import version
 
-            return f"spacy_stanza={spacy_stanza.__version__};stanza={stanza.__version__}"
+            return f"spacy_stanza={version('spacy_stanza')};stanza={version('stanza')}"
         return f"spacy={self.spacy_version}"
 
     def _key(self, doc: Document) -> str:
