@@ -10,6 +10,9 @@ copyright: BSD-3-Clause
 docs_dir: docs/site
 site_dir: site
 
+not_in_nav: |
+  _translations/*
+
 theme:
   name: material
   logo: assets/tamga-banner.svg
