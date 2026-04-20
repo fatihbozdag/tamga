@@ -1,5 +1,23 @@
 # Kavramlar
 
+## tamga ne işe yarar
+
+tamga, bir metni kimin yazdığına dair üç soruyu yanıtlar:
+
+- **Yazar tespiti** — bir aday yazar kümesinden hangisinin bu belgeyi yazma olasılığı
+  en yüksektir?
+- **Yazar doğrulama** — bu belgeyi *bu kişi* mi yazdı?
+- **Grup karşılaştırması** — bir yazarın biçemi, bir başkasının biçeminden ya da
+  tanımlanmış bir gruptan nasıl ayrılır?
+
+Bu temel soruların üstünde bir adli katman yer alır: kalibre edilmiş olabilirlik oranları,
+delil zinciri üstverisi ve mahkeme kullanımına göre ayarlanmış değerlendirme ölçütleri.
+
+Hangi soruyu sorduğunuzdan emin değil misiniz? **[Yöntem seçimi rehberiyle
+başlayın](choosing.md).**
+
+## Dört katman
+
 tamga dört katman etrafında düzenlenmiştir; her katmanın birincil bir dönüş türü vardır. Bu dört türü anlamak, tamga'nın yapabildiği her şeyi oluşturmanıza olanak tanır:
 
 | Katman | Tür | Amaç |
