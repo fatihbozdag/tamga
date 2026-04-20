@@ -25,6 +25,66 @@ predictions = clf.predict(fm)       # nearest-centroid labels
 probs = clf.predict_proba(fm)       # softmax over negative distances
 ```
 
+### BurrowsDelta
+`BurrowsDelta()`
+
+*Use when:* you have 2+ candidate authors with ~2000+ words of known writing each and
+want to rank which one most likely wrote a questioned document.
+*Don't use when:* you have only one candidate (use `GeneralImpostors` verification
+instead), or when documents are shorter than ~500 words (signal gets noisy).
+*Expect:* a distance score per candidate; lowest distance is the predicted author.
+
+The classic Burrows (2002) method: z-score features, mean-absolute-difference (L1)
+distance to each candidate's centroid. Good default for literary English.
+
+### CosineDelta
+`CosineDelta()`
+
+*Use when:* you want a modern default for Delta-family attribution — cosine is robust
+to document-length differences and less sensitive to outlier words than L1.
+*Don't use when:* your corpus mixes wildly different genres without care; cosine is
+less diagnostic when topic dominates style.
+*Expect:* a distance score per candidate in `[0, 2]`; lowest distance wins.
+
+Smith & Aldridge (2011). Standard choice in modern stylometry; often the best
+single-method baseline before tuning.
+
+### EderDelta / EderSimpleDelta
+`EderDelta()`, `EderSimpleDelta()`
+
+*Use when:* you want to dampen noisy low-frequency words in the MFW tail — Eder's
+weighting penalises contributions from less-frequent features.
+*Don't use when:* your MFW list is already short (n < 100); there's little tail to down-
+weight.
+*Expect:* same shape as Burrows Delta; different ranking when tail-MFW contributions
+would otherwise dominate.
+
+Eder (2015). Two variants: `EderDelta` with explicit per-feature weights, `EderSimpleDelta`
+with a simplified scheme.
+
+### ArgamonLinearDelta
+`ArgamonLinearDelta()`
+
+*Use when:* you specifically want Euclidean (L2) distance rather than L1 — appropriate
+when features are approximately Gaussian after z-scoring.
+*Don't use when:* the MFW distribution is skewed enough to produce outliers; L2
+penalises outliers quadratically. Prefer `CosineDelta` or `BurrowsDelta`.
+*Expect:* a distance score per candidate; same ranking shape as other Deltas with
+different sensitivity to large per-feature deviations.
+
+Argamon (2008). Probabilistic interpretation of Delta under a Gaussian generative
+model.
+
+### QuadraticDelta
+`QuadraticDelta()`
+
+*Use when:* you want to replicate experiments that use squared-L2 distance — equivalent
+to Argamon Delta without the square root.
+*Don't use when:* you need a calibrated distance for downstream combining; squared
+distances aren't a proper metric.
+*Expect:* a distance score per candidate; monotonic with Argamon Linear Delta so
+ranking is identical.
+
 ## Contrast — Zeta
 
 Craig's Zeta (`ZetaClassic`) and Eder's smoothed variant (`ZetaEder`) extract the
@@ -36,22 +96,113 @@ result = ZetaClassic(group_by="author", top_k=50, group_a="Hamilton", group_b="M
 df_a, df_b = result.tables   # top-k A-preferred / B-preferred words with proportions
 ```
 
+### ZetaClassic
+`ZetaClassic(group_by=..., top_k=..., group_a=..., group_b=...)`
+
+*Use when:* you have two pre-defined author groups (or authors) and want to know which
+words each group prefers over the other — Craig's classic Zeta.
+*Don't use when:* you only want to rank one unknown document against candidates (use a
+Delta instead), or when your groups are very small (<10 docs each).
+*Expect:* two tables of top-k words; each word has a proportion-in-A and
+proportion-in-B; large differences are the distinctive vocabulary.
+
+### ZetaEder
+`ZetaEder(group_by=..., top_k=..., group_a=..., group_b=...)`
+
+*Use when:* you want Zeta with the Eder (2017) smoothing — handles very rare or very
+common words more gracefully than the classic version.
+*Don't use when:* you're reproducing Burrows/Craig-era results for comparison; use
+`ZetaClassic` for historical parity.
+*Expect:* same output shape as `ZetaClassic`; smoother ranking near the tails.
+
 ## Dimensionality reduction
 
-`PCAReducer`, `MDSReducer`, `TSNEReducer`, `UMAPReducer` — all accept a `FeatureMatrix`
-and return a `Result` with 2-D / n-D coordinates plus (for PCA) explained-variance
-ratios.
+All reducers accept a `FeatureMatrix` and return a `Result` with 2-D / n-D coordinates.
+
+### PCAReducer
+`PCAReducer(n_components=2)`
+
+*Use when:* you want a fast, interpretable 2-D or 3-D projection where axes are
+orthogonal variance directions. Default choice for "plot my corpus" questions.
+*Don't use when:* authorship differences are highly non-linear; PCA's linear axes will
+miss curved manifolds.
+*Expect:* `coords` (n_docs × n_components) + `explained_variance_ratio_` per component.
+
+### UMAPReducer
+`UMAPReducer(n_components=2, n_neighbors=15, min_dist=0.1)`
+
+*Use when:* you want a non-linear projection that preserves local *and* global
+structure — typically the best-looking 2-D visualisation of stylometric features.
+*Don't use when:* you need reproducibility without pinning a seed — UMAP is
+stochastic. Always set `random_state`.
+*Expect:* `coords` (n_docs × n_components). Requires `tamga[viz]`.
+
+### TSNEReducer
+`TSNEReducer(n_components=2, perplexity=30)`
+
+*Use when:* you want a non-linear projection that emphasises local neighbourhood
+structure — authors cluster tightly.
+*Don't use when:* you need inter-cluster distances to be meaningful (t-SNE warps them),
+or when you plan to use the coordinates as features for a downstream method.
+*Expect:* `coords` (n_docs × n_components). Non-deterministic without a seed.
+
+### MDSReducer
+`MDSReducer(n_components=2, metric=True)`
+
+*Use when:* you want a projection that tries to preserve pairwise Delta distances as
+literally as possible — good for interpreting dendrogram + scatter together.
+*Don't use when:* you have a large corpus (>500 docs); MDS scales poorly.
+*Expect:* `coords` (n_docs × n_components) + `stress` (lower = better fit).
 
 ## Clustering
 
-`HierarchicalCluster(linkage=...)` (Ward, average, complete, single), `KMeansCluster`,
-`HDBSCANCluster`. Produce a `Result` with cluster labels + (for hierarchical) the linkage
-matrix for dendrograms.
+Clusterers accept a `FeatureMatrix` and produce cluster labels; hierarchical clustering
+also returns the linkage matrix for dendrograms.
+
+### HierarchicalCluster
+`HierarchicalCluster(linkage="ward")`
+
+*Use when:* you want a dendrogram — the canonical stylometry visualisation — where
+leaves are documents and branch heights are distances.
+*Don't use when:* your corpus is large enough (>2000 docs) that dendrogram inspection
+is no longer practical.
+*Expect:* `labels` (n_docs,) + `linkage_matrix` usable with `scipy.cluster.hierarchy.dendrogram`.
+
+Supported linkages: `"ward"` (default, variance-minimising), `"average"`, `"complete"`,
+`"single"`.
+
+### KMeansCluster
+`KMeansCluster(n_clusters=3, seed=42)`
+
+*Use when:* you have a rough expected cluster count and want spherical clusters of
+comparable size — fastest clustering option.
+*Don't use when:* cluster sizes are very unequal, cluster shapes are elongated, or you
+don't know `n_clusters` ahead of time (use `HDBSCANCluster`).
+*Expect:* `labels` (n_docs,) + cluster centroids.
+
+### HDBSCANCluster
+`HDBSCANCluster(min_cluster_size=5)`
+
+*Use when:* you don't know the cluster count ahead of time, expect variable cluster
+density, or want "noise" points to be labelled as outliers (-1).
+*Don't use when:* your corpus is small (<30 docs); HDBSCAN's density estimates get
+unstable.
+*Expect:* `labels` (n_docs,) with -1 for noise; `probabilities` (cluster-membership
+confidence).
 
 ## Consensus trees
 
-`BootstrapConsensus(mfw_bands=[100, 200, 300], replicates=20)` — Eder 2017 bootstrap
-across MFW bands, producing a Newick consensus tree with clade support values.
+### BootstrapConsensus
+`BootstrapConsensus(mfw_bands=[100, 200, 300], replicates=20)`
+
+*Use when:* you want robustness evidence for a dendrogram — repeatedly resample the
+MFW feature set and see which clades survive.
+*Don't use when:* you need one quick visualisation; bootstrap runs many Delta +
+clustering cycles and is slow.
+*Expect:* a Newick consensus tree with clade-support values (fraction of replicates
+where that clade appears).
+
+Eder (2017). Integrates out the "how many MFW?" knob by sampling across bands.
 
 ## Classification + CV
 
@@ -59,21 +210,50 @@ Any sklearn classifier (Logistic Regression, linear / RBF SVM, Random Forest, Hi
 via `build_classifier(name)`, plus `cross_validate_tamga(fm, y, cv_kind=...)` with three
 stylometry-aware CV strategies:
 
+*Use when:* you have labelled documents (author or group) and want standard ML
+performance numbers — accuracy, F1, confusion matrices — with stylometry-aware CV that
+doesn't leak author identity between folds.
+*Don't use when:* you have fewer than ~20 documents per class; CV becomes statistically
+meaningless. Also don't use for single-case verification (use `GeneralImpostors`).
+*Expect:* per-fold predictions, a mean accuracy / macro-F1, and fold-level `Result`
+objects for downstream plots.
+
 - `stratified` — StratifiedKFold, `seed` controls the shuffle
 - `loao` — Leave-One-Author-Out (LeaveOneGroupOut with author as group)
 - `leave_one_text_out` — LeaveOneOut
 
 ## Bayesian
 
-- `BayesianAuthorshipAttributor` — Wallace–Mosteller Dirichlet-smoothed log-rate
-  classifier. Uses raw counts (`MFWExtractor(scale="none")`).
-- `HierarchicalGroupComparison` — PyMC varying-intercept model for per-author draws from
-  a group hyperparameter. Useful for testing whether two author populations differ
-  systematically in a stylistic feature. Requires `tamga[bayesian]`.
+### BayesianAuthorshipAttributor
+`BayesianAuthorshipAttributor()`
+
+*Use when:* you want posterior probabilities over N candidate authors with principled
+Dirichlet smoothing — the Wallace–Mosteller Federalist approach.
+*Don't use when:* your features are z-scored (it expects raw counts; use
+`MFWExtractor(scale="none")`).
+*Expect:* `predict_proba` returns per-document posterior probability vectors over
+candidates. No need for `tamga[bayesian]` — this variant is pure NumPy.
+
+### HierarchicalGroupComparison
+`HierarchicalGroupComparison(group_a=..., group_b=..., feature_name=...)`
+
+*Use when:* you want to test whether two author populations differ systematically in a
+stylistic feature, with full per-author uncertainty — a PyMC varying-intercept model.
+*Don't use when:* you only have one author per group (no pooling signal) or need a
+fast screening method (MCMC sampling is slow; use a frequentist Zeta first).
+*Expect:* an arviz `InferenceData` with posterior draws for the group-difference
+parameter. Requires `tamga[bayesian]`.
 
 ## Forensic methods
 
 Under `tamga.forensic`:
+
+*Use when:* you want tamga's one-case verification or calibration layer — see the
+dedicated [Forensic toolkit](../forensic/index.md) pages for gloss-per-method detail.
+*Don't use when:* you have a closed candidate set and just want attribution — use
+Delta variants above.
+*Expect:* scorers that return calibrated log-LR + evidence metadata, not classifier
+accuracy.
 
 | Method | Task | Reference |
 |---|---|---|
