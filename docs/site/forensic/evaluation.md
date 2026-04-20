@@ -23,15 +23,15 @@ report.to_dict()
 
 ## The metrics
 
-| Metric | Measures | Reference |
-|---|---|---|
-| `auc` | Ranking ability. 1.0 perfect, 0.5 random. | — |
-| `c_at_1` | Accuracy with credit for principled abstention | Peñas & Rodrigo 2011 |
-| `f05u` | Precision-weighted F-measure with non-answer penalty | Bevendorff et al. PAN 2022 |
-| `brier` | Mean-squared posterior error. 0 perfect. | Brier 1950 |
-| `ece` | Expected Calibration Error (equal-width bins) | — |
-| `cllr` | Log-likelihood-ratio cost — the forensic proper scoring rule | Brümmer & du Preez 2006 |
-| `tippett` | Cumulative target / non-target LR distributions | — |
+| Metric | Measures | Use for | Range | Reference |
+|---|---|---|---|---|
+| `auc` | Ranking quality | **Choosing between systems.** Higher AUC → the system ranks same-author pairs above different-author pairs more reliably. | 0.5 (random) – 1.0 (perfect) | — |
+| `c_at_1` | Accuracy with abstention credit | **Operational decisions** where "don't know" is safer than a wrong answer. | 0 – 1 | Peñas & Rodrigo 2011 |
+| `f05u` | Precision-weighted F with non-answer penalty | **PAN-style evaluation.** Penalises over-confident wrong answers. | 0 – 1 | Bevendorff et al. PAN 2022 |
+| `brier` | Posterior calibration | **Probabilistic output quality.** Lower = better-calibrated probabilities. | 0 (perfect) – 1 (worst) | Brier 1950 |
+| `ece` | Expected calibration error | **Is `predict_proba` honest?** Bins predictions by confidence; compares claimed vs. actual accuracy. | 0 (perfect) – 1 | — |
+| `cllr` | Log-likelihood-ratio cost | **Forensic LR quality.** The strict proper scoring rule for evidential output. | 0 (perfect) – ∞ | Brümmer & du Preez 2006 |
+| `tippett` | LR distribution plot | **Sanity-checking calibration visually.** Cumulative target vs. non-target LR curves should separate. | — | — |
 
 ### c@1
 
@@ -87,20 +87,82 @@ log-LRs are predominantly target) and the non-target CDF on the left.
 
 ## Reference
 
+### compute_pan_report
+
+*Use when:* you have a labelled batch of verification trials and want every standard
+metric in one call — AUC, c@1, F0.5u, Brier, ECE, (optionally) C_llr.
+*Don't use when:* you only need one metric; each metric function is callable directly.
+*Expect:* a `PANReport` dataclass with every field populated.
+
 ::: tamga.forensic.metrics.compute_pan_report
 
 ::: tamga.forensic.metrics.PANReport
 
+### AUC
+
+*Use when:* comparing two verification systems on the same benchmark — AUC is
+threshold-independent.
+*Don't use when:* you need an operational decision — AUC says nothing about where to
+set the threshold.
+*Expect:* a single number in `[0.5, 1]`. Does not depend on predicted probabilities
+being calibrated.
+
 ::: tamga.forensic.metrics.auc
+
+### c@1
+
+*Use when:* your system can abstain ("don't know") and you want to credit that
+honestly — accuracy plus a partial-credit bonus for abstention.
+*Don't use when:* your system always outputs a decision; `c@1` reduces to accuracy.
+*Expect:* a single number in `[0, 1]`. Dominates accuracy only when abstention rate > 0.
 
 ::: tamga.forensic.metrics.c_at_1
 
+### F0.5u
+
+*Use when:* you're scoring a PAN-CLEF verification track — it's the official metric
+since PAN 2022, precision-weighted and with a non-answer penalty.
+*Don't use when:* you're reporting to a non-PAN audience; it's a specialist metric.
+*Expect:* a single number in `[0, 1]`.
+
 ::: tamga.forensic.metrics.f05u
+
+### C_llr
+
+*Use when:* you need to quantify **how good your LR output is** in forensic terms —
+this is the strict proper scoring rule the speaker-recognition community settled on.
+*Don't use when:* your scorer outputs accuracy-style probabilities; `C_llr` expects
+log-likelihood ratios.
+*Expect:* a single non-negative number; 0 is perfect; 1 is uninformative (matches a
+coin flip).
 
 ::: tamga.forensic.metrics.cllr
 
+### ECE
+
+*Use when:* you want to audit probabilistic honesty — ECE bins predictions by
+claimed confidence and checks whether actual accuracy matches.
+*Don't use when:* your dev set is small (<200 trials); ECE's bin estimates become
+noisy.
+*Expect:* a single number in `[0, 1]`; 0 is perfect calibration.
+
 ::: tamga.forensic.metrics.ece
 
+### Brier
+
+*Use when:* you want a proper scoring rule for probabilistic classifiers (not LR
+outputs) — classic squared-error between predicted probability and ground truth.
+*Don't use when:* you need a forensic LR-specific metric — use `C_llr`.
+*Expect:* a single number in `[0, 1]`; 0 is perfect.
+
 ::: tamga.forensic.metrics.brier
+
+### Tippett
+
+*Use when:* you want a visual calibration check — plot target-trial vs. non-target
+log-LRs as cumulative distributions.
+*Don't use when:* you need a single-number summary (use `C_llr`).
+*Expect:* two arrays of cumulative LRs (target and non-target) ready for a matplotlib
+plot.
 
 ::: tamga.forensic.metrics.tippett
