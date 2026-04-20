@@ -1,10 +1,20 @@
 # Konudan bağımsız öznitelikler
 
+*Şu durumda kullanın:* sorguladığınız ve bilinen belgeler farklı konularda olabilir — konuyu sızdırmadan stili yakalayan özniteliklere ihtiyaç duyarsınız.
+*Şu durumda kullanmayın:* konu sorunun bir parçasıysa (örneğin, iki belgenin içerik paylaşması *gereken* bir intihal kontrolü). Bu durumda normal öznitelikleri kullanın.
+*Beklenen sonuç:* içerik sözcüğü sinyalinin büyük bölümünü atar; işlev sözcüğü, morfoloji ve noktalama kalıplarını korur.
+
+`tamga.forensic` altında iki teknik bulunur: Sapkota karakter n-gram *kategorilendirmesi* ve Stamatatos *bozunumu*. Her ikisi de herhangi bir aşağı akış doğrulayıcısıyla birleştirilebilir.
+
 Konu geçişleri, klasik stilometrinin gerçek adli veriler üzerindeki en yaygın başarısızlık nedenidir. Bir şüphelinin tehdit mektubu ile kişisel e-postası tipik olarak farklı konulardadır; ancak muhtemelen aynı yazara aittir. Bu durumda filtrelenmemiş karakter n-gram ve sözcük n-gram öznitelikleri konu tespitine dönüşür.
 
 tamga iki tamamlayıcı araç sunar.
 
 ## Sapkota karakter n-gram kategorileri
+
+*Şu durumda kullanın:* doğrulama için karakter n-gram öznitelikleri istiyorsunuz ancak konuya duyarlı tam sözcük n-gramlarını çıkarmanız gerekiyor — yalnızca ekler, noktalama komşusu ve boşluk komşusu kategorileri tutulur.
+*Şu durumda kullanmayın:* ek filtreleme öznitelik uzayını ~500 boyutun altına düşürecek kadar küçük bir derlem söz konusuysa.
+*Beklenen sonuç:* yalnızca seçilen kategorileri içeren seyrek bir sayım matrisi; varsayılan `("prefix","suffix","punct")` konular arasında en iyi genelleyen ek odaklı tarifte.
 
 `CategorizedCharNgramExtractor`, her karakter n-gram **oluşumunu** (yalnızca dizgiyi değil) kaynak metindeki konumuna göre sınıflandırır. Öznitelik sütunları `<ngram>|<category>` biçiminde adlandırılır; bu sayede `the|whole_word` ve `the|prefix` ayrı kanallar olur — açık ve denetlenebilir.
 
@@ -35,6 +45,10 @@ fm = extractor.fit_transform(corpus)
 ```
 
 ## Stamatatos bozunumu
+
+*Şu durumda kullanın:* içerik sözcüklerini yer tutucu ile değiştirerek agresif konu kaldırma istiyorsunuz — işlev sözcükleri, morfoloji ve noktalama korunur.
+*Şu durumda kullanmayın:* aşağı akışta herhangi bir içerik sözcüğü sinyaline ihtiyaç duyuyorsanız (örn., ayırt edici sözcük dağarcığı üzerinde Zeta).
+*Beklenen sonuç:* mevcut herhangi bir çıkarıcıya geçirdiğiniz yeni bir `Corpus` nesnesi. Modlar: `"dv_ma"` *tüm* içerik sözcüklerini maskeler, `"dv_sa"` POS'a göre seçici biçimde maskeler.
 
 `distort_corpus`, **içeriği** maskelerken **stili** korumak için belgeler üzerinde ön işlem uygular: işlev sözcükleri (function words), noktalama, rakamlar ve boşluk karakterleri aynen bırakılır; içerik sözcüklerinin karakterleri değiştirilir.
 

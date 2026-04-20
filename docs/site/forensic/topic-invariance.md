@@ -1,5 +1,15 @@
 # Topic-invariant features
 
+*Use when:* your questioned and known documents might be on different topics — you
+need features that capture style without leaking topic.
+*Don't use when:* topic is part of the question (for example, a plagiarism check
+where the two documents *should* share content). Use regular features then.
+*Expect:* feature extractors that discard most content-word signal while preserving
+function-word, morphology, and punctuation patterns.
+
+Two techniques live under `tamga.forensic`: Sapkota char-n-gram *categorisation* and
+Stamatatos *distortion*. Both compose with any downstream verifier.
+
 Cross-topic is the most common failure mode of classical stylometry on real forensic
 data. A suspect's threat letter and personal email are typically on different topics but
 presumably the same author; unfiltered character-n-gram and word-n-gram features
@@ -8,6 +18,15 @@ collapse into topic detection in that setting.
 tamga ships two complementary tools.
 
 ## Sapkota character n-gram categories
+
+*Use when:* you want char-n-gram features for verification but need to strip
+topic-sensitive whole-word n-grams — keeping only affixes, punctuation-adjacent, and
+space-adjacent categories.
+*Don't use when:* your corpus is so small that further filtering collapses the
+feature space below ~500 dimensions.
+*Expect:* a sparse count matrix with only the chosen categories; default
+`("prefix","suffix","punct")` is the affix-only recipe that generalises best across
+topics.
 
 `CategorizedCharNgramExtractor` classifies each character n-gram **occurrence** (not just
 the string) by its position in the source text. Feature columns are named
@@ -42,6 +61,14 @@ fm = extractor.fit_transform(corpus)
 ```
 
 ## Stamatatos distortion
+
+*Use when:* you want aggressive topic removal via content-word masking — replaces
+content words with placeholders while preserving function words, morphology, and
+punctuation.
+*Don't use when:* you need any content-word signal downstream (e.g., Zeta on
+distinctive vocabulary).
+*Expect:* a new `Corpus` object you pass to any existing extractor. Modes: `"dv_ma"`
+masks *all* content words, `"dv_sa"` masks selectively by POS.
 
 `distort_corpus` pre-processes documents to mask **content** while preserving **style**:
 function words, punctuation, digits, and whitespace remain verbatim; content-word
