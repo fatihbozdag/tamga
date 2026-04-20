@@ -28,7 +28,6 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
   features:
-    - navigation.instant
     - navigation.tracking
     - navigation.tabs
     - navigation.sections
@@ -43,7 +42,49 @@ theme:
     repo: fontawesome/brands/github
 
 plugins:
-  - search
+  - search:
+      lang:
+        - en
+        - tr
+  - autorefs:
+      resolve_closest: true
+  - i18n:
+      docs_structure: suffix
+      reconfigure_material: true
+      fallback_to_default: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+          site_name: tamga
+        - locale: tr
+          name: Türkçe
+          build: true
+          site_name: tamga
+          nav_translations:
+            Home: Ana Sayfa
+            Getting started: Başlangıç
+            Concepts: Kavramlar
+            Corpus: Derlem
+            Features: Öznitelikler
+            Languages: Diller
+            Methods: Yöntemler
+            Results & provenance: Sonuçlar ve köken bilgisi
+            Forensic toolkit: Adli Araç Seti
+            Verification: Doğrulama
+            Calibration & LR output: Kalibrasyon ve OO çıktısı
+            Topic-invariant features: Konudan Bağımsız Öznitelikler
+            Evaluation (PAN suite): Değerlendirme (PAN)
+            Reporting: Raporlama
+            Tutorials: Öğreticiler
+            Federalist Papers: Federalist Yazıları
+            PAN-CLEF verification: PAN-CLEF doğrulama
+            Turkish stylometry: Türkçe stilometri
+            Reference: Referans
+            CLI: Komut satırı
+            study.yaml schema: study.yaml şeması
+            Python API: Python API
   - mkdocstrings:
       handlers:
         python:
