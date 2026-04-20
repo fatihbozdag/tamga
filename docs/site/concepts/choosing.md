@@ -12,7 +12,7 @@ for the full detail.
 | Attribute 1 questioned doc to N candidate authors | N authors × ~2k+ words known each; 1 questioned doc | [`CosineDelta`](methods.md#cosinedelta) (robust default) or [`BurrowsDelta`](methods.md#burrowsdelta) (classic) | nearest-author rank | [Federalist](../tutorials/federalist.md) |
 | Cluster an unknown corpus by stylistic similarity | 20+ docs, labels optional | [`PCAReducer`](methods.md#pcareducer) + [`KMeansCluster`](methods.md#kmeanscluster) or [`HDBSCANCluster`](methods.md#hdbscancluster) | silhouette, visual inspection | — |
 | Compare two pre-defined author groups | 10+ docs per group | [`ZetaClassic`](methods.md#zetaclassic) or [`ZetaEder`](methods.md#zetaeder) | per-word distinctiveness score | — |
-| Classify docs into groups with ML | 20+ docs per class | [`build_classifier`](methods.md#classification--cv) + [`cross_validate_tamga`](methods.md#classification--cv) | CV accuracy / F1 | — |
+| Classify docs into groups with ML | 20+ docs per class | [`build_classifier`](methods.md#classification-cv) + [`cross_validate_tamga`](methods.md#classification-cv) | CV accuracy / F1 | — |
 | Reduce features for visualisation | any `FeatureMatrix` | [`PCAReducer`](methods.md#pcareducer) / [`UMAPReducer`](methods.md#umapreducer) / [`TSNEReducer`](methods.md#tsnereducer) / [`MDSReducer`](methods.md#mdsreducer) | visual inspection | — |
 | Bayesian single-candidate attribution | N candidates × ≥1k words; 1 questioned doc | [`BayesianAuthorshipAttributor`](methods.md#bayesianauthorshipattributor) | posterior probability per candidate | — |
 | Bootstrap-consensus tree across MFW bands | 10+ docs, multiple MFW bands | [`BootstrapConsensus`](methods.md#bootstrapconsensus) | Newick tree with clade support | — |
