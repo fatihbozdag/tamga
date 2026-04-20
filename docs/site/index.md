@@ -93,6 +93,9 @@ UD closed-class tokens.
 **Docs site landed** — this MkDocs Material site with Concepts, Forensic toolkit, Federalist +
 PAN-CLEF + Turkish tutorials, and CLI/API reference. **417 tests passing.**
 
+**Docs site is multilingual** — English (default) and Turkish (`/tr/`) launched via
+`mkdocs-static-i18n`; DE/ES/FR infrastructure ready, translation content deferred.
+
 **Remaining** — PyPI publish.
 
 ## License & citation

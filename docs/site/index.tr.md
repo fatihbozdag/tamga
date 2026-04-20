@@ -93,6 +93,9 @@ treebank'ı) aracılığıyla `spacy-stanza` üzerinden çözümlenerek her özn
 **Dokümantasyon sitesi yayında** — Kavramlar, Adli dilbilim araç takımı, Federalist + PAN-CLEF +
 Türkçe öğreticileri ve CLI/API referansını içeren bu MkDocs Material sitesi. **417 test geçiyor.**
 
+**Dokümantasyon sitesi çok dilli** — İngilizce (varsayılan) ve Türkçe (`/tr/`) `mkdocs-static-i18n`
+ile yayında; DE/ES/FR altyapısı hazır, çeviri içeriği sonraya bırakıldı.
+
 **Kalan** — PyPI yayını.
 
 ## Lisans ve atıf

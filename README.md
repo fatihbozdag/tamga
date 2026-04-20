@@ -177,6 +177,9 @@ UD closed-class tokens.
 **Docs site landed** — MkDocs Material site with Concepts, Forensic toolkit, Federalist +
 PAN-CLEF + Turkish tutorials, and CLI/API reference. **417 tests passing.**
 
+**Docs site is multilingual** — English (default) and Turkish (`/tr/`) launched via
+`mkdocs-static-i18n`; DE/ES/FR infrastructure ready, translation content deferred.
+
 **Remaining** — PyPI publish.
 
 See [`docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`](docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md) for the full design.
