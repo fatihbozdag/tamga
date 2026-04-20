@@ -69,6 +69,7 @@ plugins:
             Home: Ana Sayfa
             Getting started: Başlangıç
             Concepts: Kavramlar
+            Choosing a method: Yöntem seçimi
             Corpus: Derlem
             Features: Öznitelikler
             Languages: Diller
@@ -133,6 +134,7 @@ nav:
   - Getting started: getting-started.md
   - Concepts:
       - concepts/index.md
+      - Choosing a method: concepts/choosing.md
       - Corpus: concepts/corpus.md
       - Features: concepts/features.md
       - Languages: concepts/languages.md
