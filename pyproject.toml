@@ -60,6 +60,7 @@ multilang = [
 docs = [
     "mkdocs>=1.6",
     "mkdocs-material>=9.5",
+    "mkdocs-static-i18n>=1.2",
     "mkdocstrings[python]>=0.25",
     "pymdown-extensions>=10.7",
 ]
