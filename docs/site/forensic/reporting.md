@@ -1,11 +1,27 @@
 # Reporting
 
+*Use when:* you have a calibrated verification `Result` and need a court-ready
+report — chain-of-custody metadata, LR statement framed on the ENFSI verbal scale,
+and an auditable HTML artefact.
+*Don't use when:* you want an exploratory research figure — use the standard
+reporting path in `concepts/results.md`.
+*Expect:* a rendered HTML report with fixed sections: case metadata, hypothesis
+pair, feature pipeline, calibrated LR, verbal-scale statement, and a Tippett plot.
+
 Forensic reports need more than a score — they need the **hypothesis pair** under test,
 the **known and questioned** material identified, a **chain-of-custody** trail back to
 source files, and the **evidential disclaimer** that the metrics are conditional on the
 analysis conditions.
 
-## The forensic report
+## build_forensic_report
+
+*Use when:* you want a single-call path from `Result` to court-ready HTML — hands the
+chain-of-custody fields, calibrated scores, verbal scale, and Tippett plot into a
+Jinja2 template.
+*Don't use when:* you're producing a research paper figure — use the standard
+`tamga report` CLI or the plotting helpers in `concepts/methods.md`.
+*Expect:* a path to the rendered HTML file; optional PDF export requires
+`tamga[reports]`.
 
 ```python
 from tamga.report import build_forensic_report
@@ -79,6 +95,23 @@ reporting guideline:
 
 You may override the disclaimer by providing a custom template; see the bundled
 `src/tamga/report/templates/forensic_lr.html.j2` for the reference implementation.
+
+### Verbal scale
+
+*Use when:* you need to translate a log-LR into the plain-language descriptor
+expected in a forensic report (ENFSI 2015 / Nordgaard et al. 2012).
+*Don't use when:* you're reporting to a statistical audience — quote the log-LR with
+its `C_llr` directly.
+*Expect:* a one-line verbal statement keyed to the log-LR magnitude.
+
+| log₁₀(LR) range | Verbal descriptor |
+|---|---|
+| 0 – 1 | weak support |
+| 1 – 2 | moderate support |
+| 2 – 3 | moderately strong support |
+| 3 – 4 | strong support |
+| 4 – 5 | very strong support |
+| > 5 | extremely strong support |
 
 ## Reference
 

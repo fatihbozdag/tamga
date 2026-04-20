@@ -1,8 +1,16 @@
 # Raporlama
 
+*Şu durumda kullanın:* kalibre edilmiş bir doğrulama `Result` nesneniz varsa ve mahkemeye hazır bir rapora ihtiyacınız varsa — delil zinciri meta verisi, ENFSI sözel ölçeğine dayalı olabilirlik oranı (LR) ifadesi ve denetlenebilir bir HTML artefaktı.
+*Şu durumda kullanmayın:* keşifsel bir araştırma şekli istiyorsanız — `concepts/results.md` içindeki standart raporlama yolunu kullanın.
+*Beklenen sonuç:* sabit bölümlere sahip oluşturulmuş bir HTML raporu: dava meta verisi, hipotez çifti, öznitelik hattı, kalibre edilmiş LR, sözel ölçek ifadesi ve bir Tippett grafiği.
+
 Adli raporlar bir puandan fazlasını gerektirir: test edilen **hipotez çifti (hypothesis pair)**, tanımlanan **bilinen ve sorgulanan** materyal, kaynak dosyalara uzanan **delil zinciri (chain of custody)** izi ve metriklerin analiz koşullarına bağlı olduğunu belirten **kanıtsal sorumluluk reddi**.
 
-## Adli rapor
+## build_forensic_report
+
+*Şu durumda kullanın:* `Result` nesnesinden mahkemeye hazır HTML'e tek çağrıyla ulaşmak istiyorsanız — delil zinciri alanlarını, kalibre edilmiş skorları, sözel ölçeği ve Tippett grafiğini bir Jinja2 şablonuna aktarır.
+*Şu durumda kullanmayın:* araştırma makalesi şekli üretiyorsanız — standart `tamga report` CLI'yı veya `concepts/methods.md` içindeki çizim yardımcılarını kullanın.
+*Beklenen sonuç:* oluşturulan HTML dosyasının yolu; isteğe bağlı PDF dışa aktarma `tamga[reports]` gerektirir.
 
 ```python
 from tamga.report import build_forensic_report
@@ -69,7 +77,11 @@ Adli rapor şablonu, Jinja2 otomatik kaçış (autoescape) etkin olarak oluştur
 
 Özel bir şablon sağlayarak sorumluluk reddini geçersiz kılabilirsiniz; referans uygulama için yerleşik `src/tamga/report/templates/forensic_lr.html.j2` dosyasına bakın.
 
-## ENFSI / Nordgaard sözel ölçeği
+## Sözel ölçek
+
+*Şu durumda kullanın:* bir log-LR değerini adli raporda beklenen sade dil tanımlayıcısına çevirmeniz gerekiyorsa (ENFSI 2015 / Nordgaard ve diğerleri 2012).
+*Şu durumda kullanmayın:* istatistiksel bir kitleye rapor sunuyorsanız — log-LR değerini `C_llr` ile birlikte doğrudan aktarın.
+*Beklenen sonuç:* log-LR büyüklüğüne karşılık gelen tek satırlık sözel ifade.
 
 Sözel ölçek, pratisyenlerin İngilizce ankor terimini koruyabilmesi için her iki dilde sunulmaktadır:
 
