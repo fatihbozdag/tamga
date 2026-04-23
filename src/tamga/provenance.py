@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import platform
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from tamga._version import __version__
@@ -91,7 +91,7 @@ class Provenance:
             corpus_hash=corpus_hash,
             feature_hash=feature_hash,
             seed=seed,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(UTC),
             resolved_config=resolved_config,
             questioned_description=questioned_description,
             known_description=known_description,

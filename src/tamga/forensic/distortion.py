@@ -42,17 +42,18 @@ DistortionMode = Literal["dv_ma", "dv_sa"]
 _TOKEN_RE = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)*", flags=re.UNICODE)
 
 
-def _load_bundled_function_words() -> frozenset[str]:
-    path = resources.files("tamga.resources.languages.en") / "function_words.txt"
+def _load_bundled_function_words(language: str = "en") -> frozenset[str]:
+    path = resources.files(f"tamga.resources.languages.{language}") / "function_words.txt"
     words = (line.strip().lower() for line in path.read_text(encoding="utf-8").splitlines())
     return frozenset(w for w in words if w)
 
 
 def _ensure_function_words(
     function_words: frozenset[str] | set[str] | list[str] | None,
+    language: str = "en",
 ) -> frozenset[str]:
     if function_words is None:
-        return _load_bundled_function_words()
+        return _load_bundled_function_words(language)
     return frozenset(w.lower() for w in function_words)
 
 
@@ -61,6 +62,7 @@ def distort_text(
     *,
     mode: DistortionMode = "dv_ma",
     function_words: frozenset[str] | set[str] | list[str] | None = None,
+    language: str = "en",
 ) -> str:
     """Apply Stamatatos distortion to a single string.
 
@@ -72,7 +74,10 @@ def distort_text(
         Distortion variant. ``dv_ma`` preserves word length; ``dv_sa`` collapses each
         content word to one ``*``.
     function_words : iterable of str, optional
-        Words to preserve verbatim. If None, uses tamga's bundled English list.
+        Words to preserve verbatim. If None, the bundled list for ``language`` is used.
+    language : str
+        Language code (``"en"``, ``"tr"``, ``"de"``, ``"es"``, ``"fr"``) selecting the
+        bundled function-word list when ``function_words`` is None. Ignored otherwise.
 
     Returns
     -------
@@ -82,7 +87,7 @@ def distort_text(
     """
     if mode not in ("dv_ma", "dv_sa"):
         raise ValueError(f"unknown distortion mode {mode!r}; expected dv_ma or dv_sa")
-    fw = _ensure_function_words(function_words)
+    fw = _ensure_function_words(function_words, language)
 
     def _replace(match: re.Match[str]) -> str:
         word = match.group(0)
@@ -100,6 +105,7 @@ def distort_corpus(
     *,
     mode: DistortionMode = "dv_ma",
     function_words: frozenset[str] | set[str] | list[str] | None = None,
+    language: str | None = None,
 ) -> Corpus:
     """Produce a new Corpus with each document's text distorted.
 
@@ -111,12 +117,17 @@ def distort_corpus(
     corpus : Corpus
     mode : {"dv_ma", "dv_sa"}
     function_words : iterable of str, optional
+        Words to preserve verbatim. If None, the bundled list for ``language`` (or
+        ``corpus.language`` when ``language`` is not given) is used.
+    language : str, optional
+        Language code overriding ``corpus.language`` for function-word selection.
     """
-    fw = _ensure_function_words(function_words)
+    lang = language if language is not None else corpus.language
+    fw = _ensure_function_words(function_words, lang)
     new_docs = []
     for doc in corpus.documents:
         new_text = distort_text(doc.text, mode=mode, function_words=fw)
         new_metadata = dict(doc.metadata)
         new_metadata["distortion_mode"] = mode
         new_docs.append(Document(id=doc.id, text=new_text, metadata=new_metadata))
-    return Corpus(documents=new_docs)
+    return Corpus(documents=new_docs, language=corpus.language)
