@@ -6,10 +6,18 @@ verification — not attribution — is the forensically canonical task.
 
 tamga ships two complementary verifiers.
 
-## General Impostors (Koppel & Winter 2014)
+## General Impostors
 
-For a questioned document Q, a candidate's known documents K, and a pool of impostor
-documents I drawn from other authors, repeatedly:
+*Use when:* you have one questioned document, one candidate's known documents, and a
+pool of ~100+ impostor documents from other authors — the forensically canonical
+same-author-or-not question with a closed candidate.
+*Don't use when:* you have no impostor pool available, or your candidate's known
+writings are less than ~1000 words total (the test becomes sample-size-bound).
+*Expect:* a score in `[0, 1]`; calibrate with `CalibratedScorer` before reporting as
+an LR.
+
+Koppel & Winter (2014). For a questioned document Q, a candidate's known documents K,
+and a pool of impostor documents I drawn from other authors, repeatedly:
 
 1. Sample a random feature subspace.
 2. Sample m impostors from the pool.
@@ -49,10 +57,18 @@ result.values["wins"]        # raw winning-iteration count
 Ties break **toward the impostors** (strict `>`). If Q is equally close to K and an
 impostor, the iteration counts as a loss — the forensically conservative choice.
 
-## Unmasking (Koppel & Schler 2004)
+## Unmasking
 
-A distribution-free, long-text verification method. Chunk Q and K into word-windows, then
-iteratively:
+*Use when:* you have long same-author prose candidates (novel chapters, long essays,
+blog archives) and want a distribution-free verification — the accuracy-drop curve
+itself is interpretable evidence.
+*Don't use when:* your documents are short (<~1500 words per side) — Unmasking needs
+enough chunks to run cross-validation meaningfully.
+*Expect:* an accuracy curve across elimination rounds; same-author pairs show a steep
+drop, different-author pairs stay near random or above.
+
+Koppel & Schler (2004). A distribution-free, long-text verification method. Chunk Q
+and K into word-windows, then iteratively:
 
 1. Train a binary classifier to distinguish Q-chunks from K-chunks.
 2. Measure CV accuracy.
@@ -81,13 +97,11 @@ result.values["eliminated_per_round"]   # auditable per-round feature removal
 
 ### When to pick which
 
-- **Short CMC / threat texts (< ~2000 words total)**: General Impostors. Unmasking needs
-  enough chunks per side to run k-fold CV meaningfully (default: `min_chunks_per_class=3`
-  so each side needs ~1500 words at `chunk_size=500`).
-- **Long prose (novels, essays, blog archives)**: Unmasking's curve is interpretable
-  directly. Pair with GI as a second opinion.
-- **Evidential report**: run both and calibrate both with `CalibratedScorer`. Agreement
-  between the two is itself evidential signal (a Juola-style multi-method verdict).
+| Situation | Pick |
+|---|---|
+| Short CMC / threat texts (< ~2000 words total) | `GeneralImpostors`. Unmasking needs more text per side to run CV meaningfully. |
+| Long prose (novels, essays, blog archives) | `Unmasking` — the accuracy-drop curve is directly interpretable. Pair with GI as a second opinion. |
+| Building an evidential report | Run both, calibrate both with `CalibratedScorer`. Agreement between the two is itself evidential signal (Juola-style multi-method verdict). |
 
 ## Reference
 

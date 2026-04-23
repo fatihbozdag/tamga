@@ -40,6 +40,132 @@ Temel özellikler:
 | `SentenceEmbeddingExtractor(model=...)` | Corpus | sentence-transformers havuzlanmış gömmesi (ek: `tamga[embeddings]`) |
 | `ContextualEmbeddingExtractor(model=..., pooling=...)` | Corpus | HF dönüştürücü gizli durum vektörleri (ek: `tamga[embeddings]`) |
 
+### Öznitelik çıkarıcı ayrıntısı
+
+Yukarıdaki her çıkarıcı çağrılabilir bir nesnedir; `fit_transform(corpus)` bir
+`FeatureMatrix` döndürür.
+
+#### MFWExtractor
+`MFWExtractor(n=200, scale="zscore", lowercase=True)`
+
+*Şu durumda kullanın:* kanonik stilometrik özniteliği — en sık sözcüklerin (MFW) göreli
+frekanslarını — istediğinizde. Delta-ailesi atıf çalışmaları için varsayılan seçimdir.
+*Şu durumda kullanmayın:* derleminiz çok küçükse (<200 benzersiz belirteç) ya da soru
+konudan bağımsızsa (MFW konuya duyarlıdır; bkz. `CategorizedCharNgramExtractor`).
+*Beklenen sonuç:* `(n_docs, n)` boyutlu kayan noktalı matris; `scale="l1"` altında
+satırlar ~1'e, `scale="zscore"` altında sıfır merkezli birim varyansa eşittir.
+
+#### CharNgramExtractor
+`CharNgramExtractor(n=3, include_boundaries=True)`
+
+*Şu durumda kullanın:* alt sözcük stilini (ön ekler, son ekler, noktalama bitişikliği)
+yakalayan ve OOV sözcükler ya da yazım hatalarıyla başa çıkabilen öznitelikler
+istediğinizde.
+*Şu durumda kullanmayın:* dillerin yazı sistemleri karışıyorsa (yazı sistemleri
+arasındaki n-gramlar gürültü üretir) ya da sözcük düzeyinde anlamsal duyarlılık
+gerekiyorsa.
+*Beklenen sonuç:* sklearn'ın `CountVectorizer` bileşenine devredilmiş seyrek sayım
+matrisi.
+
+#### WordNgramExtractor
+`WordNgramExtractor(n=1, lowercase=True)`
+
+*Şu durumda kullanın:* unigramlar (MFW eşdeğeri) ya da kısa bigram ifadeler
+istediğinizde ve z-puanlama istemediğinizde. Bigramlar sabit ifadeleri saptamak için
+kullanışlıdır.
+*Şu durumda kullanmayın:* küçük derlemlerde n ≥ 3 — seyreklik baskın gelir. Unigramlar
+için ham sayımlar gerekmiyorsa `MFWExtractor` kullanın.
+*Beklenen sonuç:* seyrek sayım matrisi; sözcük dağarcığı n ile hızla büyür.
+
+#### PosNgramExtractor
+`PosNgramExtractor(n=2, coarse=False)`
+
+*Şu durumda kullanın:* sözdizimsel stil öznitelikleri — sözcük türü (POS) etiketi
+dizileri — istediğinizde; içerik sözcüklerine duyarsız, kayıt ve sözdizimsel kayda
+duyarlıdır.
+*Şu durumda kullanmayın:* spaCy ardışık düzeniniz bir etiketleyici içermiyorsa (çoğu
+`_trf` modeli içerir) ya da belgeler çok kısaysa.
+*Beklenen sonuç:* POS n-gramları üzerinde seyrek sayım matrisi. `coarse=True` UD kaba
+etiketlerini kullanır (daha az boyut, daha sağlam).
+
+#### DependencyBigramExtractor
+`DependencyBigramExtractor()`
+
+*Şu durumda kullanın:* sözdizimsel stil öznitelikleri — özellikle spaCy tarafından
+çözümlenen (head-lemma, bağımlılık-ilişkisi, child-lemma) üçlüleri — istediğinizde.
+*Şu durumda kullanmayın:* ayrıştırıcı bir darboğazsa; bağımlılık çözümlemesi spaCy
+ardışık düzeninin en yavaş adımıdır ve POS n-gramlarıyla ikame edilebilir.
+*Beklenen sonuç:* bağımlılık üçlüleri üzerinde seyrek sayım matrisi.
+
+#### FunctionWordExtractor
+`FunctionWordExtractor(wordlist=None)`
+
+*Şu durumda kullanın:* belgenin dili için kısa, konudan bağımsız işlev sözcüğü
+listesini — stilometrinin klasik konu karşıtı sinyali — istediğinizde.
+*Şu durumda kullanmayın:* derleminiz belge başına dil etiketi olmaksızın dilleri
+karıştırıyorsa — dile özgü sözcük listesi uygulanmaz.
+*Beklenen sonuç:* `(n_docs, |wordlist|)` göreli frekans matrisi. Varsayılanlar
+paketlenmiş dile özgü listeden gelir (bkz. [Languages](languages.md)).
+
+#### PunctuationExtractor
+`PunctuationExtractor()`
+
+*Şu durumda kullanın:* neredeyse konudan bağımsız saf stil öznitelikleri istediğinizde
+— noktalama kullanımı dikkat çekici biçimde yazara özgü ve derlem açısından sağlamdır.
+*Şu durumda kullanmayın:* kaynak metin normalleştirilmişse veya noktalama işaretleri
+çıkarılmışsa (örn. düzeltme yapılmamış OCR çıktısı).
+*Beklenen sonuç:* ASCII noktalama göreli frekanslarından oluşan `(n_docs, ~20)` matris.
+
+#### ReadabilityExtractor
+`ReadabilityExtractor()`
+
+*Şu durumda kullanın:* okunabilirliği bir stil özniteliği olarak — Flesch, FK-grade,
+Gunning Fog vb. — MFW ile birleştirmek istediğinizde.
+*Şu durumda kullanmayın:* okunabilirlik bizzat sorunun kendisiyse (bu durumda metriği
+doğrudan okuyun; Delta'ya dahil etmeyin). Türkçe dışı diller için dile özgü yerel formül
+varyantını kullanın — bkz. `concepts/languages.md`.
+*Beklenen sonuç:* `(n_docs, 6)` okunabilirlik indeksleri matrisi (İngilizce varsayılanlar:
+Flesch, FK-grade, Gunning Fog, Coleman-Liau, ARI, SMOG).
+
+#### SentenceLengthExtractor
+`SentenceLengthExtractor()`
+
+*Şu durumda kullanın:* cümle ritmi imzasını — cümle başına belirteç sayısının ortalama,
+standart sapma ve çarpıklığını — istediğinizde. Küçük ama güçlü bir stilistik sinyal.
+*Şu durumda kullanmayın:* metinde yoğun cümle sınırı hataları varsa (örn. BÜYÜK HARFLE
+yazılmış hukuki metin çoğu cümle bölücüyü bozar).
+*Beklenen sonuç:* `(n_docs, 3)` matris: `[mean, std, skew]`.
+
+#### LexicalDiversityExtractor
+`LexicalDiversityExtractor()`
+
+*Şu durumda kullanın:* sözcüksel çeşitlilik öznitelikleri — TTR, MATTR, MTLD, HD-D,
+Yule'ün K/I'sı, Herdan'ın C'si, Simpson'ın D'si — istediğinizde. Sekiz indeks
+duyarlılıkları karşılaştırmanıza olanak tanır.
+*Şu durumda kullanmayın:* belgeler çok kısaysa (<200 belirteç); çoğu indeks kararsız
+hale gelir.
+*Beklenen sonuç:* `(n_docs, 8)` matris; sütunlar 8 indekse karşılık gelir.
+
+#### SentenceEmbeddingExtractor
+`SentenceEmbeddingExtractor(model="paraphrase-MiniLM-L6-v2")`
+
+*Şu durumda kullanın:* modern sinirsel gömme öznitelik kümesi — belge başına havuzlanmış
+sentence-transformer çıktısı — istediğinizde. Sınıflandırma ve kümelemede güçlü; orta
+büyüklükteki derlemler için yeterince hızlı.
+*Şu durumda kullanmayın:* donanımınızda GPU / MPS yoksa ve derleminiz büyükse (CPU
+çıkarımı yavaştır) ya da yorumlanabilirlik önemliyse (bu vektörler opaktır).
+*Beklenen sonuç:* `(n_docs, embedding_dim)` yoğun matris. `tamga[embeddings]` gerektirir.
+
+#### ContextualEmbeddingExtractor
+`ContextualEmbeddingExtractor(model="bert-base-multilingual-cased", pooling="mean")`
+
+*Şu durumda kullanın:* belge başına toplanmış HuggingFace model gizli durumları —
+yapılandırılabilir havuzlama ile dile özgü gömmeler (örn. Türkçe için
+`dbmdz/bert-base-turkish-cased`) — istediğinizde.
+*Şu durumda kullanmayın:* belirli bir modelin temsilini gerektirmiyorsanız —
+daha hafif ve hızlı bir varsayılan için `SentenceEmbeddingExtractor` kullanın.
+*Beklenen sonuç:* `(n_docs, hidden_dim)` yoğun matris. `tamga[embeddings]` gerektirir.
+
 ## Öznitelikleri birleştirme
 
 Çok öznitelikli matris oluşturmanın iki yolu:
@@ -72,8 +198,30 @@ Yöntemler öznitelik kimliklerine başvurabilir; çalıştırıcı her matrisi 
 
 Konu-değişmez iki çıkarıcı `tamga.forensic` altında yer alır:
 
-- `CategorizedCharNgramExtractor(n=..., categories=...)` — Sapkota ve ark. 2015'e göre her n-gram örneğini sınıflandırır (prefix / suffix / whole_word / mid_word / multi_word / punct / space). `categories=("prefix", "suffix", "punct")` parametresi, konular arası en iyi genellemeyi sağlayan ek odaklı öznitelik kümesini üretir.
-- `distort_corpus(corpus, mode="dv_ma"|"dv_sa")` — Stamatatos 2013 içerik maskeleme. Yeni bir Corpus döndürür; mevcut herhangi bir çıkarıcıya beslenebilir.
+#### CategorizedCharNgramExtractor
+`CategorizedCharNgramExtractor(n=4, categories=("prefix","suffix","punct"))`
+
+*Şu durumda kullanın:* adli doğrulama için konudan bağımsız karakter düzeyinde öznitelikler
+istediğinizde — n-gramlar sözcükteki konuma göre sınıflandırılır; böylece yalnızca stili
+taşıyan kategorileri (ekler, noktalama) tutup konuya duyarlı tam sözcük kategorisini
+düşürebilirsiniz.
+*Şu durumda kullanmayın:* konu sağlamlığı hedef değilse — düz bir `CharNgramExtractor`
+daha hızlı ve boyut başına daha fazla sinyal taşır.
+*Beklenen sonuç:* seçilen n-gram kategorileriyle kısıtlanmış seyrek sayım matrisi.
+
+Sapkota ve ark. 2015; `categories=("prefix","suffix","punct")` konular arası en iyi
+genellemeyi sağlayan ek odaklı tariftir.
+
+#### distort_corpus
+`distort_corpus(corpus, mode="dv_ma")`
+
+*Şu durumda kullanın:* Stamatatos (2013) konu maskeleme istediğinizde — içerik sözcüklerini
+yer tutucularla değiştirirken işlev sözcüklerini ve noktalamayı korur. Konudan bağımsız
+bir ardışık düzen için herhangi bir çıkarıcıyla eşleştirin.
+*Şu durumda kullanmayın:* analiziniz içerik sözcüğü sinyaline ihtiyaç duyuyorsa (örn.
+ayırt edici sözcük dağarcığını arayan Zeta).
+*Beklenen sonuç:* mevcut herhangi bir çıkarıcıya beslediğiniz yeni bir Corpus nesnesi.
+Modlar: `"dv_ma"` tüm içerik sözcüklerini maskeler, `"dv_sa"` seçici maskeler.
 
 Bkz. [Konu-değişmez öznitelikler](../forensic/topic-invariance.md).
 

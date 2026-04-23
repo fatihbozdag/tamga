@@ -1,5 +1,22 @@
 # Concepts
 
+## What tamga is for
+
+tamga answers three questions about who wrote a text:
+
+- **Attribution** — which of a set of candidate authors most likely wrote this document?
+- **Verification** — was this document written by *this specific* person?
+- **Group comparison** — how does one author's style differ from another's, or from a
+  defined group?
+
+On top of those core questions it ships a forensic layer: calibrated likelihood ratios,
+chain-of-custody metadata, and evaluation metrics tuned for courtroom use.
+
+Not sure which question you're asking? **[Start with the Choosing a method
+guide](choosing.md).**
+
+## The four layers
+
 tamga is organised around four layers, each with one primary return type. Understanding
 these four types lets you compose anything tamga can do:
 

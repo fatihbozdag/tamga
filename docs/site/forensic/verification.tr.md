@@ -4,9 +4,13 @@ Yazar doğrulama (authorship verification) tek sınıflı bir karardır: **belir
 
 tamga iki tamamlayıcı doğrulayıcı sunar.
 
-## General Impostors (Koppel & Winter 2014)
+## General Impostors
 
-Sorgulanan belge Q, adayın bilinen belgeleri K ve diğer yazarlardan oluşan sahte yazar havuzu I verildiğinde, yinelemeli olarak:
+*Şu durumda kullanın:* bir sorgulanan belgeniz, bir adayın bilinen belgelerinin ve diğer yazarlardan oluşan ~100+ sahte yazar havuzunun olduğu, adli açıdan standart aynı-yazar-mı-değil-mi sorusunu yanıtlamanız gereken durumlarda.
+*Şu durumda kullanmayın:* sahte yazar havuzunuz yoksa veya adayın bilinen metinleri toplamda ~1000 sözcüğün altındaysa (test örneklem boyutuna bağımlı hale gelir).
+*Beklenen sonuç:* `[0, 1]` aralığında bir puan; olabilirlik oranı olarak raporlamadan önce `CalibratedScorer` ile kalibrasyon yapın.
+
+Koppel & Winter (2014). Sorgulanan belge Q, adayın bilinen belgeleri K ve diğer yazarlardan oluşan sahte yazar havuzu I verildiğinde, yinelemeli olarak:
 
 1. Rastgele bir öznitelik alt uzayı örneklenir.
 2. Havuzdan m sahte yazar örneklenir.
@@ -46,9 +50,13 @@ result.values["wins"]        # ham kazanma sayısı
 
 Berabere durumlar **sahte yazarlar lehine** bozulur (katı `>`). Q, K'ya ve bir sahte yazara eşit derecede yakınsa, yineleme kayıp olarak sayılır — adli açıdan tutucu seçim.
 
-## Unmasking (Koppel & Schler 2004)
+## Unmasking
 
-Dağılım varsayımına dayanmayan, uzun metin doğrulama yöntemi. Q ve K, sözcük pencereleri halinde parçalanır; ardından yinelemeli olarak:
+*Şu durumda kullanın:* uzun düz yazı adaylarınız (roman bölümleri, uzun denemeler, blog arşivleri) varsa ve dağılım varsayımına dayanmayan bir doğrulama istiyorsanız — doğruluk düşüş eğrisi bizzat yorumlanabilir bir delil zinciri oluşturur.
+*Şu durumda kullanmayın:* belgeleriniz kısa ise (her taraf için <~1500 sözcük) — Unmasking, çapraz doğrulamayı anlamlı biçimde çalıştırmak için yeterli parçaya ihtiyaç duyar.
+*Beklenen sonuç:* eleme turları boyunca bir doğruluk eğrisi; aynı yazara ait çiftler dik düşüş gösterir, farklı yazara ait çiftler rastgele düzeyde veya üzerinde kalır.
+
+Koppel & Schler (2004). Dağılım varsayımına dayanmayan, uzun metin doğrulama yöntemi. Q ve K, sözcük pencereleri halinde parçalanır; ardından yinelemeli olarak:
 
 1. Q parçalarını K parçalarından ayırt etmek için ikili sınıflandırıcı eğitilir.
 2. CV doğruluğu ölçülür.
@@ -74,9 +82,11 @@ result.values["eliminated_per_round"]   # denetlenebilir tur başına öznitelik
 
 ### Hangisi seçilmeli
 
-- **Kısa CMC / tehdit metinleri (toplam < ~2000 sözcük)**: General Impostors. Unmasking, k-katlı CV'yi anlamlı biçimde çalıştırmak için yeterli parça gerektirir (varsayılan: `min_chunks_per_class=3`; `chunk_size=500` ile her tarafta ~1500 sözcük gereklidir).
-- **Uzun düz yazı (roman, deneme, blog arşivi)**: Unmasking eğrisi doğrudan yorumlanabilir. İkinci görüş olarak GI ile birleştirin.
-- **Kanıtsal rapor**: Her ikisini çalıştırın ve her ikisini `CalibratedScorer` ile kalibre edin. İki yöntem arasındaki uyum, başlı başına kanıtsal sinyaldir (Juola tarzı çok yöntemli karar).
+| Durum | Seçim |
+|---|---|
+| Kısa CMC / tehdit metinleri (toplam < ~2000 sözcük) | `GeneralImpostors`. Unmasking, CV'yi anlamlı biçimde çalıştırmak için her tarafta daha fazla metne ihtiyaç duyar. |
+| Uzun düz yazı (roman, deneme, blog arşivi) | `Unmasking` — doğruluk düşüş eğrisi doğrudan yorumlanabilir. İkinci görüş olarak GI ile birleştirin. |
+| Kanıtsal rapor oluşturma | Her ikisini çalıştırın ve her ikisini `CalibratedScorer` ile kalibre edin. İki yöntem arasındaki uyum, başlı başına kanıtsal sinyaldir (Juola tarzı çok yöntemli karar). |
 
 ## Referans
 

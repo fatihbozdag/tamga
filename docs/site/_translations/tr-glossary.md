@@ -30,6 +30,17 @@ each commit.
 | chain of custody | *delil zinciri* | Forensic/legal standard. |
 | provenance | *köken bilgisi* | Keeps "provenance" feel; literal "soy" sounds odd for data. |
 
+## Gloss pattern (for concepts / forensic pages)
+
+| English | Turkish |
+|---|---|
+| *Use when:* | *Şu durumda kullanın:* |
+| *Don't use when:* | *Şu durumda kullanmayın:* |
+| *Expect:* | *Beklenen sonuç:* |
+
+Apply these exact renderings in every gloss block across `concepts/` and `forensic/`
+pages. Do not paraphrase the marker phrases.
+
 Brand / proper nouns (never translate): **tamga**, **Burrows**, **Eder**, **Argamon**,
 **Cosine**, **Quadratic Delta**, **Zeta**, **General Impostors**, **Unmasking**,
 **Stamatatos**, **Sapkota**, **PANReport**, **Mosteller & Wallace**, **Federalist Papers**,

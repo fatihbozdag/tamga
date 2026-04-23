@@ -22,15 +22,15 @@ report.to_dict()
 
 ## Metrikler
 
-| Metrik | Ölçtüğü | Referans |
-|---|---|---|
-| `auc` | Sıralama yeteneği. 1.0 mükemmel, 0.5 rastgele. | — |
-| `c_at_1` | İlkeli çekinme kredisiyle doğruluk | Peñas & Rodrigo 2011 |
-| `f05u` | Yanıtsızlık cezalı hassasiyet ağırlıklı F-ölçüsü | Bevendorff et al. PAN 2022 |
-| `brier` | Ortalama kare posterior hatası. 0 mükemmel. | Brier 1950 |
-| `ece` | Beklenen Kalibrasyon Hatası (eşit genişlikli bölmeler) | — |
-| `cllr` | Log-olabilirlik-oranı maliyeti — adli uygun puanlama kuralı | Brümmer & du Preez 2006 |
-| `tippett` | Sınıf başına kümülatif hedef / hedef olmayan LR dağılımları | — |
+| Ölçüt | Ölçtüğü | Ne için | Aralık | Kaynak |
+|---|---|---|---|---|
+| `auc` | Sıralama kalitesi | **Sistemler arasında seçim yaparken.** Daha yüksek AUC → sistem, aynı-yazar çiftlerini farklı-yazar çiftlerinin üzerinde daha güvenilir biçimde sıralar. | 0.5 (rastgele) – 1.0 (mükemmel) | — |
+| `c_at_1` | Çekimser kalma kredisiyle doğruluk | **"Bilmiyorum" cevabının yanlış cevaptan daha güvenli olduğu operasyonel kararlar** için. | 0 – 1 | Peñas & Rodrigo 2011 |
+| `f05u` | Yanıtsızlık cezalı hassasiyet ağırlıklı F | **PAN-tipi değerlendirme.** Aşırı güvenli yanlış cevapları cezalandırır. | 0 – 1 | Bevendorff et al. PAN 2022 |
+| `brier` | Posterior kalibrasyonu | **Olasılıksal çıktı kalitesi.** Düşük = daha iyi kalibre edilmiş olasılıklar. | 0 (mükemmel) – 1 (en kötü) | Brier 1950 |
+| `ece` | Beklenen kalibrasyon hatası | **`predict_proba` dürüst mü?** Tahminleri güvene göre gruplar; iddia edilen ile gerçek doğruluğu karşılaştırır. | 0 (mükemmel) – 1 | — |
+| `cllr` | Log-olabilirlik-oranı maliyeti | **Adli LR kalitesi.** Kanıtsal çıktı için katı uygun puanlama kuralı. | 0 (mükemmel) – ∞ | Brümmer & du Preez 2006 |
+| `tippett` | LR dağılım grafiği | **Kalibrasyonu görsel olarak denetleme.** Kümülatif hedef ve hedef olmayan LR eğrileri ayrışmalıdır. | — | — |
 
 ### c@1
 
@@ -80,20 +80,68 @@ plt.legend()
 
 ## Referans
 
+### compute_pan_report
+
+*Şu durumda kullanın:* etiketlenmiş bir doğrulama denemesi grubunuz var ve tek bir çağrıda her standart metriği — AUC, c@1, F0.5u, Brier, ECE, (isteğe bağlı) C_llr — istiyorsunuz.
+*Şu durumda kullanmayın:* yalnızca tek bir metriğe ihtiyacınız var; her metrik fonksiyonu doğrudan çağrılabilir.
+*Beklenen sonuç:* her alanı doldurulmuş bir `PANReport` veri sınıfı.
+
 ::: tamga.forensic.metrics.compute_pan_report
 
 ::: tamga.forensic.metrics.PANReport
 
+### AUC
+
+*Şu durumda kullanın:* aynı kıyaslama üzerinde iki doğrulama sistemini karşılaştırırken — AUC eşik bağımsızdır.
+*Şu durumda kullanmayın:* operasyonel bir karar almanız gerekiyor — AUC, eşiğin nereye ayarlanacağı konusunda hiçbir şey söylemez.
+*Beklenen sonuç:* `[0.5, 1]` aralığında tek bir sayı. Tahmin edilen olasılıkların kalibre edilmiş olmasına bağlı değildir.
+
 ::: tamga.forensic.metrics.auc
+
+### c@1
+
+*Şu durumda kullanın:* sisteminiz çekimser kalabiliyorsa ("bilmiyorum") ve bunu dürüstçe kredilendirmek istiyorsanız — doğruluk artı çekimser kalma için kısmi kredi bonusu.
+*Şu durumda kullanmayın:* sisteminiz her zaman bir karar üretiyorsa; `c@1` doğruluğa indirger.
+*Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı. Yalnızca çekimser kalma oranı > 0 olduğunda doğruluğu geçer.
 
 ::: tamga.forensic.metrics.c_at_1
 
+### F0.5u
+
+*Şu durumda kullanın:* bir PAN-CLEF doğrulama izini puanlıyorsanız — PAN 2022'den bu yana resmi metriktir; hassasiyet ağırlıklı ve yanıtsızlık cezalıdır.
+*Şu durumda kullanmayın:* PAN dışı bir kitleye raporluyorsanız; uzman bir metriktir.
+*Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı.
+
 ::: tamga.forensic.metrics.f05u
+
+### C_llr
+
+*Şu durumda kullanın:* adli açıdan **LR çıktınızın ne kadar iyi olduğunu** ölçmeniz gerekiyorsa — bu, konuşmacı tanıma topluluğunun benimsediği katı uygun puanlama kuralıdır.
+*Şu durumda kullanmayın:* puanlayıcınız doğruluk-tipi olasılıklar üretiyorsa; `C_llr` log-olabilirlik oranları bekler.
+*Beklenen sonuç:* negatif olmayan tek bir sayı; 0 mükemmeldir; 1 bilgisizdir (yazı-tura ile eşleşir).
 
 ::: tamga.forensic.metrics.cllr
 
+### ECE
+
+*Şu durumda kullanın:* olasılıksal dürüstlüğü denetlemek istiyorsanız — ECE, tahminleri iddia edilen güvene göre gruplandırır ve gerçek doğruluğun eşleşip eşleşmediğini kontrol eder.
+*Şu durumda kullanmayın:* geliştirme kümeniz küçükse (<200 deneme); ECE'nin grup tahminleri gürültülü hale gelir.
+*Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı; 0 mükemmel kalibrasyon demektir.
+
 ::: tamga.forensic.metrics.ece
 
+### Brier
+
+*Şu durumda kullanın:* olasılıksal sınıflandırıcılar için uygun bir puanlama kuralı istiyorsanız (LR çıktıları değil) — tahmin edilen olasılık ile gerçek değer arasındaki klasik karesel hata.
+*Şu durumda kullanmayın:* adli LR'ye özgü bir metriğe ihtiyaç duyuyorsanız — `C_llr` kullanın.
+*Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı; 0 mükemmeldir.
+
 ::: tamga.forensic.metrics.brier
+
+### Tippett
+
+*Şu durumda kullanın:* görsel bir kalibrasyon denetimi istiyorsanız — hedef deneme ve hedef olmayan log-LR'leri kümülatif dağılımlar olarak çizin.
+*Şu durumda kullanmayın:* tek sayılı bir özete ihtiyacınız varsa (`C_llr` kullanın).
+*Beklenen sonuç:* matplotlib grafiği için hazır iki kümülatif LR dizisi (hedef ve hedef olmayan).
 
 ::: tamga.forensic.metrics.tippett
