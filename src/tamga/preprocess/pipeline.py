@@ -148,5 +148,6 @@ class SpacyPipeline:
 
         # At this point, every slot has been populated either from cache or from fresh parsing.
         final_docs: list[Doc] = [d for d in parsed if d is not None]
-        assert len(final_docs) == len(parsed), "internal error: some documents were not parsed"
+        if len(final_docs) != len(parsed):
+            raise RuntimeError("internal error: some documents were not parsed")
         return ParsedCorpus(corpus=corpus, docs=final_docs)

@@ -97,11 +97,21 @@ def run_study(
         method_dir.mkdir(parents=True, exist_ok=True)
         try:
             result = _dispatch_method(method_cfg, corpus, features_by_id, seed=cfg.seed)
+            # Derive feature_hash from the primary feature id used by this method (if any).
+            feat_hash: str | None = None
+            features_attr = getattr(method_cfg, "features", None)
+            if features_attr:
+                primary_feat_id = (
+                    features_attr if isinstance(features_attr, str) else features_attr[0]
+                )
+                fm_primary = features_by_id.get(primary_feat_id)
+                if fm_primary is not None:
+                    feat_hash = fm_primary.provenance_hash or None
             result.provenance = Provenance.current(
                 spacy_model=pipe.model,
                 spacy_version=spacy.__version__,
                 corpus_hash=corpus.hash(),
-                feature_hash=None,
+                feature_hash=feat_hash,
                 seed=cfg.seed,
                 resolved_config=cfg.model_dump(),
             )
@@ -191,13 +201,22 @@ def _dispatch_method(
         fm = features_by_id[feat_id]
         y = np.array(corpus.metadata_column(method_cfg.group_by))
         cv_kind = method_cfg.cv.kind if method_cfg.cv else "stratified"
+        groups: Any = None
+        if cv_kind == "loao":
+            groups_col = method_cfg.cv.groups_from if method_cfg.cv else None
+            if not groups_col:
+                raise ValueError(
+                    f"method {method_cfg.id!r}: cv.kind='loao' requires cv.groups_from "
+                    "(a metadata column naming the grouping unit, e.g. 'author')"
+                )
+            groups = np.array(corpus.metadata_column(groups_col))
         clf = build_classifier(method_cfg.params.get("estimator", "logreg"))
         report = cross_validate_tamga(
             clf,
             fm,
             y,
             cv_kind=cv_kind,
-            groups_from=y if cv_kind == "loao" else None,
+            groups_from=groups,
             seed=seed,
         )
         return Result(

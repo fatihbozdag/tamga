@@ -15,8 +15,7 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
-    "Operating System :: POSIX",
-    "Operating System :: MacOS",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -80,7 +79,7 @@ tamga = "tamga.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/fatihbozdag/tamga"
-Documentation = "https://github.com/fatihbozdag/tamga"
+Documentation = "https://fatihbozdag.github.io/tamga/"
 Source = "https://github.com/fatihbozdag/tamga"
 Issues = "https://github.com/fatihbozdag/tamga/issues"
 
