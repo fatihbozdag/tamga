@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-from tamga.gui.pages import ingest, results, run, study  # noqa: F401
+from tamga.gui.pages import forensic, ingest, results, run, study  # noqa: F401

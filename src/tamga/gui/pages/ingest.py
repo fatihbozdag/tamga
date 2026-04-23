@@ -6,6 +6,7 @@ from pathlib import Path
 
 from nicegui import ui
 
+from tamga.gui.filepicker import is_native_available, pick_file, pick_folder
 from tamga.gui.layout import page_shell
 from tamga.gui.state import get_state
 from tamga.io import load_corpus
@@ -33,17 +34,52 @@ def ingest_page() -> None:
             "(columns: ``id``, ``author``, ``year``, …), pass it too."
         )
 
-        corpus_input = ui.input(
-            label="Corpus directory",
-            placeholder="/path/to/corpus",
-            value=str(state.corpus_path or ""),
-        ).classes("w-full")
+        native = is_native_available()
+        browse_disabled_hint = (
+            "Browse works only in native mode (without --no-native). "
+            "Type or paste the absolute path instead."
+        )
 
-        metadata_input = ui.input(
-            label="Metadata TSV (optional)",
-            placeholder="/path/to/metadata.tsv",
-            value=str(state.metadata_path or ""),
-        ).classes("w-full")
+        with ui.row().classes("w-full items-end gap-2"):
+            corpus_input = ui.input(
+                label="Corpus directory",
+                placeholder="/path/to/corpus",
+                value=str(state.corpus_path or ""),
+            ).classes("flex-1")
+
+            async def browse_corpus() -> None:
+                chosen = await pick_folder("Select corpus folder")
+                if chosen:
+                    corpus_input.value = chosen
+
+            browse_corpus_btn = ui.button(
+                "Browse folder", icon="folder_open", on_click=browse_corpus
+            ).props("outline")
+            browse_corpus_btn.set_enabled(native)
+            if not native:
+                browse_corpus_btn.tooltip(browse_disabled_hint)
+
+        with ui.row().classes("w-full items-end gap-2"):
+            metadata_input = ui.input(
+                label="Metadata TSV (optional)",
+                placeholder="/path/to/metadata.tsv",
+                value=str(state.metadata_path or ""),
+            ).classes("flex-1")
+
+            async def browse_metadata() -> None:
+                chosen = await pick_file(
+                    "Select metadata TSV",
+                    file_types=("TSV files (*.tsv;*.txt)", "All files (*.*)"),
+                )
+                if chosen:
+                    metadata_input.value = chosen
+
+            browse_metadata_btn = ui.button(
+                "Browse file", icon="description", on_click=browse_metadata
+            ).props("outline")
+            browse_metadata_btn.set_enabled(native)
+            if not native:
+                browse_metadata_btn.tooltip(browse_disabled_hint)
 
         language_select = ui.select(
             options=_LANGUAGE_CHOICES,

@@ -17,6 +17,7 @@ NAV = [
     ("Study", "/study", "tune"),
     ("Run", "/run", "play_arrow"),
     ("Results", "/results", "insights"),
+    ("Forensic", "/forensic", "gavel"),
 ]
 
 
@@ -27,6 +28,7 @@ def page_shell(title: str) -> Iterator[None]:
     Each ``@ui.page`` function calls ``with page_shell("Page Title"): ...``
     and fills the main column from inside the block.
     """
+    ui.colors(primary=BRAND_NAVY, secondary=BRAND_BRASS)
     with ui.header().style(f"background-color: {BRAND_NAVY}; color: white;"):
         ui.label("tamga").classes("text-2xl font-bold").style(f"color: {BRAND_BRASS}")
         ui.label(title).classes("text-lg ml-4 opacity-90")
