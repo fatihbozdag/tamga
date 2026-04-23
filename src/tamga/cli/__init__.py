@@ -14,6 +14,7 @@ from tamga.cli.consensus_cmd import consensus_command
 from tamga.cli.delta_cmd import delta_command
 from tamga.cli.embed_cmd import embed_command
 from tamga.cli.features_cmd import features_command
+from tamga.cli.gui_cmd import gui_command
 from tamga.cli.info_cmd import info_command
 from tamga.cli.ingest_cmd import ingest_command
 from tamga.cli.init_cmd import init_command
@@ -48,6 +49,7 @@ app.command(name="run")(run_command)
 app.command(name="report")(report_command)
 app.command(name="plot")(plot_command)
 app.command(name="shell")(shell_command)
+app.command(name="gui")(gui_command)
 app.add_typer(cache_app, name="cache")
 
 
