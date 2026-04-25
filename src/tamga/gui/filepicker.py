@@ -13,7 +13,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import webview
-from nicegui import app, run
+from nicegui import app
+from webview import FileDialog
 
 
 def _main_window() -> webview.Window | None:
@@ -29,9 +30,8 @@ async def pick_folder(title: str = "Select folder") -> str | None:
     window = _main_window()
     if window is None:
         return None
-    result = await run.io_bound(
-        window.create_file_dialog,
-        webview.FOLDER_DIALOG,
+    result = await window.create_file_dialog(
+        FileDialog.FOLDER,
         directory="",
         allow_multiple=False,
     )
@@ -47,9 +47,8 @@ async def pick_file(
     window = _main_window()
     if window is None:
         return None
-    result = await run.io_bound(
-        window.create_file_dialog,
-        webview.OPEN_DIALOG,
+    result = await window.create_file_dialog(
+        FileDialog.OPEN,
         allow_multiple=False,
         file_types=tuple(file_types),
     )
@@ -66,9 +65,8 @@ async def pick_save_path(
     window = _main_window()
     if window is None:
         return None
-    result = await run.io_bound(
-        window.create_file_dialog,
-        webview.SAVE_DIALOG,
+    result = await window.create_file_dialog(
+        FileDialog.SAVE,
         save_filename=default_filename,
         file_types=tuple(file_types),
     )

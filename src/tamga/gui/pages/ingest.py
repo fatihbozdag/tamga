@@ -20,6 +20,18 @@ _LANGUAGE_CHOICES = {
     "fr": "Français",
 }
 
+_METADATA_CANDIDATES = ("metadata.tsv", "metadata.csv", "metadata.txt")
+
+
+def _detect_metadata(folder: Path) -> Path | None:
+    if not folder.is_dir():
+        return None
+    for name in _METADATA_CANDIDATES:
+        candidate = folder / name
+        if candidate.is_file():
+            return candidate
+    return None
+
 
 @ui.page("/")
 @ui.page("/ingest")
@@ -47,10 +59,20 @@ def ingest_page() -> None:
                 value=str(state.corpus_path or ""),
             ).classes("flex-1")
 
+            def _autofill_metadata_from_corpus() -> None:
+                folder_str = (corpus_input.value or "").strip()
+                if not folder_str or (metadata_input.value or "").strip():
+                    return
+                detected = _detect_metadata(Path(folder_str).expanduser())
+                if detected is not None:
+                    metadata_input.value = str(detected)
+                    ui.notify(f"auto-detected metadata: {detected.name}", type="positive")
+
             async def browse_corpus() -> None:
                 chosen = await pick_folder("Select corpus folder")
                 if chosen:
                     corpus_input.value = chosen
+                    _autofill_metadata_from_corpus()
 
             browse_corpus_btn = ui.button(
                 "Browse folder", icon="folder_open", on_click=browse_corpus
@@ -80,6 +102,8 @@ def ingest_page() -> None:
             browse_metadata_btn.set_enabled(native)
             if not native:
                 browse_metadata_btn.tooltip(browse_disabled_hint)
+
+        corpus_input.on_value_change(lambda _e: _autofill_metadata_from_corpus())
 
         language_select = ui.select(
             options=_LANGUAGE_CHOICES,

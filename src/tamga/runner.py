@@ -22,6 +22,7 @@ from tamga.features import (
     WordNgramExtractor,
 )
 from tamga.io import load_corpus
+from tamga.methods.bayesian import BayesianAuthorshipAttributor
 from tamga.methods.classify import build_classifier, cross_validate_tamga
 from tamga.methods.cluster import HierarchicalCluster
 from tamga.methods.consensus import BootstrapConsensus
@@ -117,6 +118,9 @@ def run_study(
             )
             result.save(method_dir)
             _log.info("wrote %s", method_dir)
+            _emit_default_plot(
+                method_cfg=method_cfg, method_dir=method_dir, result=result, corpus=corpus
+            )
         except Exception as exc:
             _log.error("method %s failed: %s", method_cfg.id, exc)
             (method_dir / "error.txt").write_text(str(exc))
@@ -194,6 +198,22 @@ def _dispatch_method(
             replicates=int(method_cfg.params.get("replicates", 20)),
         ).fit_transform(corpus)
 
+    if kind == "bayesian":
+        feat_id = (
+            method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
+        )
+        fm = features_by_id[feat_id]
+        y = np.array(corpus.metadata_column(method_cfg.group_by))
+        clf = BayesianAuthorshipAttributor(
+            prior_alpha=float(method_cfg.params.get("prior_alpha", 1.0))
+        ).fit(fm, y)
+        preds = clf.predict(fm)
+        return Result(
+            method_name="bayesian_authorship",
+            params=dict(method_cfg.params),
+            values={"predictions": preds, "accuracy": float((preds == y).mean())},
+        )
+
     if kind == "classify":
         feat_id = (
             method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
@@ -222,7 +242,127 @@ def _dispatch_method(
         return Result(
             method_name=f"classify_{method_cfg.params.get('estimator', 'logreg')}",
             params=dict(method_cfg.params),
-            values={"accuracy": report["accuracy"]},
+            values={
+                "accuracy": report["accuracy"],
+                "predictions": report["predictions"],
+                "y_true": y,
+            },
         )
 
     raise ValueError(f"runner does not support method kind: {kind!r}")
+
+
+def _emit_default_plot(
+    *,
+    method_cfg: Any,
+    method_dir: Path,
+    result: Result,
+    corpus: Any,
+) -> None:
+    """Render a sensible default figure for this method into method_dir."""
+    try:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        from tamga.viz.mpl import (
+            plot_confusion_matrix,
+            plot_dendrogram,
+            plot_feature_importance,
+            plot_scatter_2d,
+            plot_zeta,
+        )
+
+        kind = method_cfg.kind
+        groups: list[str] | None = None
+        group_by = getattr(method_cfg, "group_by", None)
+        if group_by:
+            try:
+                groups = [str(v) for v in corpus.metadata_column(group_by)]
+            except Exception:
+                groups = None
+
+        fig = None
+        png_name: str | None = None
+
+        if kind == "reduce":
+            coords = result.values.get("coordinates")
+            doc_ids = result.values.get("document_ids")
+            if coords is None:
+                return
+            arr = np.asarray(coords)
+            if arr.ndim != 2 or arr.shape[1] < 2:
+                return
+            fig = plot_scatter_2d(
+                arr,
+                labels=list(doc_ids) if doc_ids else None,
+                groups=groups,
+                title=str(result.method_name),
+            )
+            png_name = "scatter.png"
+
+        elif kind == "cluster":
+            linkage = result.values.get("linkage")
+            doc_ids = result.values.get("document_ids")
+            if linkage is None:
+                return
+            fig = plot_dendrogram(
+                np.asarray(linkage),
+                labels=list(doc_ids) if doc_ids else None,
+                title=str(result.method_name),
+            )
+            png_name = "dendrogram.png"
+
+        elif kind == "zeta" and len(result.tables) >= 2:
+            fig = plot_zeta(
+                result.tables[0],
+                result.tables[1],
+                label_a=str(result.values.get("group_a", "A")),
+                label_b=str(result.values.get("group_b", "B")),
+            )
+            png_name = "zeta.png"
+
+        elif kind in ("delta", "bayesian"):
+            preds = result.values.get("predictions")
+            if preds is None or groups is None:
+                return
+            fig = plot_confusion_matrix(
+                np.asarray(groups),
+                np.asarray(preds),
+                title=str(result.method_name),
+            )
+            png_name = "confusion_matrix.png"
+
+        elif kind == "classify":
+            preds = result.values.get("predictions")
+            y_true = result.values.get("y_true")
+            if preds is None or y_true is None:
+                return
+            fig = plot_confusion_matrix(
+                np.asarray(y_true),
+                np.asarray(preds),
+                title=str(result.method_name),
+            )
+            png_name = "confusion_matrix.png"
+
+        elif kind == "consensus":
+            support = result.values.get("support") or {}
+            if not support:
+                return
+            items = sorted(support.items(), key=lambda kv: kv[1], reverse=True)[:20]
+            names = [k.replace(",", " · ") for k, _ in items]
+            scores = np.asarray([v for _, v in items], dtype=float)
+            fig = plot_feature_importance(
+                names,
+                scores,
+                top_n=len(names),
+                title="Bootstrap clade support",
+            )
+            png_name = "clade_support.png"
+
+        if fig is not None and png_name is not None:
+            fig.savefig(method_dir / png_name, dpi=150, bbox_inches="tight")
+            plt.close(fig)
+    except Exception as exc:
+        _log.warning("could not emit default plot for %s: %s", method_dir.name, exc)

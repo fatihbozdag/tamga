@@ -18,7 +18,7 @@ _METHODS = {
     "cluster": "Hierarchical cluster — unsupervised grouping",
     "consensus": "Bootstrap consensus — stability across many MFW bands",
     "classify": "Classify (logreg) — cross-validated supervised",
-    "bayesian": "Bayesian — PyMC hierarchical model (needs [bayesian] extra)",
+    "bayesian": "Bayesian — Wallace-Mosteller-style authorship attribution",
 }
 _FEATURES = {
     "mfw": "Most-frequent words",
@@ -29,7 +29,7 @@ _FEATURES = {
     "lexical_diversity": "Lexical diversity (TTR, MATTR, MTLD)",
     "readability": "Readability indices (Flesch, Gunning-Fog, …)",
 }
-_METHODS_NEEDING_GROUP_BY = ("delta", "zeta", "classify")
+_METHODS_NEEDING_GROUP_BY = ("delta", "zeta", "classify", "bayesian")
 _METHODS_NOT_USING_FEATURE = ("consensus",)
 
 
@@ -70,7 +70,7 @@ def study_page() -> None:
             top_k_input = ui.number(label="top_k (zeta)", value=20, min=5, max=200).classes("w-32")
 
         group_by_input = ui.input(
-            label="Group-by metadata column (for delta / zeta / classify)",
+            label="Group-by metadata column (for delta / zeta / classify / bayesian)",
             value="author" if "author" in state.corpus_metadata_cols else "",
         ).classes("w-64")
 
@@ -126,7 +126,7 @@ def study_page() -> None:
             if method_kind in _METHODS_NEEDING_GROUP_BY:
                 if not group_by_input.value.strip():
                     status.set_content(
-                        "**error:** `group_by` is required for delta / zeta / classify."
+                        "**error:** `group_by` is required for delta / zeta / classify / bayesian."
                     )
                     return
                 method_cfg["group_by"] = group_by_input.value.strip()
