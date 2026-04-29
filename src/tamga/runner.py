@@ -34,7 +34,7 @@ from tamga.methods.delta import (
     EderSimpleDelta,
     QuadraticDelta,
 )
-from tamga.methods.reduce import PCAReducer
+from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
 from tamga.methods.zeta import ZetaClassic
 from tamga.plumbing.logging import get_logger
 from tamga.preprocess.pipeline import SpacyPipeline
@@ -53,13 +53,20 @@ _FEATURE_BUILDERS = {
     "readability": ReadabilityExtractor,
 }
 
-_DELTA_VARIANTS = {
+_DELTA_VARIANTS: dict[str, type] = {
     "burrows": BurrowsDelta,
     "cosine": CosineDelta,
     "argamon_linear": ArgamonLinearDelta,
     "quadratic": QuadraticDelta,
     "eder": EderDelta,
     "eder_simple": EderSimpleDelta,
+}
+
+_REDUCER_VARIANTS: dict[str, type] = {
+    "pca": PCAReducer,
+    "mds": MDSReducer,
+    "tsne": TSNEReducer,
+    "umap": UMAPReducer,
 }
 
 
@@ -199,9 +206,16 @@ def _dispatch_method(
             method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
         )
         fm = features_by_id[feat_id]
-        return PCAReducer(n_components=int(method_cfg.params.get("n_components", 2))).fit_transform(
-            fm
-        )
+        variant = str(method_cfg.params.get("variant", "pca"))
+        cls = _REDUCER_VARIANTS.get(variant)
+        if cls is None:
+            raise ValueError(
+                f"unknown reduce variant: {variant!r} (known: {sorted(_REDUCER_VARIANTS)})"
+            )
+        kwargs = {k: v for k, v in method_cfg.params.items() if k != "variant"}
+        kwargs.setdefault("n_components", 2)
+        result: Result = cls(**kwargs).fit_transform(fm)
+        return result
 
     if kind == "cluster":
         feat_id = (

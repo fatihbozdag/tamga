@@ -65,3 +65,36 @@ def test_delta_variant_runs(tmp_path: Path, mini_corpus_dir: Path, variant: str)
     payload = json.loads(result_path.read_text())
     assert payload["method_name"] == f"delta_{variant}"
     assert "accuracy" in payload["values"]
+
+
+@pytest.mark.parametrize(
+    ("variant", "extra"),
+    [
+        ("pca", {}),
+        ("mds", {"random_state": 0}),
+        # mini_corpus is 4 docs → perplexity must be < n_samples for t-SNE
+        # and n_neighbors < n_samples for UMAP.
+        ("tsne", {"perplexity": 2.0, "random_state": 0}),
+        ("umap", {"n_neighbors": 2, "random_state": 0}),
+    ],
+)
+def test_reduce_variant_runs(
+    tmp_path: Path,
+    mini_corpus_dir: Path,
+    variant: str,
+    extra: dict[str, Any],
+) -> None:
+    from tamga.runner import run_study
+
+    cfg = _study_yaml(
+        tmp_path,
+        mini_corpus_dir,
+        kind="reduce",
+        method_params={"variant": variant, "n_components": 2, **extra},
+    )
+    run_dir = run_study(cfg, output_dir=tmp_path / "runs", run_name="r")
+    result_path = run_dir / "reduce_1" / "result.json"
+    assert result_path.exists(), f"no result.json for variant={variant}"
+    payload = json.loads(result_path.read_text())
+    assert payload["method_name"] == variant
+    assert "coordinates" in payload["values"]
