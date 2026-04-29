@@ -131,6 +131,22 @@ def test_cluster_variant_runs(
     assert "labels" in payload["values"]
 
 
+def test_consensus_emits_bct_plot(tmp_path: Path, mini_corpus_dir: Path) -> None:
+    from tamga.runner import run_study
+
+    cfg = _study_yaml(
+        tmp_path,
+        mini_corpus_dir,
+        kind="consensus",
+        method_params={"mfw_bands": [20, 40], "replicates": 5},
+    )
+    run_dir = run_study(cfg, output_dir=tmp_path / "runs", run_name="r")
+    method_dir = run_dir / "consensus_1"
+    assert (method_dir / "result.json").exists()
+    # New default plot is the consensus tree; bar chart is a fallback only.
+    assert (method_dir / "consensus_tree.png").exists()
+
+
 @pytest.mark.parametrize("variant", ["classic", "eder"])
 def test_zeta_variant_runs(tmp_path: Path, mini_corpus_dir: Path, variant: str) -> None:
     from tamga.runner import run_study

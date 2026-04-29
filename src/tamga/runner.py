@@ -324,6 +324,7 @@ def _emit_default_plot(
         import matplotlib.pyplot as plt
 
         from tamga.viz.mpl import (
+            plot_bootstrap_consensus_tree,
             plot_confusion_matrix,
             plot_dendrogram,
             plot_feature_importance,
@@ -405,18 +406,34 @@ def _emit_default_plot(
 
         elif kind == "consensus":
             support = result.values.get("support") or {}
+            doc_ids = result.values.get("document_ids") or []
             if not support:
                 return
-            items = sorted(support.items(), key=lambda kv: kv[1], reverse=True)[:20]
-            names = [k.replace(",", " · ") for k, _ in items]
-            scores = np.asarray([v for _, v in items], dtype=float)
-            fig = plot_feature_importance(
-                names,
-                scores,
-                top_n=len(names),
-                title="Bootstrap clade support",
-            )
-            png_name = "clade_support.png"
+            leaves = [str(d) for d in doc_ids]
+            if len(leaves) >= 2:
+                try:
+                    fig = plot_bootstrap_consensus_tree(
+                        {str(k): float(v) for k, v in support.items()},
+                        leaves,
+                    )
+                    png_name = "consensus_tree.png"
+                except Exception as bct_exc:
+                    _log.warning(
+                        "BCT plot failed for %s, falling back to clade-support bar chart: %s",
+                        method_dir.name,
+                        bct_exc,
+                    )
+            if fig is None:
+                items = sorted(support.items(), key=lambda kv: kv[1], reverse=True)[:20]
+                names = [k.replace(",", " · ") for k, _ in items]
+                scores = np.asarray([v for _, v in items], dtype=float)
+                fig = plot_feature_importance(
+                    names,
+                    scores,
+                    top_n=len(names),
+                    title="Bootstrap clade support",
+                )
+                png_name = "clade_support.png"
 
         if fig is not None and png_name is not None:
             fig.savefig(method_dir / png_name, dpi=150, bbox_inches="tight")
