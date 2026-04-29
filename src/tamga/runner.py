@@ -26,7 +26,14 @@ from tamga.methods.bayesian import BayesianAuthorshipAttributor
 from tamga.methods.classify import build_classifier, cross_validate_tamga
 from tamga.methods.cluster import HierarchicalCluster
 from tamga.methods.consensus import BootstrapConsensus
-from tamga.methods.delta import BurrowsDelta
+from tamga.methods.delta import (
+    ArgamonLinearDelta,
+    BurrowsDelta,
+    CosineDelta,
+    EderDelta,
+    EderSimpleDelta,
+    QuadraticDelta,
+)
 from tamga.methods.reduce import PCAReducer
 from tamga.methods.zeta import ZetaClassic
 from tamga.plumbing.logging import get_logger
@@ -44,6 +51,15 @@ _FEATURE_BUILDERS = {
     "punctuation": PunctuationExtractor,
     "lexical_diversity": LexicalDiversityExtractor,
     "readability": ReadabilityExtractor,
+}
+
+_DELTA_VARIANTS = {
+    "burrows": BurrowsDelta,
+    "cosine": CosineDelta,
+    "argamon_linear": ArgamonLinearDelta,
+    "quadratic": QuadraticDelta,
+    "eder": EderDelta,
+    "eder_simple": EderSimpleDelta,
 }
 
 
@@ -153,16 +169,21 @@ def _dispatch_method(
     kind = method_cfg.kind
 
     if kind == "delta":
-        # Only Burrows for now in the runner; other Delta variants can be wired later.
         feat_id = (
             method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
         )
         fm = features_by_id[feat_id]
         y = np.array(corpus.metadata_column(method_cfg.group_by))
-        clf = BurrowsDelta().fit(fm, y)
+        variant = str(method_cfg.params.get("variant", "burrows"))
+        cls = _DELTA_VARIANTS.get(variant)
+        if cls is None:
+            raise ValueError(
+                f"unknown delta variant: {variant!r} (known: {sorted(_DELTA_VARIANTS)})"
+            )
+        clf = cls().fit(fm, y)
         preds = clf.predict(fm)
         return Result(
-            method_name="burrows_delta",
+            method_name=f"delta_{variant}",
             params=dict(method_cfg.params),
             values={"predictions": preds, "accuracy": float((preds == y).mean())},
         )
