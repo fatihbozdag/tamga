@@ -24,7 +24,7 @@ from tamga.features import (
 from tamga.io import load_corpus
 from tamga.methods.bayesian import BayesianAuthorshipAttributor
 from tamga.methods.classify import build_classifier, cross_validate_tamga
-from tamga.methods.cluster import HierarchicalCluster
+from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
 from tamga.methods.consensus import BootstrapConsensus
 from tamga.methods.delta import (
     ArgamonLinearDelta,
@@ -67,6 +67,12 @@ _REDUCER_VARIANTS: dict[str, type] = {
     "mds": MDSReducer,
     "tsne": TSNEReducer,
     "umap": UMAPReducer,
+}
+
+_CLUSTER_VARIANTS: dict[str, type] = {
+    "hierarchical": HierarchicalCluster,
+    "kmeans": KMeansCluster,
+    "hdbscan": HDBSCANCluster,
 }
 
 
@@ -222,10 +228,15 @@ def _dispatch_method(
             method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
         )
         fm = features_by_id[feat_id]
-        return HierarchicalCluster(
-            n_clusters=int(method_cfg.params.get("n_clusters", 2)),
-            linkage=method_cfg.params.get("linkage", "ward"),
-        ).fit_transform(fm)
+        variant = str(method_cfg.params.get("variant", "hierarchical"))
+        cluster_cls = _CLUSTER_VARIANTS.get(variant)
+        if cluster_cls is None:
+            raise ValueError(
+                f"unknown cluster variant: {variant!r} (known: {sorted(_CLUSTER_VARIANTS)})"
+            )
+        kwargs = {k: v for k, v in method_cfg.params.items() if k != "variant"}
+        cluster_result: Result = cluster_cls(**kwargs).fit_transform(fm)
+        return cluster_result
 
     if kind == "consensus":
         return BootstrapConsensus(

@@ -98,3 +98,34 @@ def test_reduce_variant_runs(
     payload = json.loads(result_path.read_text())
     assert payload["method_name"] == variant
     assert "coordinates" in payload["values"]
+
+
+@pytest.mark.parametrize(
+    ("variant", "extra"),
+    [
+        ("hierarchical", {"n_clusters": 2, "linkage": "ward"}),
+        ("kmeans", {"n_clusters": 2, "random_state": 0}),
+        # 4 docs → min_cluster_size must drop below default 5 to produce non-noise.
+        ("hdbscan", {"min_cluster_size": 2}),
+    ],
+)
+def test_cluster_variant_runs(
+    tmp_path: Path,
+    mini_corpus_dir: Path,
+    variant: str,
+    extra: dict[str, Any],
+) -> None:
+    from tamga.runner import run_study
+
+    cfg = _study_yaml(
+        tmp_path,
+        mini_corpus_dir,
+        kind="cluster",
+        method_params={"variant": variant, **extra},
+    )
+    run_dir = run_study(cfg, output_dir=tmp_path / "runs", run_name="r")
+    result_path = run_dir / "cluster_1" / "result.json"
+    assert result_path.exists(), f"no result.json for variant={variant}"
+    payload = json.loads(result_path.read_text())
+    assert payload["method_name"] == variant
+    assert "labels" in payload["values"]
