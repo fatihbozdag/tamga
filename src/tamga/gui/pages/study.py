@@ -32,6 +32,38 @@ _FEATURES = {
 _METHODS_NEEDING_GROUP_BY = ("delta", "zeta", "classify", "bayesian")
 _METHODS_NOT_USING_FEATURE = ("consensus",)
 
+# Method-kind → {variant_id: label}. Consensus / classify / bayesian have no
+# user-facing variants in the runner today, so they map to {} and the variant
+# select is hidden.
+_VARIANTS: dict[str, dict[str, str]] = {
+    "delta": {
+        "burrows": "Burrows (classic)",
+        "cosine": "Cosine",
+        "argamon_linear": "Argamon Linear (L2)",
+        "quadratic": "Quadratic (L2²)",
+        "eder": "Eder (rank-weighted)",
+        "eder_simple": "Eder Simple (L1)",
+    },
+    "reduce": {
+        "pca": "PCA",
+        "mds": "MDS",
+        "tsne": "t-SNE",
+        "umap": "UMAP",
+    },
+    "cluster": {
+        "hierarchical": "Hierarchical (Ward)",
+        "kmeans": "KMeans",
+        "hdbscan": "HDBSCAN",
+    },
+    "zeta": {
+        "classic": "Classic (Craig)",
+        "eder": "Eder",
+    },
+    "consensus": {},
+    "classify": {},
+    "bayesian": {},
+}
+
 
 @ui.page("/study")
 def study_page() -> None:
@@ -50,6 +82,23 @@ def study_page() -> None:
 
         ui.markdown("### 2. Configure a study")
         method_select = ui.select(options=_METHODS, value="delta", label="Method").classes("w-full")
+
+        variant_options = _VARIANTS["delta"]
+        variant_select = ui.select(
+            options=variant_options,
+            value=next(iter(variant_options)),
+            label="Variant",
+        ).classes("w-full")
+
+        def _refresh_variant_options() -> None:
+            opts = _VARIANTS.get(method_select.value, {})
+            variant_select.options = opts
+            variant_select.value = next(iter(opts), None)
+            variant_select.set_visibility(bool(opts))
+            variant_select.update()
+
+        method_select.on_value_change(lambda _e: _refresh_variant_options())
+
         feature_select = ui.select(options=_FEATURES, value="mfw", label="Feature").classes(
             "w-full"
         )
@@ -116,6 +165,8 @@ def study_page() -> None:
 
             method_kind = method_select.value
             method_params: dict[str, object] = {}
+            if _VARIANTS.get(method_kind) and variant_select.value:
+                method_params["variant"] = variant_select.value
             method_cfg: dict[str, object] = {
                 "id": f"{method_kind}_1",
                 "kind": method_kind,
