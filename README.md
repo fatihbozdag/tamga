@@ -67,6 +67,24 @@ No. 50) lives at [`examples/quickstart/`](examples/quickstart/). The full 85-pap
 reproducing the classic Mosteller & Wallace (1964) result is at
 [`examples/federalist/`](examples/federalist/).
 
+## Desktop GUI
+
+If you'd rather click than write YAML, tamga ships a NiceGUI + pywebview desktop shell that
+walks the same workflow — **Ingest → Study → Run → Results** — plus a dedicated
+**Forensic** tab.
+
+```bash
+uv pip install "tamga[gui]"
+tamga gui
+```
+
+This opens a native window with native file pickers; pass `--no-native` to fall back to a
+browser tab. From the **Study** page you can pick the method (Burrows/Cosine/Argamon/…
+Delta, PCA/MDS/t-SNE/UMAP, Ward/k-means/HDBSCAN, Zeta classic/Eder, bootstrap consensus,
+classify, Bayesian) and the feature family (MFW, char/word n-grams, function words,
+punctuation, lexical diversity, readability), set parameters, save `study.yaml`, run, and
+view results — figures, parquet tables, and `result.json` scalars — in one place.
+
 ### Example output
 
 PCA on 200 MFW, trained on known-author Federalist Papers; the disputed #50 is projected
