@@ -129,3 +129,19 @@ def test_cluster_variant_runs(
     payload = json.loads(result_path.read_text())
     assert payload["method_name"] == variant
     assert "labels" in payload["values"]
+
+
+@pytest.mark.parametrize("variant", ["classic", "eder"])
+def test_zeta_variant_runs(tmp_path: Path, mini_corpus_dir: Path, variant: str) -> None:
+    from tamga.runner import run_study
+
+    cfg = _study_yaml(
+        tmp_path,
+        mini_corpus_dir,
+        kind="zeta",
+        method_params={"variant": variant, "top_k": 5, "min_df": 1},
+        group_by="author",
+    )
+    run_dir = run_study(cfg, output_dir=tmp_path / "runs", run_name="r")
+    result_path = run_dir / "zeta_1" / "result.json"
+    assert result_path.exists(), f"no result.json for variant={variant}"

@@ -35,7 +35,7 @@ from tamga.methods.delta import (
     QuadraticDelta,
 )
 from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
-from tamga.methods.zeta import ZetaClassic
+from tamga.methods.zeta import ZetaClassic, ZetaEder
 from tamga.plumbing.logging import get_logger
 from tamga.preprocess.pipeline import SpacyPipeline
 from tamga.provenance import Provenance
@@ -73,6 +73,11 @@ _CLUSTER_VARIANTS: dict[str, type] = {
     "hierarchical": HierarchicalCluster,
     "kmeans": KMeansCluster,
     "hdbscan": HDBSCANCluster,
+}
+
+_ZETA_VARIANTS: dict[str, type] = {
+    "classic": ZetaClassic,
+    "eder": ZetaEder,
 }
 
 
@@ -202,10 +207,16 @@ def _dispatch_method(
         )
 
     if kind == "zeta":
-        return ZetaClassic(
-            group_by=method_cfg.group_by,
-            top_k=int(method_cfg.params.get("top_k", 20)),
-        ).fit_transform(corpus)
+        variant = str(method_cfg.params.get("variant", "classic"))
+        zeta_cls = _ZETA_VARIANTS.get(variant)
+        if zeta_cls is None:
+            raise ValueError(f"unknown zeta variant: {variant!r} (known: {sorted(_ZETA_VARIANTS)})")
+        zeta_kwargs = {k: v for k, v in method_cfg.params.items() if k not in ("variant",)}
+        zeta_kwargs.setdefault("top_k", 20)
+        zeta_result: Result = zeta_cls(group_by=method_cfg.group_by, **zeta_kwargs).fit_transform(
+            corpus
+        )
+        return zeta_result
 
     if kind == "reduce":
         feat_id = (
