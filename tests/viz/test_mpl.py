@@ -7,6 +7,7 @@ import pandas as pd
 from scipy.cluster.hierarchy import linkage
 
 from tamga.viz.mpl import (
+    plot_bootstrap_consensus_tree,
     plot_confusion_matrix,
     plot_dendrogram,
     plot_distance_heatmap,
@@ -70,3 +71,24 @@ def test_plot_zeta(tmp_path: Path):
     )
     fig = plot_zeta(df_a, df_b, label_a="A", label_b="B")
     fig.savefig(tmp_path / "zeta.png")
+
+
+def test_plot_bootstrap_consensus_tree(tmp_path: Path):
+    # Two well-supported clades, a weak one, all 5 leaves accounted for.
+    support = {
+        "a,b": 0.95,
+        "a,b,c": 0.55,
+        "d,e": 0.85,
+    }
+    leaves = ["a", "b", "c", "d", "e"]
+    out = tmp_path / "bct.png"
+    fig = plot_bootstrap_consensus_tree(support, leaves)
+    fig.savefig(out)
+    assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_bootstrap_consensus_tree_rejects_singleton():
+    import pytest
+
+    with pytest.raises(ValueError, match="at least 2"):
+        plot_bootstrap_consensus_tree({}, ["only"])

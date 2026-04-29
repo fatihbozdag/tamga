@@ -24,11 +24,18 @@ from tamga.features import (
 from tamga.io import load_corpus
 from tamga.methods.bayesian import BayesianAuthorshipAttributor
 from tamga.methods.classify import build_classifier, cross_validate_tamga
-from tamga.methods.cluster import HierarchicalCluster
+from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
 from tamga.methods.consensus import BootstrapConsensus
-from tamga.methods.delta import BurrowsDelta
-from tamga.methods.reduce import PCAReducer
-from tamga.methods.zeta import ZetaClassic
+from tamga.methods.delta import (
+    ArgamonLinearDelta,
+    BurrowsDelta,
+    CosineDelta,
+    EderDelta,
+    EderSimpleDelta,
+    QuadraticDelta,
+)
+from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
+from tamga.methods.zeta import ZetaClassic, ZetaEder
 from tamga.plumbing.logging import get_logger
 from tamga.preprocess.pipeline import SpacyPipeline
 from tamga.provenance import Provenance
@@ -44,6 +51,33 @@ _FEATURE_BUILDERS = {
     "punctuation": PunctuationExtractor,
     "lexical_diversity": LexicalDiversityExtractor,
     "readability": ReadabilityExtractor,
+}
+
+_DELTA_VARIANTS: dict[str, type] = {
+    "burrows": BurrowsDelta,
+    "cosine": CosineDelta,
+    "argamon_linear": ArgamonLinearDelta,
+    "quadratic": QuadraticDelta,
+    "eder": EderDelta,
+    "eder_simple": EderSimpleDelta,
+}
+
+_REDUCER_VARIANTS: dict[str, type] = {
+    "pca": PCAReducer,
+    "mds": MDSReducer,
+    "tsne": TSNEReducer,
+    "umap": UMAPReducer,
+}
+
+_CLUSTER_VARIANTS: dict[str, type] = {
+    "hierarchical": HierarchicalCluster,
+    "kmeans": KMeansCluster,
+    "hdbscan": HDBSCANCluster,
+}
+
+_ZETA_VARIANTS: dict[str, type] = {
+    "classic": ZetaClassic,
+    "eder": ZetaEder,
 }
 
 
@@ -153,44 +187,67 @@ def _dispatch_method(
     kind = method_cfg.kind
 
     if kind == "delta":
-        # Only Burrows for now in the runner; other Delta variants can be wired later.
         feat_id = (
             method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
         )
         fm = features_by_id[feat_id]
         y = np.array(corpus.metadata_column(method_cfg.group_by))
-        clf = BurrowsDelta().fit(fm, y)
+        variant = str(method_cfg.params.get("variant", "burrows"))
+        cls = _DELTA_VARIANTS.get(variant)
+        if cls is None:
+            raise ValueError(
+                f"unknown delta variant: {variant!r} (known: {sorted(_DELTA_VARIANTS)})"
+            )
+        clf = cls().fit(fm, y)
         preds = clf.predict(fm)
         return Result(
-            method_name="burrows_delta",
+            method_name=f"delta_{variant}",
             params=dict(method_cfg.params),
             values={"predictions": preds, "accuracy": float((preds == y).mean())},
         )
 
     if kind == "zeta":
-        return ZetaClassic(
-            group_by=method_cfg.group_by,
-            top_k=int(method_cfg.params.get("top_k", 20)),
-        ).fit_transform(corpus)
+        variant = str(method_cfg.params.get("variant", "classic"))
+        zeta_cls = _ZETA_VARIANTS.get(variant)
+        if zeta_cls is None:
+            raise ValueError(f"unknown zeta variant: {variant!r} (known: {sorted(_ZETA_VARIANTS)})")
+        zeta_kwargs = {k: v for k, v in method_cfg.params.items() if k not in ("variant",)}
+        zeta_kwargs.setdefault("top_k", 20)
+        zeta_result: Result = zeta_cls(group_by=method_cfg.group_by, **zeta_kwargs).fit_transform(
+            corpus
+        )
+        return zeta_result
 
     if kind == "reduce":
         feat_id = (
             method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
         )
         fm = features_by_id[feat_id]
-        return PCAReducer(n_components=int(method_cfg.params.get("n_components", 2))).fit_transform(
-            fm
-        )
+        variant = str(method_cfg.params.get("variant", "pca"))
+        cls = _REDUCER_VARIANTS.get(variant)
+        if cls is None:
+            raise ValueError(
+                f"unknown reduce variant: {variant!r} (known: {sorted(_REDUCER_VARIANTS)})"
+            )
+        kwargs = {k: v for k, v in method_cfg.params.items() if k != "variant"}
+        kwargs.setdefault("n_components", 2)
+        result: Result = cls(**kwargs).fit_transform(fm)
+        return result
 
     if kind == "cluster":
         feat_id = (
             method_cfg.features if isinstance(method_cfg.features, str) else method_cfg.features[0]
         )
         fm = features_by_id[feat_id]
-        return HierarchicalCluster(
-            n_clusters=int(method_cfg.params.get("n_clusters", 2)),
-            linkage=method_cfg.params.get("linkage", "ward"),
-        ).fit_transform(fm)
+        variant = str(method_cfg.params.get("variant", "hierarchical"))
+        cluster_cls = _CLUSTER_VARIANTS.get(variant)
+        if cluster_cls is None:
+            raise ValueError(
+                f"unknown cluster variant: {variant!r} (known: {sorted(_CLUSTER_VARIANTS)})"
+            )
+        kwargs = {k: v for k, v in method_cfg.params.items() if k != "variant"}
+        cluster_result: Result = cluster_cls(**kwargs).fit_transform(fm)
+        return cluster_result
 
     if kind == "consensus":
         return BootstrapConsensus(
@@ -267,6 +324,7 @@ def _emit_default_plot(
         import matplotlib.pyplot as plt
 
         from tamga.viz.mpl import (
+            plot_bootstrap_consensus_tree,
             plot_confusion_matrix,
             plot_dendrogram,
             plot_feature_importance,
@@ -348,18 +406,34 @@ def _emit_default_plot(
 
         elif kind == "consensus":
             support = result.values.get("support") or {}
+            doc_ids = result.values.get("document_ids") or []
             if not support:
                 return
-            items = sorted(support.items(), key=lambda kv: kv[1], reverse=True)[:20]
-            names = [k.replace(",", " · ") for k, _ in items]
-            scores = np.asarray([v for _, v in items], dtype=float)
-            fig = plot_feature_importance(
-                names,
-                scores,
-                top_n=len(names),
-                title="Bootstrap clade support",
-            )
-            png_name = "clade_support.png"
+            leaves = [str(d) for d in doc_ids]
+            if len(leaves) >= 2:
+                try:
+                    fig = plot_bootstrap_consensus_tree(
+                        {str(k): float(v) for k, v in support.items()},
+                        leaves,
+                    )
+                    png_name = "consensus_tree.png"
+                except Exception as bct_exc:
+                    _log.warning(
+                        "BCT plot failed for %s, falling back to clade-support bar chart: %s",
+                        method_dir.name,
+                        bct_exc,
+                    )
+            if fig is None:
+                items = sorted(support.items(), key=lambda kv: kv[1], reverse=True)[:20]
+                names = [k.replace(",", " · ") for k, _ in items]
+                scores = np.asarray([v for _, v in items], dtype=float)
+                fig = plot_feature_importance(
+                    names,
+                    scores,
+                    top_n=len(names),
+                    title="Bootstrap clade support",
+                )
+                png_name = "clade_support.png"
 
         if fig is not None and png_name is not None:
             fig.savefig(method_dir / png_name, dpi=150, bbox_inches="tight")
