@@ -8,6 +8,8 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.figure import Figure
 from scipy.cluster.hierarchy import dendrogram as scipy_dendrogram
+from scipy.cluster.hierarchy import linkage as scipy_linkage
+from scipy.spatial.distance import squareform
 from sklearn.metrics import confusion_matrix
 
 from tamga.viz.style import figure_size
@@ -115,6 +117,68 @@ def plot_feature_importance(
     fig, ax = plt.subplots(figsize=figure_size("single"))
     ax.barh([names[i] for i in order][::-1], importance[order][::-1])
     ax.set_xlabel("importance")
+    ax.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
+def plot_bootstrap_consensus_tree(
+    support: dict[str, float],
+    leaves: list[str],
+    *,
+    title: str = "Bootstrap consensus tree",
+    min_support_annotate: float = 0.5,
+) -> Figure:
+    """Render a bootstrap consensus tree from a clade-support map.
+
+    `support` maps a comma-joined sorted leaf-id frozenset (the same key shape
+    BootstrapConsensus emits) to its support fraction in [0, 1]. We construct
+    a pairwise distance matrix where d(i,j) = 1 - max{support(c) | i,j ∈ c},
+    run average-linkage clustering on that, and draw the dendrogram. Internal
+    nodes whose support exceeds `min_support_annotate` are labelled with the
+    rounded support percentage.
+
+    The y-axis "1 - clade support" reads cleanly: short branches = strong
+    consensus across the bootstrap MFW bands.
+    """
+    n = len(leaves)
+    if n < 2:
+        raise ValueError("plot_bootstrap_consensus_tree needs at least 2 leaves")
+    idx = {leaf: i for i, leaf in enumerate(leaves)}
+
+    # Pairwise consensus distance: 1 - max support of any clade containing both.
+    D = np.ones((n, n), dtype=float)  # noqa: N806
+    np.fill_diagonal(D, 0.0)
+    for clade_str, freq in support.items():
+        members = [m.strip() for m in clade_str.split(",")]
+        ids = [idx[m] for m in members if m in idx]
+        for i in ids:
+            for j in ids:
+                if i != j:
+                    D[i, j] = min(D[i, j], 1.0 - float(freq))
+
+    Z = scipy_linkage(squareform(D, checks=False), method="average")  # noqa: N806
+
+    fig, ax = plt.subplots(figsize=figure_size("one_and_half"))
+    ddata = scipy_dendrogram(Z, labels=leaves, ax=ax, leaf_rotation=90)
+
+    # Annotate internal nodes with support % (≈ 1 - height) when meaningful.
+    for x_coords, y_coords in zip(ddata["icoord"], ddata["dcoord"], strict=False):
+        height = y_coords[1]  # top of the U-shape
+        support_frac = max(0.0, 1.0 - height)
+        if support_frac >= min_support_annotate:
+            x_mid = 0.5 * (x_coords[1] + x_coords[2])
+            ax.annotate(
+                f"{round(support_frac * 100)}%",
+                (x_mid, height),
+                xytext=(0, 3),
+                textcoords="offset points",
+                ha="center",
+                va="bottom",
+                fontsize=7,
+                color="#444",
+            )
+    ax.set_ylabel("1 - clade support")
     ax.set_title(title)
     fig.tight_layout()
     return fig
