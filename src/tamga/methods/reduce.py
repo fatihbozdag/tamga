@@ -22,12 +22,18 @@ class _ReducerBase:
         values: dict[str, object] = {
             "coordinates": coords,
             "document_ids": list(fm.document_ids),
+            "feature_names": list(fm.feature_names),
         }
         # Attach implementation-specific artefacts.
         if hasattr(model, "explained_variance_ratio_"):
             values["explained_variance_ratio"] = model.explained_variance_ratio_
         if hasattr(model, "stress_"):
             values["stress"] = float(model.stress_)
+        # PCA-only: components_ is the (n_components, n_features) loading matrix.
+        # Manifold methods (MDS, t-SNE, UMAP) have no analogue, so we surface this only
+        # when the underlying sklearn estimator exposes it.
+        if hasattr(model, "components_"):
+            values["loadings"] = model.components_
         return Result(
             method_name=self.method_name,
             params=dict(self._kwargs),

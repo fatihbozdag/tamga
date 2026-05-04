@@ -242,6 +242,107 @@ def plot_rolling_delta(
     return fig
 
 
+def plot_pca_biplot(
+    coordinates: np.ndarray,
+    loadings: np.ndarray,
+    feature_names: list[str],
+    *,
+    labels: list[str] | None = None,
+    groups: list[str] | None = None,
+    top_n: int = 15,
+    explained_variance_ratio: np.ndarray | None = None,
+    title: str = "PCA biplot",
+) -> Figure:
+    """Render a PCA biplot: document scatter in PC1/PC2 + top-N loading vectors.
+
+    Parameters
+    ----------
+    coordinates : (n_docs, >=2) array
+        Document coordinates in principal-component space.
+    loadings : (n_components, n_features) array
+        sklearn's `PCA.components_`. Only the first two rows are used.
+    feature_names : list[str]
+        Names of the original features (one per loading column). Used to
+        label the top-N loading arrows.
+    top_n : int
+        Number of loading vectors to overlay (largest by L2 norm in the
+        PC1/PC2 plane). Lower this when the plot becomes unreadable.
+    explained_variance_ratio : np.ndarray | None
+        If supplied, axis labels report `PC1 (xx.x%)` / `PC2 (xx.x%)`.
+    """
+    if coordinates.ndim != 2 or coordinates.shape[1] < 2:
+        raise ValueError(f"coordinates must be (n_docs, >=2); got shape {coordinates.shape}")
+    if loadings.ndim != 2 or loadings.shape[0] < 2:
+        raise ValueError(
+            f"loadings must be (n_components>=2, n_features); got shape {loadings.shape}"
+        )
+    if loadings.shape[1] != len(feature_names):
+        raise ValueError(
+            f"loadings columns ({loadings.shape[1]}) != len(feature_names) ({len(feature_names)})"
+        )
+
+    fig, ax = plt.subplots(figsize=figure_size("one_and_half"))
+
+    if groups is not None:
+        unique = sorted(set(groups))
+        palette = sns.color_palette(n_colors=len(unique))
+        for i, g in enumerate(unique):
+            mask = np.array([gg == g for gg in groups])
+            ax.scatter(coordinates[mask, 0], coordinates[mask, 1], label=g, color=palette[i], s=40)
+        ax.legend(fontsize=7, loc="upper left")
+    else:
+        ax.scatter(coordinates[:, 0], coordinates[:, 1], s=40)
+    if labels is not None:
+        for i, label in enumerate(labels):
+            ax.annotate(label, (coordinates[i, 0], coordinates[i, 1]), fontsize=6, alpha=0.7)
+
+    # Pick top-N loadings by L2 norm in PC1/PC2 plane and scale them so the longest
+    # arrow spans 90% of the smaller axis half-range.
+    plane = loadings[:2]  # shape (2, n_features)
+    norms = np.linalg.norm(plane, axis=0)
+    top_idx = np.argsort(norms)[::-1][: min(top_n, plane.shape[1])]
+    half_range = min(
+        np.ptp(coordinates[:, 0]) / 2,
+        np.ptp(coordinates[:, 1]) / 2,
+    )
+    scale = (0.9 * half_range) / norms[top_idx[0]] if norms[top_idx[0]] > 0 else 1.0
+    for i in top_idx:
+        x = scale * plane[0, i]
+        y = scale * plane[1, i]
+        ax.arrow(
+            0,
+            0,
+            x,
+            y,
+            color="#a83232",
+            head_width=0.02 * half_range,
+            head_length=0.04 * half_range,
+            length_includes_head=True,
+            alpha=0.85,
+            lw=0.8,
+        )
+        ax.annotate(
+            feature_names[i],
+            (x, y),
+            fontsize=7,
+            color="#7a1f1f",
+            xytext=(3, 3),
+            textcoords="offset points",
+        )
+
+    if explained_variance_ratio is not None and len(explained_variance_ratio) >= 2:
+        ax.set_xlabel(f"PC1 ({100 * float(explained_variance_ratio[0]):.1f}%)")
+        ax.set_ylabel(f"PC2 ({100 * float(explained_variance_ratio[1]):.1f}%)")
+    else:
+        ax.set_xlabel("PC1")
+        ax.set_ylabel("PC2")
+    ax.axhline(0, color="grey", lw=0.5, alpha=0.4)
+    ax.axvline(0, color="grey", lw=0.5, alpha=0.4)
+    ax.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
 def plot_reliability_diagram(
     y_true: np.ndarray,
     y_proba: np.ndarray,

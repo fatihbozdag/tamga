@@ -381,6 +381,7 @@ def _emit_default_plot(
             plot_dendrogram,
             plot_feature_importance,
             plot_imposters_scores,
+            plot_pca_biplot,
             plot_reliability_diagram,
             plot_rolling_delta,
             plot_scatter_2d,
@@ -414,6 +415,25 @@ def _emit_default_plot(
                 title=str(result.method_name),
             )
             png_name = "scatter.png"
+            # Bonus: PCA biplot when loadings + feature_names are available.
+            loadings = result.values.get("loadings")
+            feature_names = result.values.get("feature_names")
+            if loadings is not None and feature_names:
+                try:
+                    evr = result.values.get("explained_variance_ratio")
+                    biplot_fig = plot_pca_biplot(
+                        arr,
+                        np.asarray(loadings),
+                        list(feature_names),
+                        labels=list(doc_ids) if doc_ids else None,
+                        groups=groups,
+                        explained_variance_ratio=np.asarray(evr) if evr is not None else None,
+                        title=f"{result.method_name} biplot",
+                    )
+                    biplot_fig.savefig(method_dir / "pca_biplot.png", dpi=150, bbox_inches="tight")
+                    plt.close(biplot_fig)
+                except Exception as bp_exc:
+                    _log.warning("PCA biplot failed for %s: %s", method_dir.name, bp_exc)
 
         elif kind == "cluster":
             linkage = result.values.get("linkage")

@@ -147,6 +147,22 @@ def test_consensus_emits_bct_plot(tmp_path: Path, mini_corpus_dir: Path) -> None
     assert (method_dir / "consensus_tree.png").exists()
 
 
+def test_pca_emits_biplot(tmp_path: Path, mini_corpus_dir: Path) -> None:
+    """When method=reduce + variant=pca, runner should drop pca_biplot.png next to scatter.png."""
+    from tamga.runner import run_study
+
+    cfg = _study_yaml(
+        tmp_path,
+        mini_corpus_dir,
+        kind="reduce",
+        method_params={"variant": "pca", "n_components": 2},
+    )
+    run_dir = run_study(cfg, output_dir=tmp_path / "runs", run_name="r")
+    method_dir = run_dir / "reduce_1"
+    assert (method_dir / "scatter.png").exists()
+    assert (method_dir / "pca_biplot.png").exists()
+
+
 def test_classify_emits_reliability_diagram(tmp_path: Path) -> None:
     """End-to-end: classify with logreg should also drop a reliability_diagram.png."""
     from tamga.runner import run_study
