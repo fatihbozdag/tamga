@@ -147,6 +147,39 @@ def test_consensus_emits_bct_plot(tmp_path: Path, mini_corpus_dir: Path) -> None
     assert (method_dir / "consensus_tree.png").exists()
 
 
+def test_classify_emits_reliability_diagram(tmp_path: Path) -> None:
+    """End-to-end: classify with logreg should also drop a reliability_diagram.png."""
+    from tamga.runner import run_study
+
+    fed_dir = Path(__file__).parent / "fixtures" / "federalist"
+    method_cfg: dict[str, Any] = {
+        "id": "classify_1",
+        "kind": "classify",
+        "features": "feat1",
+        "group_by": "author",
+        "cv": {"kind": "leave_one_text_out"},
+        "params": {"estimator": "logreg"},
+    }
+    study = {
+        "seed": 42,
+        "preprocess": {"language": "en", "spacy": {}},
+        "corpus": {"path": str(fed_dir), "metadata": str(fed_dir / "metadata.tsv")},
+        "features": [{"id": "feat1", "type": "mfw", "params": {"n": 80}}],
+        "methods": [method_cfg],
+        "output": {"dir": str(tmp_path / "runs"), "timestamp": False},
+    }
+    cfg_path = tmp_path / "study.yaml"
+    cfg_path.write_text(yaml.safe_dump(study, sort_keys=False))
+    run_dir = run_study(cfg_path, output_dir=tmp_path / "runs", run_name="r")
+    method_dir = run_dir / "classify_1"
+    assert (method_dir / "result.json").exists()
+    assert (method_dir / "confusion_matrix.png").exists()
+    assert (method_dir / "reliability_diagram.png").exists()
+    payload = json.loads((method_dir / "result.json").read_text())
+    assert "ece" in payload["values"]
+    assert "brier" in payload["values"]
+
+
 def test_general_imposters_runs_and_plots(tmp_path: Path) -> None:
     """End-to-end: verify fed_49 against Madison; result+plot land on disk."""
     from tamga.runner import run_study

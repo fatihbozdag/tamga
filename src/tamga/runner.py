@@ -335,14 +335,27 @@ def _dispatch_method(
             groups_from=groups,
             seed=seed,
         )
+        from tamga.metrics.calibration import brier_score, expected_calibration_error
+
+        values: dict[str, Any] = {
+            "accuracy": report["accuracy"],
+            "predictions": report["predictions"],
+            "y_true": y,
+        }
+        if report.get("proba") is not None and report.get("classes") is not None:
+            values["proba"] = report["proba"]
+            values["classes"] = report["classes"]
+            try:
+                values["ece"] = expected_calibration_error(
+                    y, report["proba"], classes=report["classes"]
+                )
+                values["brier"] = brier_score(y, report["proba"], classes=report["classes"])
+            except Exception as exc:
+                _log.warning("calibration metrics failed: %s", exc)
         return Result(
             method_name=f"classify_{method_cfg.params.get('estimator', 'logreg')}",
             params=dict(method_cfg.params),
-            values={
-                "accuracy": report["accuracy"],
-                "predictions": report["predictions"],
-                "y_true": y,
-            },
+            values=values,
         )
 
     raise ValueError(f"runner does not support method kind: {kind!r}")
@@ -368,6 +381,7 @@ def _emit_default_plot(
             plot_dendrogram,
             plot_feature_importance,
             plot_imposters_scores,
+            plot_reliability_diagram,
             plot_rolling_delta,
             plot_scatter_2d,
             plot_zeta,
@@ -456,6 +470,29 @@ def _emit_default_plot(
                 title=str(result.method_name),
             )
             png_name = "confusion_matrix.png"
+            # Bonus: reliability diagram if y_proba is available.
+            proba = result.values.get("proba")
+            classes = result.values.get("classes")
+            if proba is not None and classes is not None:
+                try:
+                    rel_fig = plot_reliability_diagram(
+                        np.asarray(y_true),
+                        np.asarray(proba),
+                        classes=np.asarray(classes),
+                        title=f"{result.method_name} reliability",
+                    )
+                    rel_fig.savefig(
+                        method_dir / "reliability_diagram.png",
+                        dpi=150,
+                        bbox_inches="tight",
+                    )
+                    plt.close(rel_fig)
+                except Exception as cal_exc:
+                    _log.warning(
+                        "reliability diagram failed for %s: %s",
+                        method_dir.name,
+                        cal_exc,
+                    )
 
         elif kind == "consensus":
             support = result.values.get("support") or {}

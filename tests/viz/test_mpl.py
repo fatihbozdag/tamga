@@ -13,6 +13,7 @@ from tamga.viz.mpl import (
     plot_distance_heatmap,
     plot_feature_importance,
     plot_imposters_scores,
+    plot_reliability_diagram,
     plot_rolling_delta,
     plot_scatter_2d,
     plot_zeta,
@@ -133,6 +134,19 @@ def test_plot_imposters_scores_mixed_decisions(tmp_path: Path):
     )
     fig = plot_imposters_scores(table, threshold=0.5)
     out = tmp_path / "imp.png"
+    fig.savefig(out)
+    assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_reliability_diagram_smoke(tmp_path: Path):
+    rng = np.random.default_rng(0)
+    n = 200
+    y_true = rng.choice(["A", "B"], size=n)
+    raw = rng.uniform(size=(n, 2))
+    y_proba = raw / raw.sum(axis=1, keepdims=True)
+    classes = np.array(["A", "B"])
+    fig = plot_reliability_diagram(y_true, y_proba, classes=classes, n_bins=8)
+    out = tmp_path / "reliability.png"
     fig.savefig(out)
     assert out.is_file() and out.stat().st_size > 0
 
