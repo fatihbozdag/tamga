@@ -242,6 +242,69 @@ def plot_rolling_delta(
     return fig
 
 
+def plot_reliability_diagram(
+    y_true: np.ndarray,
+    y_proba: np.ndarray,
+    *,
+    classes: np.ndarray | None = None,
+    n_bins: int = 10,
+    title: str | None = None,
+) -> Figure:
+    """Reliability diagram + confidence histogram for a probabilistic classifier.
+
+    Top panel: per-bin observed accuracy vs mean predicted confidence with a
+    diagonal "perfect calibration" reference. Bars below the diagonal mean
+    over-confident predictions; above means under-confident. Bottom panel:
+    histogram of per-prediction confidence to surface bin sparsity.
+    """
+    from tamga.metrics.calibration import (
+        brier_score,
+        calibration_curve,
+        expected_calibration_error,
+    )
+
+    curve = calibration_curve(y_true, y_proba, classes=classes, n_bins=n_bins)
+    ece = expected_calibration_error(y_true, y_proba, classes=classes, n_bins=n_bins)
+    brier = brier_score(y_true, y_proba, classes=classes)
+
+    fig, (ax_top, ax_bot) = plt.subplots(
+        2,
+        1,
+        figsize=figure_size("one_and_half"),
+        gridspec_kw={"height_ratios": [3, 1]},
+        sharex=True,
+    )
+    width = curve.bin_edges[1] - curve.bin_edges[0]
+    has_data = curve.counts > 0
+    ax_top.bar(
+        curve.bin_centers[has_data],
+        curve.accuracy[has_data],
+        width=width * 0.9,
+        edgecolor="#222",
+        color="#4f81bd",
+        alpha=0.85,
+        label="observed accuracy",
+    )
+    ax_top.plot([0, 1], [0, 1], "--", color="grey", lw=1, alpha=0.7, label="perfect")
+    ax_top.set_xlim(0, 1)
+    ax_top.set_ylim(0, 1.05)
+    ax_top.set_ylabel("accuracy")
+    ax_top.legend(loc="upper left", fontsize=7)
+    ax_top.set_title(title or f"Reliability diagram (ECE={ece:.3f}, Brier={brier:.3f})")
+
+    ax_bot.bar(
+        curve.bin_centers,
+        curve.counts,
+        width=width * 0.9,
+        color="#888",
+        alpha=0.7,
+    )
+    ax_bot.set_xlabel("predicted confidence")
+    ax_bot.set_ylabel("count")
+    fig.tight_layout()
+    return fig
+
+
 def plot_imposters_scores(
     table: pd.DataFrame,
     *,

@@ -67,8 +67,27 @@ def cross_validate_tamga(
 
     preds = cross_val_predict(estimator, fm.X, y, cv=cv, groups=groups)
     report = classification_report(y, preds, output_dict=True, zero_division=0)
+
+    proba: np.ndarray | None = None
+    classes: np.ndarray | None = None
+    if hasattr(estimator, "predict_proba"):
+        try:
+            proba = cross_val_predict(
+                estimator, fm.X, y, cv=cv, groups=groups, method="predict_proba"
+            )
+            # cross_val_predict reorders class columns to match np.unique(y); recover.
+            classes = np.unique(y)
+        except Exception:
+            # Some estimators raise when predict_proba is unsupported under a given CV fold
+            # configuration -- skip silently and let downstream calibration code handle the
+            # missing-proba case.
+            proba = None
+            classes = None
+
     return {
         "accuracy": float((preds == y).mean()),
         "predictions": preds,
         "per_class": report,
+        "proba": proba,
+        "classes": classes,
     }
