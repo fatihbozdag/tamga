@@ -13,6 +13,7 @@ from tamga.viz.mpl import (
     plot_distance_heatmap,
     plot_feature_importance,
     plot_imposters_scores,
+    plot_pca_biplot,
     plot_reliability_diagram,
     plot_rolling_delta,
     plot_scatter_2d,
@@ -136,6 +137,37 @@ def test_plot_imposters_scores_mixed_decisions(tmp_path: Path):
     out = tmp_path / "imp.png"
     fig.savefig(out)
     assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_pca_biplot_renders(tmp_path: Path):
+    rng = np.random.default_rng(0)
+    coords = rng.standard_normal((20, 2))
+    loadings = rng.standard_normal((2, 8))
+    names = ["the", "and", "of", "to", "a", "in", "that", "is"]
+    fig = plot_pca_biplot(
+        coords,
+        loadings,
+        names,
+        labels=[f"d{i}" for i in range(20)],
+        groups=["A"] * 10 + ["B"] * 10,
+        explained_variance_ratio=np.array([0.4, 0.25]),
+        top_n=5,
+    )
+    out = tmp_path / "biplot.png"
+    fig.savefig(out)
+    assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_pca_biplot_validates_shapes():
+    import pytest
+
+    coords = np.random.default_rng(0).standard_normal((10, 2))
+    with pytest.raises(ValueError, match="loadings columns"):
+        plot_pca_biplot(coords, np.zeros((2, 5)), ["only", "three"])
+    with pytest.raises(ValueError, match="coordinates must be"):
+        plot_pca_biplot(np.zeros((10, 1)), np.zeros((2, 3)), ["a", "b", "c"])
+    with pytest.raises(ValueError, match="loadings must be"):
+        plot_pca_biplot(coords, np.zeros((1, 3)), ["a", "b", "c"])
 
 
 def test_plot_reliability_diagram_smoke(tmp_path: Path):
