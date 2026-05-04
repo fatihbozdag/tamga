@@ -304,10 +304,17 @@ def _dispatch_method(
             prior_alpha=float(method_cfg.params.get("prior_alpha", 1.0))
         ).fit(fm, y)
         preds = clf.predict(fm)
+        proba = clf.predict_proba(fm)
         return Result(
             method_name="bayesian_authorship",
             params=dict(method_cfg.params),
-            values={"predictions": preds, "accuracy": float((preds == y).mean())},
+            values={
+                "predictions": preds,
+                "accuracy": float((preds == y).mean()),
+                "proba": proba,
+                "classes": clf.classes_,
+                "document_ids": list(fm.document_ids),
+            },
         )
 
     if kind == "classify":
@@ -382,6 +389,7 @@ def _emit_default_plot(
             plot_feature_importance,
             plot_imposters_scores,
             plot_pca_biplot,
+            plot_posterior_heatmap,
             plot_reliability_diagram,
             plot_rolling_delta,
             plot_scatter_2d,
@@ -478,6 +486,31 @@ def _emit_default_plot(
                 title=str(result.method_name),
             )
             png_name = "confusion_matrix.png"
+            # Bonus for bayesian: posterior heatmap if the matrix is on values.
+            if kind == "bayesian":
+                proba = result.values.get("proba")
+                classes = result.values.get("classes")
+                doc_ids = result.values.get("document_ids")
+                if proba is not None and classes is not None and doc_ids:
+                    try:
+                        post_fig = plot_posterior_heatmap(
+                            np.asarray(proba),
+                            [str(d) for d in doc_ids],
+                            [str(c) for c in classes],
+                            title=f"{result.method_name} posterior",
+                        )
+                        post_fig.savefig(
+                            method_dir / "posterior_heatmap.png",
+                            dpi=150,
+                            bbox_inches="tight",
+                        )
+                        plt.close(post_fig)
+                    except Exception as ph_exc:
+                        _log.warning(
+                            "posterior heatmap failed for %s: %s",
+                            method_dir.name,
+                            ph_exc,
+                        )
 
         elif kind == "classify":
             preds = result.values.get("predictions")
