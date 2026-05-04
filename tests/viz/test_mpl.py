@@ -12,6 +12,7 @@ from tamga.viz.mpl import (
     plot_dendrogram,
     plot_distance_heatmap,
     plot_feature_importance,
+    plot_rolling_delta,
     plot_scatter_2d,
     plot_zeta,
 )
@@ -85,6 +86,46 @@ def test_plot_bootstrap_consensus_tree(tmp_path: Path):
     fig = plot_bootstrap_consensus_tree(support, leaves)
     fig.savefig(out)
     assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_rolling_delta_two_targets(tmp_path: Path):
+    table = pd.DataFrame(
+        [
+            {
+                "doc_id": "alpha",
+                "window_idx": i,
+                "window_start_token": i * 100,
+                "window_end_token": i * 100 + 400,
+                "nearest_author": "A" if i % 2 == 0 else "B",
+                "distance_A": 0.5 + 0.05 * i,
+                "distance_B": 0.6 - 0.03 * i,
+            }
+            for i in range(6)
+        ]
+        + [
+            {
+                "doc_id": "beta",
+                "window_idx": i,
+                "window_start_token": i * 100,
+                "window_end_token": i * 100 + 400,
+                "nearest_author": "B",
+                "distance_A": 0.7,
+                "distance_B": 0.3,
+            }
+            for i in range(4)
+        ]
+    )
+    fig = plot_rolling_delta(table)
+    out = tmp_path / "rolling.png"
+    fig.savefig(out)
+    assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_rolling_delta_rejects_empty_table():
+    import pytest
+
+    with pytest.raises(ValueError, match="at least one window"):
+        plot_rolling_delta(pd.DataFrame())
 
 
 def test_plot_bootstrap_consensus_tree_rejects_singleton():
