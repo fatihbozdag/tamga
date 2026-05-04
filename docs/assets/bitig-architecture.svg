@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="t a">
-  <title id="t">tamga architecture</title>
+  <title id="t">bitig architecture</title>
   <desc id="a">Four-layer architecture: corpus, features, methods, forensic; output on the right.</desc>
 
   <defs>
@@ -25,7 +25,7 @@
   <rect width="1200" height="560" class="bg"/>
 
   <!-- top rail label -->
-  <text x="60" y="40" class="rail-label">TAMGA · ANALYSIS PIPELINE</text>
+  <text x="60" y="40" class="rail-label">BITIG · ANALYSIS PIPELINE</text>
 
   <!-- CORPUS -->
   <g>
@@ -113,6 +113,6 @@
 
   <!-- bottom rail -->
   <text x="60" y="530" class="caption">
-    Declarative study.yaml · tamga run · CLI: init · ingest · features · delta · zeta · reduce · cluster · consensus · classify · embed · bayesian · report · shell
+    Declarative study.yaml · bitig run · CLI: init · ingest · features · delta · zeta · reduce · cluster · consensus · classify · embed · bayesian · report · shell
   </text>
 </svg>

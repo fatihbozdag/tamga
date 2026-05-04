@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" role="img" aria-labelledby="t a">
-  <title id="t">tamga</title>
-  <desc id="a">tamga — computational stylometry: the tamga mark beside the wordmark and tagline.</desc>
+  <title id="t">bitig</title>
+  <desc id="a">bitig — computational stylometry: the bitig glyph beside the wordmark and tagline.</desc>
 
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -22,7 +22,7 @@
   <!-- decorative side-rule -->
   <line x1="40" y1="80" x2="40" y2="300" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
 
-  <!-- tamga mark: a stylized clan-mark, asymmetric geometry suggesting a signature -->
+  <!-- bitig glyph: a stylized inscription mark, asymmetric geometry suggesting a signature -->
   <g transform="translate(120 80)" fill="none" stroke="url(#ink)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
     <!-- vertical stem -->
     <line x1="80" y1="10" x2="80" y2="210"/>
@@ -38,7 +38,7 @@
 
   <!-- wordmark -->
   <g font-family="Georgia, 'Source Serif Pro', 'Iowan Old Style', serif" fill="url(#ink)">
-    <text x="380" y="200" font-size="160" font-weight="600" letter-spacing="2">tamga</text>
+    <text x="380" y="200" font-size="160" font-weight="600" letter-spacing="2">bitig</text>
     <text x="382" y="245" font-size="22" letter-spacing="6" opacity="0.85" font-family="'Helvetica Neue', Arial, sans-serif">
       COMPUTATIONAL  STYLOMETRY
     </text>
@@ -52,6 +52,6 @@
 
   <!-- origin gloss -->
   <text x="382" y="322" font-family="'Helvetica Neue', Arial, sans-serif" font-size="13" fill="#C9A34A" opacity="0.75" letter-spacing="1">
-    TAMGA  (Old Turkic)  ·  mark,  brand,  clan-sign
+    BITIG  (Old Turkic)  ·  writing,  inscription,  charter
   </text>
 </svg>

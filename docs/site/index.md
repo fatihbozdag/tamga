@@ -11,9 +11,9 @@ hide:
 
 **Computational stylometry for authorship attribution, author-group comparison, and forensic-linguistic analysis.** A Python replacement for R's `Stylo`, with a modern NLP pipeline (spaCy, transformer embeddings), a Bayesian layer (PyMC), and a full forensic-evidential toolkit on top.
 
-> Named after the **bitig** — the Turkic clan-mark by which individual and familial
-> identity was recognised at a glance — the material-culture counterpart to a stylistic
-> fingerprint.
+> Named after the **bitig** — the Turkic word for *writing* / *inscription*, the kind
+> chiselled into the 8th-century Orkhon stelae. A bitig was a recorded text bearing a
+> writer's hand; this package looks for that hand.
 
 ## Architecture
 
