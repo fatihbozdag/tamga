@@ -1,4 +1,4 @@
-"""Tests for Bayesian authorship attribution — requires tamga[bayesian]."""
+"""Tests for Bayesian authorship attribution — requires bitig[bayesian]."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 from sklearn.base import is_classifier
 
-from tamga.corpus import Corpus, Document
-from tamga.features import MFWExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features import MFWExtractor
 
 pytestmark = pytest.mark.slow
 
@@ -30,13 +30,13 @@ def _corpus() -> Corpus:
 
 
 def test_bayesian_attributor_is_classifier() -> None:
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor
 
     assert is_classifier(BayesianAuthorshipAttributor())
 
 
 def test_bayesian_attributor_separates_two_authors() -> None:
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor
 
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
@@ -48,7 +48,7 @@ def test_bayesian_attributor_separates_two_authors() -> None:
 
 
 def test_bayesian_attributor_predict_proba_sums_to_one() -> None:
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor
 
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
@@ -59,10 +59,10 @@ def test_bayesian_attributor_predict_proba_sums_to_one() -> None:
 
 
 def test_bayesian_raises_clear_error_when_not_installed(monkeypatch: pytest.MonkeyPatch) -> None:
-    from tamga.methods import bayesian
+    from bitig.methods import bayesian
 
     monkeypatch.setattr(bayesian, "_pymc_available", False)
-    with pytest.raises(ImportError, match=r"tamga\[bayesian\]"):
+    with pytest.raises(ImportError, match=r"bitig\[bayesian\]"):
         bayesian.HierarchicalGroupComparison(group_by="author")
 
 
@@ -76,7 +76,7 @@ class TestAuthorToGroupIdx:
     """
 
     def test_author_group_index_typical_corpus(self) -> None:
-        from tamga.methods.bayesian import _build_author_to_group_idx
+        from bitig.methods.bayesian import _build_author_to_group_idx
 
         y = np.array(["alice", "alice", "bob", "carol", "carol"])
         groups = np.array(["L1", "L1", "L1", "L2", "L2"])
@@ -87,7 +87,7 @@ class TestAuthorToGroupIdx:
         assert idx.tolist() == [0, 0, 1]
 
     def test_author_group_index_raises_on_conflicting_group(self) -> None:
-        from tamga.methods.bayesian import _build_author_to_group_idx
+        from bitig.methods.bayesian import _build_author_to_group_idx
 
         y = np.array(["alice", "alice"])
         groups = np.array(["L1", "L2"])  # same author, two groups
@@ -97,7 +97,7 @@ class TestAuthorToGroupIdx:
             _build_author_to_group_idx(y, groups, unique_authors, unique_groups)
 
     def test_author_group_index_preserves_unique_authors_order(self) -> None:
-        from tamga.methods.bayesian import _build_author_to_group_idx
+        from bitig.methods.bayesian import _build_author_to_group_idx
 
         y = np.array(["bob", "alice", "bob", "alice"])
         groups = np.array(["G1", "G2", "G1", "G2"])

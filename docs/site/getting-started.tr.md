@@ -2,53 +2,53 @@
 
 ## Kurulum
 
-tamga Python 3.11+ gerektirir.
+bitig Python 3.11+ gerektirir.
 
 === "uv (önerilen)"
 
     ```bash
-    uv pip install tamga
+    uv pip install bitig
     python -m spacy download en_core_web_trf
     ```
 
 === "pip"
 
     ```bash
-    pip install tamga
+    pip install bitig
     python -m spacy download en_core_web_trf
     ```
 
 ### İsteğe bağlı eklentiler
 
 ```bash
-uv pip install "tamga[bayesian]"    # PyMC + arviz for hierarchical models
-uv pip install "tamga[embeddings]"  # sentence-transformers + contextual BERT
-uv pip install "tamga[viz]"         # plotly, kaleido, ete3
-uv pip install "tamga[reports]"     # weasyprint for PDF report export
-uv pip install "tamga[docs]"        # mkdocs + material theme (build this site)
+uv pip install "bitig[bayesian]"    # PyMC + arviz for hierarchical models
+uv pip install "bitig[embeddings]"  # sentence-transformers + contextual BERT
+uv pip install "bitig[viz]"         # plotly, kaleido, ete3
+uv pip install "bitig[reports]"     # weasyprint for PDF report export
+uv pip install "bitig[docs]"        # mkdocs + material theme (build this site)
 ```
 
 ## Beş komutla bir çalışma
 
 ```bash
-tamga init my-study          # (1) scaffold a project directory
+bitig init my-study          # (1) scaffold a project directory
 cd my-study
 # (2) drop .txt files into corpus/
 # (3) fill in corpus/metadata.tsv — one row per file with filename → author, group, year, ...
-tamga ingest corpus/ --metadata corpus/metadata.tsv  # (4) parse + cache
-tamga info                    # (5a) verify the ingest
-tamga run study.yaml --name demo   # (5b) run the declared study
-tamga report results/demo --output results/demo/report.html
+bitig ingest corpus/ --metadata corpus/metadata.tsv  # (4) parse + cache
+bitig info                    # (5a) verify the ingest
+bitig run study.yaml --name demo   # (5b) run the declared study
+bitig report results/demo --output results/demo/report.html
 ```
 
-`tamga init` ile oluşturulan proje iskeleti, 200 en sık sözcük üzerinde Burrows Delta
+`bitig init` ile oluşturulan proje iskeleti, 200 en sık sözcük üzerinde Burrows Delta
 + PCA + Zeta içeren çalışan bir `study.yaml` içerir; dolayısıyla yukarıdaki adım dizisi,
 aldığınız herhangi bir derlemde baştan sona çalışır.
 
 ## İlk Python oturumunuz
 
 ```python
-from tamga import (
+from bitig import (
     Corpus, Document,
     MFWExtractor, BurrowsDelta,
     PCAReducer, plot_scatter_2d,
@@ -76,15 +76,15 @@ clf = BurrowsDelta().fit_predict(fm)  # sklearn-compatible
 
 Depo ile birlikte çalıştırmaya hazır iki örnek gelir:
 
-- [`examples/quickstart/`](https://github.com/fatihbozdag/tamga/tree/main/examples/quickstart)
+- [`examples/quickstart/`](https://github.com/fatihbozdag/bitig/tree/main/examples/quickstart)
   — tartışmalı 50. makale dahil 9 makale kullanan başlangıç dostu bir kılavuz.
-- [`examples/federalist/`](https://github.com/fatihbozdag/tamga/tree/main/examples/federalist)
+- [`examples/federalist/`](https://github.com/fatihbozdag/bitig/tree/main/examples/federalist)
   — Mosteller & Wallace (1964) sonucunu yeniden üreten 85 makalenin tam analizi.
 
 Hızlı başlangıç, ilk çalıştırmada şu PCA grafiğini üretir:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/fatihbozdag/tamga/main/examples/quickstart/results/demo/pca/pca.png" alt="Hamilton ve Madison'ın PCA grafiği" style="max-width: 82%;">
+  <img src="https://raw.githubusercontent.com/fatihbozdag/bitig/main/examples/quickstart/results/demo/pca/pca.png" alt="Hamilton ve Madison'ın PCA grafiği" style="max-width: 82%;">
 </p>
 
 ## Sonraki adımlar

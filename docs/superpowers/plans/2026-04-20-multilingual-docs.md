@@ -23,10 +23,10 @@ Tasks 4–8 all follow this procedure. The implementer reads the English source,
    - **YAML front matter (if any) preserved verbatim** — `hide:`, `status:`, etc. are MkDocs directives, not prose.
    - **Headings translated** (`# Corpus` → `# Derlem`). Match the glossary for recurring nouns.
    - **Prose, admonition bodies, captions, alt-text translated.**
-   - **Code blocks copied verbatim** — Python, YAML, shell, JSON. Never translate `tamga ingest`, `cfg.preprocess.language`, CLI flag names, Python identifiers, or YAML keys.
+   - **Code blocks copied verbatim** — Python, YAML, shell, JSON. Never translate `bitig ingest`, `cfg.preprocess.language`, CLI flag names, Python identifiers, or YAML keys.
    - **Inline code (backticks) copied verbatim** — `Corpus.language`, `--metadata`, `study.yaml`.
    - **Citations, bibliography, DOIs, URLs copied verbatim.**
-   - **Brand/method names copied verbatim** — `tamga`, `Burrows`, `Eder`, `Argamon`, `General Impostors`, `Unmasking`, `PANReport`, `Delta`, `Zeta`.
+   - **Brand/method names copied verbatim** — `bitig`, `Burrows`, `Eder`, `Argamon`, `General Impostors`, `Unmasking`, `PANReport`, `Delta`, `Zeta`.
    - **Mermaid diagram labels:** translate prose labels; keep English for API names.
 3. Run `mkdocs build --strict` — must pass with no warnings.
 4. Run a targeted grep for glossary consistency — for every glossary term used on the page, confirm the Turkish rendering matches the pinned form.
@@ -119,11 +119,11 @@ plugins:
           default: true
           name: English
           build: true
-          site_name: tamga
+          site_name: bitig
         - locale: tr
           name: Türkçe
           build: true
-          site_name: tamga
+          site_name: bitig
           nav_translations:
             Home: Ana Sayfa
             Getting started: Başlangıç
@@ -173,7 +173,7 @@ hide:
   - navigation
 ---
 
-# tamga
+# bitig
 
 **Yazar tespiti, yazar grupları karşılaştırması ve adli dilbilim için hesaplamalı stilometri.**
 
@@ -230,7 +230,7 @@ hide:
 
 # Turkish terminology glossary
 
-This file pins the Turkish rendering of recurring technical terms used across the tamga
+This file pins the Turkish rendering of recurring technical terms used across the bitig
 documentation. It is not rendered in the public navigation. Translators MUST consult this
 table before drafting or updating a Turkish page; consistency is enforced by grep before
 each commit.
@@ -254,7 +254,7 @@ each commit.
 | chain of custody | *delil zinciri* | Forensic/legal standard. |
 | provenance | *köken bilgisi* | Keeps "provenance" feel; literal "soy" sounds odd for data. |
 
-Brand / proper nouns (never translate): **tamga**, **Burrows**, **Eder**, **Argamon**,
+Brand / proper nouns (never translate): **bitig**, **Burrows**, **Eder**, **Argamon**,
 **Cosine**, **Quadratic Delta**, **Zeta**, **General Impostors**, **Unmasking**,
 **Stamatatos**, **Sapkota**, **PANReport**, **Mosteller & Wallace**, **Federalist Papers**,
 **PAN-CLEF**, **CalibratedScorer**, **study.yaml**.
@@ -307,7 +307,7 @@ Follow the **Translation Task Procedure**.
 
 Pay particular attention to:
 - All `bash`, `yaml`, `python` code blocks — copy verbatim.
-- CLI command flags (`--metadata`, `--language`, `--name`) and `tamga <subcommand>` invocations — copy verbatim.
+- CLI command flags (`--metadata`, `--language`, `--name`) and `bitig <subcommand>` invocations — copy verbatim.
 - Inline code like `study.yaml`, `corpus/`, `results/` — copy verbatim.
 
 - [ ] **Step 3: Build strict**
@@ -475,7 +475,7 @@ Follow the **Translation Task Procedure**. PAN-CLEF is a proper noun. Dataset fi
 
 - [ ] **Step 4: Translate `tutorials/turkish.md`**
 
-Follow the **Translation Task Procedure**. **Meta-moment:** the English original explains Turkish stylometry to English readers. The Turkish version explains Turkish stylometry to Turkish readers — this lets the meta-commentary ("here's how to use Turkish with tamga") become less meta and more direct in Turkish. Read the whole page first and adjust framing paragraphs accordingly; do not mechanically translate the "as a Turkish reader you already know …" asides.
+Follow the **Translation Task Procedure**. **Meta-moment:** the English original explains Turkish stylometry to English readers. The Turkish version explains Turkish stylometry to Turkish readers — this lets the meta-commentary ("here's how to use Turkish with bitig") become less meta and more direct in Turkish. Read the whole page first and adjust framing paragraphs accordingly; do not mechanically translate the "as a Turkish reader you already know …" asides.
 
 - [ ] **Step 5: Build strict after each page**
 
@@ -516,7 +516,7 @@ Follow the **Translation Task Procedure**. Section index.
 
 - [ ] **Step 2: Translate `reference/cli.md`**
 
-Follow the **Translation Task Procedure**. Every `tamga <command>` invocation and flag (`--metadata`, `--language`, `--name`, `--output`) stays verbatim. Only the descriptive prose between commands is translated.
+Follow the **Translation Task Procedure**. Every `bitig <command>` invocation and flag (`--metadata`, `--language`, `--name`, `--output`) stays verbatim. Only the descriptive prose between commands is translated.
 
 - [ ] **Step 3: Translate `reference/config.md`**
 
@@ -524,7 +524,7 @@ Follow the **Translation Task Procedure**. `study.yaml` schema — every key nam
 
 - [ ] **Step 4: Translate `reference/api.md`**
 
-Follow the **Translation Task Procedure**. This page renders mkdocstrings-generated Python API documentation. The top-level prose introducing the API is translatable; the embedded docstring content comes from `src/tamga/` Python source (English) and is NOT in scope per the spec. That means this page is mostly short — a paragraph of intro above the mkdocstrings autodoc block.
+Follow the **Translation Task Procedure**. This page renders mkdocstrings-generated Python API documentation. The top-level prose introducing the API is translatable; the embedded docstring content comes from `src/bitig/` Python source (English) and is NOT in scope per the spec. That means this page is mostly short — a paragraph of intro above the mkdocstrings autodoc block.
 
 - [ ] **Step 5: Build strict**
 
@@ -656,10 +656,10 @@ git push origin main
 
 Watch the `Docs` workflow on GitHub Actions — it must pass (build + deploy). Once deployed, smoke-test the live URLs:
 
-- `https://fatihbozdag.github.io/tamga/` — EN renders, permalinks work.
-- `https://fatihbozdag.github.io/tamga/tr/` — TR renders.
-- `https://fatihbozdag.github.io/tamga/getting-started/` — EN permalink unchanged.
-- `https://fatihbozdag.github.io/tamga/tr/concepts/languages/` — deep TR link works.
+- `https://fatihbozdag.github.io/bitig/` — EN renders, permalinks work.
+- `https://fatihbozdag.github.io/bitig/tr/` — TR renders.
+- `https://fatihbozdag.github.io/bitig/getting-started/` — EN permalink unchanged.
+- `https://fatihbozdag.github.io/bitig/tr/concepts/languages/` — deep TR link works.
 - Language switcher works in both directions.
 
 - [ ] **Step 6: Update the README + docs landing page**

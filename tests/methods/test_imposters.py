@@ -1,4 +1,4 @@
-"""Unit tests for `tamga.methods.imposters.GeneralImposters`."""
+"""Unit tests for `bitig.methods.imposters.GeneralImposters`."""
 
 from __future__ import annotations
 
@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from tamga.corpus import Corpus
-from tamga.corpus.document import Document
-from tamga.methods.imposters import GeneralImposters
+from bitig.corpus import Corpus
+from bitig.corpus.document import Document
+from bitig.methods.imposters import GeneralImposters
 
 
 def _alice_text(seed: int, n_paragraphs: int = 200) -> str:

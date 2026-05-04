@@ -1,4 +1,4 @@
-"""Integration test — tamga extractors and delta classifiers compose cleanly in sklearn.Pipeline
+"""Integration test — bitig extractors and delta classifiers compose cleanly in sklearn.Pipeline
 with cross_validate + LeaveOneGroupOut CV.
 
 This is the load-bearing demonstration that our architectural promise of sklearn compatibility
@@ -12,9 +12,9 @@ import pytest
 from sklearn.model_selection import LeaveOneGroupOut, cross_val_score
 from sklearn.pipeline import Pipeline
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.delta import BurrowsDelta
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.delta import BurrowsDelta
 
 pytestmark = pytest.mark.integration
 

@@ -5,12 +5,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.forensic.lr import (
+from bitig.forensic.lr import (
     CalibratedScorer,
     log_lr_from_probs,
     log_lr_from_probs_with_priors,
 )
-from tamga.forensic.metrics import cllr, ece
+from bitig.forensic.metrics import cllr, ece
 
 
 class TestLogLrFromProbs:

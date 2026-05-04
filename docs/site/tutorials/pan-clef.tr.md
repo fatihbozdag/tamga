@@ -36,7 +36,7 @@ Her deneme için üretin:
 
 ```python
 import numpy as np
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 rng = np.random.default_rng(42)
 VOCAB = [
@@ -119,7 +119,7 @@ Q, K ve sahte yazarların aynı sözcük dağarcığında bulunması için özni
 birleştirilmiş derlem üzerinde oluşturun.
 
 ```python
-from tamga import MFWExtractor
+from bitig import MFWExtractor
 
 fm = MFWExtractor(n=500, scale="zscore", lowercase=True).fit_transform(corpus)
 
@@ -136,8 +136,8 @@ Her deneme için şunları bir araya getiririz:
 - Sahte yazar havuzu = aday yazar hariç herkes
 
 ```python
-from tamga.features import FeatureMatrix
-from tamga.forensic import GeneralImpostors
+from bitig.features import FeatureMatrix
+from bitig.forensic import GeneralImpostors
 
 def slice_fm(rows: list[int]) -> FeatureMatrix:
     return FeatureMatrix(
@@ -184,7 +184,7 @@ Ham GI puanları ayrım biçimlidir ancak olasılık değildir. Çıktının sav
 olması için ayrılmış bir bölümde kalibre edin.
 
 ```python
-from tamga.forensic import CalibratedScorer, log_lr_from_probs
+from bitig.forensic import CalibratedScorer, log_lr_from_probs
 
 # 60/40 split — calibrate on the first 60%, evaluate on the rest.
 n = len(scores)
@@ -204,7 +204,7 @@ print(f"log-LR range:               [{test_log_lrs.min():.2f}, {test_log_lrs.max
 ## 6. PAN değerlendirmesi
 
 ```python
-from tamga.forensic import compute_pan_report
+from bitig.forensic import compute_pan_report
 
 report = compute_pan_report(
     probs=test_probs,
@@ -236,7 +236,7 @@ Yapay kurulumda beklenen çıktı (yaklaşık):
 
 ```python
 import matplotlib.pyplot as plt
-from tamga.forensic import tippett
+from bitig.forensic import tippett
 
 data = tippett(test_log_lrs, test_labels)
 
@@ -258,16 +258,16 @@ ve hedef-dışı CDF'nin hızla düşmesini gösterir.
 
 ## 8. Adli HTML raporu
 
-Test kümesi sonuçlarını tamga `Result` olarak kaydedin, `Provenance` üzerine delil zinciri
+Test kümesi sonuçlarını bitig `Result` olarak kaydedin, `Provenance` üzerine delil zinciri
 meta verisi damgalayın ve LR çerçeveli adli raporu oluşturun.
 
 ```python
 import json
 import spacy
 from pathlib import Path
-from tamga.provenance import Provenance
-from tamga.result import Result
-from tamga.report import build_forensic_report
+from bitig.provenance import Provenance
+from bitig.result import Result
+from bitig.report import build_forensic_report
 
 run_dir = Path("pan_demo")
 (run_dir / "gi").mkdir(parents=True, exist_ok=True)

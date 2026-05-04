@@ -5,12 +5,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.classify import build_classifier, cross_validate_tamga
-from tamga.methods.cluster import HierarchicalCluster
-from tamga.methods.reduce import PCAReducer
-from tamga.methods.zeta import ZetaClassic
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.classify import build_classifier, cross_validate_bitig
+from bitig.methods.cluster import HierarchicalCluster
+from bitig.methods.reduce import PCAReducer
+from bitig.methods.zeta import ZetaClassic
 
 pytestmark = pytest.mark.integration
 
@@ -34,7 +34,7 @@ def test_phase3_end_to_end_workflow() -> None:
     ).fit_transform(corpus)
     assert len(zeta.tables) == 2
 
-    report = cross_validate_tamga(
+    report = cross_validate_bitig(
         build_classifier("logreg", random_state=42),
         fm,
         y,

@@ -1,25 +1,25 @@
 # Python API
 
 Auto-generated from the source via mkdocstrings. Every symbol listed below is re-exported
-at `tamga` top level (unless otherwise noted).
+at `bitig` top level (unless otherwise noted).
 
 ## Corpus
 
-::: tamga.corpus.Corpus
+::: bitig.corpus.Corpus
     options:
       show_root_full_path: false
 
-::: tamga.corpus.Document
+::: bitig.corpus.Document
     options:
       show_root_full_path: false
 
 ## Features
 
-::: tamga.features.base.FeatureMatrix
+::: bitig.features.base.FeatureMatrix
     options:
       show_root_full_path: false
 
-::: tamga.features.mfw.MFWExtractor
+::: bitig.features.mfw.MFWExtractor
     options:
       show_root_full_path: false
 
@@ -27,44 +27,44 @@ at `tamga` top level (unless otherwise noted).
 
 ### Delta
 
-::: tamga.methods.delta.burrows.BurrowsDelta
+::: bitig.methods.delta.burrows.BurrowsDelta
     options:
       show_root_full_path: false
 
 ### Zeta
 
-::: tamga.methods.zeta.ZetaClassic
+::: bitig.methods.zeta.ZetaClassic
     options:
       show_root_full_path: false
 
 ### Clustering
 
-::: tamga.methods.cluster.HierarchicalCluster
+::: bitig.methods.cluster.HierarchicalCluster
     options:
       show_root_full_path: false
 
 ### Classification
 
-::: tamga.methods.classify.build_classifier
+::: bitig.methods.classify.build_classifier
 
-::: tamga.methods.classify.cross_validate_tamga
+::: bitig.methods.classify.cross_validate_bitig
 
 ## Results
 
-::: tamga.result.Result
+::: bitig.result.Result
     options:
       show_root_full_path: false
 
-::: tamga.provenance.Provenance
+::: bitig.provenance.Provenance
     options:
       show_root_full_path: false
 
 ## Runner
 
-::: tamga.runner.run_study
+::: bitig.runner.run_study
 
 ## Reporting
 
-::: tamga.report.render.build_report
+::: bitig.report.render.build_report
 
-::: tamga.report.render.build_forensic_report
+::: bitig.report.render.build_forensic_report

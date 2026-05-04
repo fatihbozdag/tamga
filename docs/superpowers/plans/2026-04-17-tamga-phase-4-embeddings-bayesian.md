@@ -1,10 +1,10 @@
-# tamga — Phase 4: Embeddings + Bayesian — Implementation Plan
+# bitig — Phase 4: Embeddings + Bayesian — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Ship the two optional-extra modules declared in the spec: `tamga[embeddings]` (sentence-transformer + contextual-BERT embedding extractors implementing the existing `BaseFeatureExtractor` protocol) and `tamga[bayesian]` (a Wallace–Mosteller Bayesian authorship attributor implementing `ClassifierMixin`, plus a PyMC hierarchical group-comparison model for L2-vs-native and proficiency-band analyses). Add CLI commands `tamga embed` and `tamga bayesian`. End state: users who `pip install tamga[embeddings,bayesian]` unlock modern style vectors and probabilistic attribution; users who don't get a clear "install the `[embeddings]`/`[bayesian]` extra to enable" message.
+**Goal:** Ship the two optional-extra modules declared in the spec: `bitig[embeddings]` (sentence-transformer + contextual-BERT embedding extractors implementing the existing `BaseFeatureExtractor` protocol) and `bitig[bayesian]` (a Wallace–Mosteller Bayesian authorship attributor implementing `ClassifierMixin`, plus a PyMC hierarchical group-comparison model for L2-vs-native and proficiency-band analyses). Add CLI commands `bitig embed` and `bitig bayesian`. End state: users who `pip install bitig[embeddings,bayesian]` unlock modern style vectors and probabilistic attribution; users who don't get a clear "install the `[embeddings]`/`[bayesian]` extra to enable" message.
 
-**Architecture:** Optional extras load lazily. Imports of `sentence_transformers` / `torch` / `pymc` / `arviz` live inside the class methods, not at module top level, so users without the extras can still `import tamga` and run Phase 1-3 code. Each new extractor/method does an explicit import check in `__init__` that raises `ImportError` with the install hint.
+**Architecture:** Optional extras load lazily. Imports of `sentence_transformers` / `torch` / `pymc` / `arviz` live inside the class methods, not at module top level, so users without the extras can still `import bitig` and run Phase 1-3 code. Each new extractor/method does an explicit import check in `__init__` that raises `ImportError` with the install hint.
 
 **Tech Stack:** `sentence-transformers` (≥2.6), `torch` (≥2.2), `transformers` (pulled transitively), `pymc` (≥5.10), `arviz` (≥0.17). All five already declared in `pyproject.toml` optional-extras from Phase 1.
 
@@ -43,21 +43,21 @@ python -c "from sentence_transformers import SentenceTransformer; SentenceTransf
 ## Task 2: `SentenceEmbeddingExtractor` + `ContextualEmbeddingExtractor`
 
 **Files:**
-- Create: `src/tamga/features/embeddings.py`
+- Create: `src/bitig/features/embeddings.py`
 - Create: `tests/features/test_embeddings.py`
-- Modify: `src/tamga/features/__init__.py` (conditional import)
+- Modify: `src/bitig/features/__init__.py` (conditional import)
 
 ### Step 2.1 — Failing tests `tests/features/test_embeddings.py`
 
 ```python
-"""Tests for embedding-based feature extractors — requires tamga[embeddings]."""
+"""Tests for embedding-based feature extractors — requires bitig[embeddings]."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 pytestmark = pytest.mark.slow  # Model loading is slow.
 
@@ -69,7 +69,7 @@ def _corpus(*texts: str) -> Corpus:
 
 
 def test_sentence_embedding_extractor_produces_fixed_dim() -> None:
-    from tamga.features.embeddings import SentenceEmbeddingExtractor
+    from bitig.features.embeddings import SentenceEmbeddingExtractor
 
     ex = SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
     fm = ex.fit_transform(_corpus("Hello world.", "The quick brown fox jumped."))
@@ -79,7 +79,7 @@ def test_sentence_embedding_extractor_produces_fixed_dim() -> None:
 
 
 def test_sentence_embedding_similar_texts_have_high_cosine_sim() -> None:
-    from tamga.features.embeddings import SentenceEmbeddingExtractor
+    from bitig.features.embeddings import SentenceEmbeddingExtractor
 
     ex = SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
     fm = ex.fit_transform(
@@ -98,7 +98,7 @@ def test_sentence_embedding_similar_texts_have_high_cosine_sim() -> None:
 
 
 def test_sentence_embedding_handles_empty_text() -> None:
-    from tamga.features.embeddings import SentenceEmbeddingExtractor
+    from bitig.features.embeddings import SentenceEmbeddingExtractor
 
     ex = SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
     fm = ex.fit_transform(_corpus("", "hello"))
@@ -107,20 +107,20 @@ def test_sentence_embedding_handles_empty_text() -> None:
 
 def test_embeddings_raises_clear_error_when_not_installed(monkeypatch) -> None:
     """If sentence-transformers is absent, import/construction raises an informative error."""
-    from tamga.features import embeddings
+    from bitig.features import embeddings
 
     # Simulate missing dep by breaking the import path temporarily.
     monkeypatch.setattr(embeddings, "_sentence_transformers_available", False)
-    with pytest.raises(ImportError, match=r"tamga\[embeddings\]"):
+    with pytest.raises(ImportError, match=r"bitig\[embeddings\]"):
         embeddings.SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
 ```
 
 ### Step 2.2 — Run → FAIL.
 
-### Step 2.3 — Implement `src/tamga/features/embeddings.py`
+### Step 2.3 — Implement `src/bitig/features/embeddings.py`
 
 ```python
-"""Embedding-based feature extractors (optional — tamga[embeddings]).
+"""Embedding-based feature extractors (optional — bitig[embeddings]).
 
 Two extractors:
 
@@ -129,7 +129,7 @@ Two extractors:
 - `ContextualEmbeddingExtractor` — a raw transformer (e.g. BERT); pool layer-k token embeddings
   by mean or CLS.
 
-Both raise `ImportError` at construction if the optional `tamga[embeddings]` extra is not installed.
+Both raise `ImportError` at construction if the optional `bitig[embeddings]` extra is not installed.
 """
 
 from __future__ import annotations
@@ -138,8 +138,8 @@ from typing import Literal
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -151,8 +151,8 @@ except ImportError:
 Pool = Literal["mean", "cls", "max"]
 
 _INSTALL_HINT = (
-    "this extractor requires the optional `tamga[embeddings]` extra — "
-    "install with `pip install tamga[embeddings]`"
+    "this extractor requires the optional `bitig[embeddings]` extra — "
+    "install with `pip install bitig[embeddings]`"
 )
 
 
@@ -260,7 +260,7 @@ class ContextualEmbeddingExtractor(BaseFeatureExtractor):
         return X, feature_names
 ```
 
-### Step 2.4 — Update `src/tamga/features/__init__.py`
+### Step 2.4 — Update `src/bitig/features/__init__.py`
 
 Add conditional imports — only export if the extractor class can be constructed (i.e. the extra is installed):
 
@@ -268,7 +268,7 @@ Add conditional imports — only export if the extractor class can be constructe
 # ... existing imports ...
 
 try:
-    from tamga.features.embeddings import ContextualEmbeddingExtractor, SentenceEmbeddingExtractor
+    from bitig.features.embeddings import ContextualEmbeddingExtractor, SentenceEmbeddingExtractor
 
     _EMBEDDINGS_AVAILABLE = True
 except ImportError:
@@ -282,8 +282,8 @@ if _EMBEDDINGS_AVAILABLE:
 ### Step 2.5 — Run → PASS (4/4). Commit:
 
 ```bash
-git add src/tamga/features/embeddings.py tests/features/test_embeddings.py src/tamga/features/__init__.py
-git commit -m "feat(features): sentence + contextual embedding extractors (tamga[embeddings] extra)"
+git add src/bitig/features/embeddings.py tests/features/test_embeddings.py src/bitig/features/__init__.py
+git commit -m "feat(features): sentence + contextual embedding extractors (bitig[embeddings] extra)"
 ```
 
 ---
@@ -291,13 +291,13 @@ git commit -m "feat(features): sentence + contextual embedding extractors (tamga
 ## Task 3: `BayesianAuthorshipAttributor` — Wallace–Mosteller attribution
 
 **Files:**
-- Create: `src/tamga/methods/bayesian.py`
+- Create: `src/bitig/methods/bayesian.py`
 - Create: `tests/methods/test_bayesian.py`
 
 ### Step 3.1 — Failing tests
 
 ```python
-"""Tests for Bayesian authorship attribution — requires tamga[bayesian]."""
+"""Tests for Bayesian authorship attribution — requires bitig[bayesian]."""
 
 from __future__ import annotations
 
@@ -305,8 +305,8 @@ import numpy as np
 import pytest
 from sklearn.base import is_classifier
 
-from tamga.corpus import Corpus, Document
-from tamga.features import MFWExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features import MFWExtractor
 
 pytestmark = pytest.mark.slow
 
@@ -329,13 +329,13 @@ def _corpus() -> Corpus:
 
 
 def test_bayesian_attributor_is_classifier() -> None:
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor
 
     assert is_classifier(BayesianAuthorshipAttributor())
 
 
 def test_bayesian_attributor_separates_two_authors() -> None:
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor
 
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
@@ -347,7 +347,7 @@ def test_bayesian_attributor_separates_two_authors() -> None:
 
 
 def test_bayesian_attributor_predict_proba_sums_to_one() -> None:
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor
 
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
@@ -358,14 +358,14 @@ def test_bayesian_attributor_predict_proba_sums_to_one() -> None:
 
 
 def test_bayesian_raises_clear_error_when_not_installed(monkeypatch) -> None:
-    from tamga.methods import bayesian
+    from bitig.methods import bayesian
 
     monkeypatch.setattr(bayesian, "_pymc_available", False)
-    with pytest.raises(ImportError, match=r"tamga\[bayesian\]"):
+    with pytest.raises(ImportError, match=r"bitig\[bayesian\]"):
         bayesian.HierarchicalGroupComparison(group_by="author")
 ```
 
-### Step 3.2 — Implement `src/tamga/methods/bayesian.py`
+### Step 3.2 — Implement `src/bitig/methods/bayesian.py`
 
 ```python
 """Bayesian authorship attribution (Wallace-Mosteller-style) + hierarchical group comparison.
@@ -389,7 +389,7 @@ from __future__ import annotations
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 
-from tamga.features import FeatureMatrix
+from bitig.features import FeatureMatrix
 
 try:
     import pymc  # noqa: F401
@@ -399,8 +399,8 @@ except ImportError:
     _pymc_available = False
 
 _INSTALL_HINT_BAYESIAN = (
-    "this method requires the optional `tamga[bayesian]` extra — "
-    "install with `pip install tamga[bayesian]`"
+    "this method requires the optional `bitig[bayesian]` extra — "
+    "install with `pip install bitig[bayesian]`"
 )
 
 
@@ -466,7 +466,7 @@ class HierarchicalGroupComparison:
         theta_author ~ Normal(mu_group, sigma_group)   # per-author stylistic score
         observation[author, doc] ~ Normal(theta_author, obs_sigma)
 
-    Requires tamga[bayesian] extra.
+    Requires bitig[bayesian] extra.
     """
 
     def __init__(
@@ -555,25 +555,25 @@ class HierarchicalGroupComparison:
 Actually the hierarchical test (`test_bayesian_raises_clear_error_when_not_installed`) only checks the error message path, not PyMC sampling itself. A dedicated PyMC sampling test is deferred because fitting a real hierarchical model takes 30+ seconds — not appropriate for the main test suite. Add a `@pytest.mark.slow` integration test later if needed.
 
 ```bash
-git add src/tamga/methods/bayesian.py tests/methods/test_bayesian.py
-git commit -m "feat(methods): Bayesian authorship attribution + hierarchical group comparison (tamga[bayesian])"
+git add src/bitig/methods/bayesian.py tests/methods/test_bayesian.py
+git commit -m "feat(methods): Bayesian authorship attribution + hierarchical group comparison (bitig[bayesian])"
 ```
 
 ---
 
-## Task 4: CLI — `tamga embed` and `tamga bayesian`
+## Task 4: CLI — `bitig embed` and `bitig bayesian`
 
 **Files:**
-- Create: `src/tamga/cli/embed_cmd.py`
-- Create: `src/tamga/cli/bayesian_cmd.py`
+- Create: `src/bitig/cli/embed_cmd.py`
+- Create: `src/bitig/cli/bayesian_cmd.py`
 - Create: `tests/cli/test_embed_cmd.py`
 - Create: `tests/cli/test_bayesian_cmd.py`
-- Modify: `src/tamga/cli/__init__.py`
+- Modify: `src/bitig/cli/__init__.py`
 
-### Step 4.1 — `src/tamga/cli/embed_cmd.py`
+### Step 4.1 — `src/bitig/cli/embed_cmd.py`
 
 ```python
-"""`tamga embed <corpus>` — produce an embedding FeatureMatrix and save to parquet."""
+"""`bitig embed <corpus>` — produce an embedding FeatureMatrix and save to parquet."""
 
 from __future__ import annotations
 
@@ -582,7 +582,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.io import load_corpus
+from bitig.io import load_corpus
 
 console = Console()
 
@@ -596,7 +596,7 @@ def embed_command(
 ) -> None:
     """Embed a corpus with a sentence-transformer model and save the matrix to parquet."""
     try:
-        from tamga.features.embeddings import SentenceEmbeddingExtractor
+        from bitig.features.embeddings import SentenceEmbeddingExtractor
     except ImportError as exc:
         console.print(f"[red]error:[/red] {exc}")
         raise typer.Exit(code=1) from exc
@@ -607,10 +607,10 @@ def embed_command(
     console.print(f"[green]wrote[/green] {output} ({fm.X.shape[0]} docs x {fm.n_features} dims)")
 ```
 
-### Step 4.2 — `src/tamga/cli/bayesian_cmd.py`
+### Step 4.2 — `src/bitig/cli/bayesian_cmd.py`
 
 ```python
-"""`tamga bayesian <corpus>` — Bayesian authorship attribution."""
+"""`bitig bayesian <corpus>` — Bayesian authorship attribution."""
 
 from __future__ import annotations
 
@@ -621,8 +621,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
 
 console = Console()
 
@@ -636,14 +636,14 @@ def bayesian_command(
     prior_alpha: float = typer.Option(1.0, "--prior-alpha"),
 ) -> None:
     """Wallace-Mosteller Bayesian authorship attribution."""
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor
 
     corpus = load_corpus(path, metadata=metadata)
     if test_filter:
         key, _, value = test_filter.partition("=")
         test = corpus.filter(**{key: value})
         train_docs = [d for d in corpus.documents if d not in test.documents]
-        from tamga.corpus import Corpus
+        from bitig.corpus import Corpus
 
         train = Corpus(documents=train_docs)
     else:
@@ -682,7 +682,7 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "mini_corpus"
@@ -714,7 +714,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"
@@ -741,11 +741,11 @@ def test_bayesian_attributes_fed_49_to_madison() -> None:
 
 ### Step 4.4 — Register and commit
 
-Append to `src/tamga/cli/__init__.py`:
+Append to `src/bitig/cli/__init__.py`:
 
 ```python
-from tamga.cli.bayesian_cmd import bayesian_command
-from tamga.cli.embed_cmd import embed_command
+from bitig.cli.bayesian_cmd import bayesian_command
+from bitig.cli.embed_cmd import embed_command
 
 app.command(name="embed")(embed_command)
 app.command(name="bayesian")(bayesian_command)
@@ -754,8 +754,8 @@ app.command(name="bayesian")(bayesian_command)
 Commit:
 
 ```bash
-git add src/tamga/cli/embed_cmd.py src/tamga/cli/bayesian_cmd.py tests/cli/test_embed_cmd.py tests/cli/test_bayesian_cmd.py src/tamga/cli/__init__.py
-git commit -m "feat(cli): tamga embed and tamga bayesian (optional-extras-aware)"
+git add src/bitig/cli/embed_cmd.py src/bitig/cli/bayesian_cmd.py tests/cli/test_embed_cmd.py tests/cli/test_bayesian_cmd.py src/bitig/cli/__init__.py
+git commit -m "feat(cli): bitig embed and bitig bayesian (optional-extras-aware)"
 ```
 
 ---
@@ -763,25 +763,25 @@ git commit -m "feat(cli): tamga embed and tamga bayesian (optional-extras-aware)
 ## Task 5: Public API + tag
 
 **Files:**
-- Modify: `src/tamga/__init__.py`
-- Modify: `src/tamga/methods/__init__.py` (conditional bayesian export)
+- Modify: `src/bitig/__init__.py`
+- Modify: `src/bitig/methods/__init__.py` (conditional bayesian export)
 - Modify: `README.md`
 
-### Step 5.1 — `src/tamga/__init__.py` — conditional embeddings + bayesian exports
+### Step 5.1 — `src/bitig/__init__.py` — conditional embeddings + bayesian exports
 
 Append after the Phase 3 section:
 
 ```python
-# Optional extras — available only when tamga[embeddings] / tamga[bayesian] installed.
+# Optional extras — available only when bitig[embeddings] / bitig[bayesian] installed.
 try:
-    from tamga.features.embeddings import ContextualEmbeddingExtractor, SentenceEmbeddingExtractor  # noqa: F401
+    from bitig.features.embeddings import ContextualEmbeddingExtractor, SentenceEmbeddingExtractor  # noqa: F401
 
     _EMBEDDINGS_AVAILABLE = True
 except ImportError:
     _EMBEDDINGS_AVAILABLE = False
 
 try:
-    from tamga.methods.bayesian import BayesianAuthorshipAttributor, HierarchicalGroupComparison  # noqa: F401
+    from bitig.methods.bayesian import BayesianAuthorshipAttributor, HierarchicalGroupComparison  # noqa: F401
 
     _BAYESIAN_AVAILABLE = True
 except ImportError:
@@ -800,10 +800,10 @@ Replace the `## Status` section with:
 ```markdown
 ## Status
 
-**Phase 4 — Optional extras.** `tamga[embeddings]` adds sentence-transformer + contextual-BERT
-embeddings (pool mean/cls/max). `tamga[bayesian]` adds Wallace-Mosteller Bayesian authorship
+**Phase 4 — Optional extras.** `bitig[embeddings]` adds sentence-transformer + contextual-BERT
+embeddings (pool mean/cls/max). `bitig[bayesian]` adds Wallace-Mosteller Bayesian authorship
 attribution (sklearn ClassifierMixin, plugs into Pipeline/cross_validate) and a PyMC
-hierarchical group-comparison model. CLI: `tamga embed`, `tamga bayesian`. Phases 1-3 remain
+hierarchical group-comparison model. CLI: `bitig embed`, `bitig bayesian`. Phases 1-3 remain
 installable without either extra.
 
 Phase 5 (viz + reports + wizard shell), Phase 6 (docs + PyPI) remain.
@@ -813,9 +813,9 @@ Phase 5 (viz + reports + wizard shell), Phase 6 (docs + PyPI) remain.
 
 ```bash
 source .venv/bin/activate
-pytest -n auto --cov=tamga -q
+pytest -n auto --cov=bitig -q
 pre-commit run --all-files
-git add src/tamga/__init__.py README.md
+git add src/bitig/__init__.py README.md
 git commit -m "feat: public API re-exports for Phase 4 (embeddings + Bayesian extras)"
 git tag -a phase-4-extras -m "Phase 4 complete: embeddings + Bayesian attribution optional extras"
 ```
@@ -829,10 +829,10 @@ git tag -a phase-4-extras -m "Phase 4 complete: embeddings + Bayesian attributio
 pytest -n auto -q
 
 # Embedding CLI round-trip.
-tamga embed ./tests/fixtures/mini_corpus --model sentence-transformers/all-MiniLM-L6-v2 --output /tmp/emb.parquet
+bitig embed ./tests/fixtures/mini_corpus --model sentence-transformers/all-MiniLM-L6-v2 --output /tmp/emb.parquet
 
 # Bayesian attribution on Federalist.
-tamga bayesian ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
+bitig bayesian ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
     --group-by author --test-filter role=test --mfw 500
 ```
 

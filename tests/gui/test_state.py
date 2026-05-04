@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tamga.gui.state import GuiState, get_state, reset_state
+from bitig.gui.state import GuiState, get_state, reset_state
 
 
 def test_get_state_returns_singleton() -> None:

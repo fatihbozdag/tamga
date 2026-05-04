@@ -1,6 +1,6 @@
 # Tutorials
 
-Two runnable tutorials ship with tamga.
+Two runnable tutorials ship with bitig.
 
 ## [Federalist Papers](federalist.md)
 
@@ -19,4 +19,4 @@ General Impostors, calibrate via Platt scaling, and report the full PAN metric s
 AUC, c@1, F0.5u, Brier, ECE, C_llr — alongside a forensic HTML report with LR framing
 and chain-of-custody.
 
-Illustrates: the full `tamga.forensic` workflow end-to-end.
+Illustrates: the full `bitig.forensic` workflow end-to-end.

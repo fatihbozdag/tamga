@@ -4,14 +4,14 @@ Forensic authorship research needs more than attribution — it needs **one-clas
 verification**, **topic-invariant features**, and **evidential output framed as a
 likelihood ratio**, calibrated against a reference population.
 
-`tamga.forensic` ships these as a cohesive layer on top of the analysis methods. Every
-tool is classifier-agnostic — pair it with any tamga feature set and any Delta / Zeta /
+`bitig.forensic` ships these as a cohesive layer on top of the analysis methods. Every
+tool is classifier-agnostic — pair it with any bitig feature set and any Delta / Zeta /
 classify method.
 
 ## What's in the package
 
 ```python
-from tamga.forensic import (
+from bitig.forensic import (
     # Verification
     GeneralImpostors,            # Koppel & Winter 2014
     Unmasking,                   # Koppel & Schler 2004
@@ -30,7 +30,7 @@ from tamga.forensic import (
     PANReport, compute_pan_report,
 )
 
-from tamga.report import build_forensic_report   # LR-framed HTML template
+from bitig.report import build_forensic_report   # LR-framed HTML template
 ```
 
 ## The forensic workflow
@@ -68,7 +68,7 @@ probability under different-author, with a **calibrated** underlying scorer. Raw
 classifier posteriors are rarely calibrated and are easily abused as "probability of
 guilt" in ways that misrepresent forensic semantics.
 
-tamga's `CalibratedScorer` + `log_lr_from_probs` pipeline converts any raw score to a
+bitig's `CalibratedScorer` + `log_lr_from_probs` pipeline converts any raw score to a
 log-LR defensible in a forensic report, and the bundled ENFSI / Nordgaard verbal scale in
 the report template gives a transparent verbal reading.
 

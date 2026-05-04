@@ -6,8 +6,8 @@
 # tree. Runs against the full 85-paper corpus with standard author labels.
 #
 # Usage:
-#   tamga run examples/federalist/study.yaml --name demo
-#   tamga report examples/federalist/results/demo --output examples/federalist/report.html
+#   bitig run examples/federalist/study.yaml --name demo
+#   bitig report examples/federalist/results/demo --output examples/federalist/report.html
 
 name: federalist-full
 seed: 42
@@ -69,7 +69,7 @@ report:
   title: "Federalist Papers — full stylometric analysis"
 
 cache:
-  dir: examples/federalist/.tamga/cache
+  dir: examples/federalist/.bitig/cache
 
 output:
   dir: examples/federalist/results

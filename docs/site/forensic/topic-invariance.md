@@ -7,7 +7,7 @@ where the two documents *should* share content). Use regular features then.
 *Expect:* feature extractors that discard most content-word signal while preserving
 function-word, morphology, and punctuation patterns.
 
-Two techniques live under `tamga.forensic`: Sapkota char-n-gram *categorisation* and
+Two techniques live under `bitig.forensic`: Sapkota char-n-gram *categorisation* and
 Stamatatos *distortion*. Both compose with any downstream verifier.
 
 Cross-topic is the most common failure mode of classical stylometry on real forensic
@@ -15,7 +15,7 @@ data. A suspect's threat letter and personal email are typically on different to
 presumably the same author; unfiltered character-n-gram and word-n-gram features
 collapse into topic detection in that setting.
 
-tamga ships two complementary tools.
+bitig ships two complementary tools.
 
 ## Sapkota character n-gram categories
 
@@ -49,7 +49,7 @@ Sapkota et al. (2015) showed that selecting only **affix (prefix + suffix) + pun
 dramatically improves cross-topic attribution — the forensic default.
 
 ```python
-from tamga.forensic import CategorizedCharNgramExtractor
+from bitig.forensic import CategorizedCharNgramExtractor
 
 extractor = CategorizedCharNgramExtractor(
     n=3,
@@ -83,8 +83,8 @@ Length-preserving — morphological habits (typical word lengths) remain visible
 Aggressive; only function-word and punctuation pattern survives.
 
 ```python
-from tamga.forensic import distort_corpus
-from tamga import MFWExtractor
+from bitig.forensic import distort_corpus
+from bitig import MFWExtractor
 
 distorted = distort_corpus(corpus, mode="dv_ma")
 
@@ -129,12 +129,12 @@ character n-grams on cross-genre PAN tasks.
 
 ## Reference
 
-::: tamga.forensic.char_ngrams.CategorizedCharNgramExtractor
+::: bitig.forensic.char_ngrams.CategorizedCharNgramExtractor
     options:
       show_root_full_path: false
 
-::: tamga.forensic.char_ngrams.classify_ngram
+::: bitig.forensic.char_ngrams.classify_ngram
 
-::: tamga.forensic.distortion.distort_corpus
+::: bitig.forensic.distortion.distort_corpus
 
-::: tamga.forensic.distortion.distort_text
+::: bitig.forensic.distortion.distort_text

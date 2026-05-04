@@ -1,9 +1,9 @@
-site_name: tamga
+site_name: bitig
 site_description: Computational stylometry — a Python replacement for R's Stylo, with a forensic toolkit on top.
 site_author: Fatih Bozdağ
-site_url: https://fatihbozdag.github.io/tamga/
-repo_url: https://github.com/fatihbozdag/tamga
-repo_name: fatihbozdag/tamga
+site_url: https://fatihbozdag.github.io/bitig/
+repo_url: https://github.com/fatihbozdag/bitig
+repo_name: fatihbozdag/bitig
 edit_uri: edit/main/docs/
 copyright: BSD-3-Clause
 
@@ -15,7 +15,7 @@ not_in_nav: |
 
 theme:
   name: material
-  logo: assets/tamga-banner.svg
+  logo: assets/bitig-banner.svg
   favicon: assets/favicon.svg
   palette:
     - scheme: default
@@ -60,11 +60,11 @@ plugins:
           default: true
           name: English
           build: true
-          site_name: tamga
+          site_name: bitig
         - locale: tr
           name: Türkçe
           build: true
-          site_name: tamga
+          site_name: bitig
           nav_translations:
             Home: Ana Sayfa
             Getting started: Başlangıç

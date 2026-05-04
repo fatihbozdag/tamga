@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tamga.config import StudyConfig, load_config, resolve_config
+from bitig.config import StudyConfig, load_config, resolve_config
 
 
 def _write(p: Path, text: str) -> Path:

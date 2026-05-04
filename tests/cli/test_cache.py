@@ -1,11 +1,11 @@
-"""Tests for `tamga cache`."""
+"""Tests for `bitig cache`."""
 
 from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
-from tamga.preprocess.cache import DocBinCache
+from bitig.cli import app
+from bitig.preprocess.cache import DocBinCache
 
 runner = CliRunner()
 

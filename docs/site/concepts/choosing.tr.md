@@ -1,6 +1,6 @@
 # Yöntem seçimi
 
-Hangi tamga yönteminin sorunuza uyacağından emin değil misiniz? Bu sayfa en yaygın
+Hangi bitig yönteminin sorunuza uyacağından emin değil misiniz? Bu sayfa en yaygın
 durumlar için *"X'i yapmak istiyorum — hangisini kullanmalıyım?"* sorusunu yanıtlar.
 Yöntem adları tam ayrıntı için [Yöntemler](methods.md) ve
 [Adli araç seti](../forensic/index.md) sayfalarındaki birincil girdilere bağlanır.
@@ -12,7 +12,7 @@ Yöntem adları tam ayrıntı için [Yöntemler](methods.md) ve
 | 1 sorgulanan belgeyi N aday yazar arasından tespit etmek | Her aday için ~2k+ sözcük bilinen metin; 1 sorgulanan belge | [`CosineDelta`](methods.md#cosinedelta) (sağlam varsayılan) veya [`BurrowsDelta`](methods.md#burrowsdelta) (klasik) | en yakın yazar sıralaması | [Federalist](../tutorials/federalist.md) |
 | Bilinmeyen bir derlemi biçemsel benzerlikle kümelemek | 20+ belge, etiketler isteğe bağlı | [`PCAReducer`](methods.md#pcareducer) + [`KMeansCluster`](methods.md#kmeanscluster) veya [`HDBSCANCluster`](methods.md#hdbscancluster) | silhouette, görsel inceleme | — |
 | Önceden tanımlı iki yazar grubunu karşılaştırmak | Her grup için 10+ belge | [`ZetaClassic`](methods.md#zetaclassic) veya [`ZetaEder`](methods.md#zetaeder) | sözcük başına ayırt edicilik skoru | — |
-| Belgeleri makine öğrenmesiyle sınıflandırmak | Her sınıf için 20+ belge | [`build_classifier`](methods.md#snflandrma-capraz-dogrulama) + [`cross_validate_tamga`](methods.md#snflandrma-capraz-dogrulama) | CV doğruluğu / F1 | — |
+| Belgeleri makine öğrenmesiyle sınıflandırmak | Her sınıf için 20+ belge | [`build_classifier`](methods.md#snflandrma-capraz-dogrulama) + [`cross_validate_bitig`](methods.md#snflandrma-capraz-dogrulama) | CV doğruluğu / F1 | — |
 | Görselleştirme için öznitelikleri boyut indirgemek | herhangi bir `FeatureMatrix` | [`PCAReducer`](methods.md#pcareducer) / [`UMAPReducer`](methods.md#umapreducer) / [`TSNEReducer`](methods.md#tsnereducer) / [`MDSReducer`](methods.md#mdsreducer) | görsel inceleme | — |
 | Bayes yaklaşımıyla tek-aday yazar tespiti | N aday × ≥1k sözcük; 1 sorgulanan belge | [`BayesianAuthorshipAttributor`](methods.md#bayesianauthorshipattributor) | aday başına sonsal olasılık | — |
 | MFW bantları üzerinde bootstrap konsensüs ağacı | 10+ belge, birden fazla MFW bandı | [`BootstrapConsensus`](methods.md#bootstrapconsensus) | klad desteği ile Newick ağacı | — |

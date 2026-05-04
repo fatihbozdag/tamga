@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features.pos import PosNgramExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.pos import PosNgramExtractor
 
 pytestmark = pytest.mark.spacy
 

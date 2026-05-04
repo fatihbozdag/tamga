@@ -1,7 +1,7 @@
 """Tests for FunctionWordExtractor."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.function_words import FunctionWordExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.function_words import FunctionWordExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -38,8 +38,8 @@ def test_function_word_accepts_custom_list() -> None:
 
 def test_function_word_uses_corpus_language_turkish() -> None:
     """Turkish corpus → Turkish function-word list loaded."""
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
 
     c = Corpus(documents=[Document(id="d0", text="Ben ve sen gittik.")], language="tr")
     ex = FunctionWordExtractor(scale="none")
@@ -49,7 +49,7 @@ def test_function_word_uses_corpus_language_turkish() -> None:
 
 
 def test_function_word_list_bundled_for_all_five_languages() -> None:
-    from tamga.features.function_words import _load_bundled_list
+    from bitig.features.function_words import _load_bundled_list
 
     for lang in ["en", "tr", "de", "es", "fr"]:
         words = _load_bundled_list(lang)
@@ -57,8 +57,8 @@ def test_function_word_list_bundled_for_all_five_languages() -> None:
 
 
 def test_function_word_explicit_language_overrides_corpus() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
 
     c = Corpus(documents=[Document(id="d0", text="the cat")], language="tr")
     ex = FunctionWordExtractor(scale="none", language="en")
@@ -67,8 +67,8 @@ def test_function_word_explicit_language_overrides_corpus() -> None:
 
 
 def test_function_word_wordlist_overrides_everything() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
 
     c = Corpus(documents=[Document(id="d0", text="foo bar")], language="tr")
     ex = FunctionWordExtractor(wordlist=["foo"], language="en", scale="none")

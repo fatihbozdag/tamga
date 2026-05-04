@@ -4,7 +4,7 @@ import dataclasses
 
 import pytest
 
-from tamga.languages import LANGUAGES, get_language
+from bitig.languages import LANGUAGES, get_language
 
 
 def test_registry_contains_five_first_class_languages() -> None:

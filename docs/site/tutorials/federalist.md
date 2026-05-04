@@ -11,7 +11,7 @@ argue for ratification of the US Constitution. Authorship of 73 papers is known
 Wallace (1964) used word-frequency Bayesian inference to attribute all 12 disputed
 papers to Madison — a result confirmed by every subsequent stylometric analysis.
 
-This tutorial uses tamga to reproduce the essentials of their result: training Burrows
+This tutorial uses bitig to reproduce the essentials of their result: training Burrows
 Delta on the known Hamilton / Madison papers, projecting the disputed papers onto the
 learned space, and visualising the separation with PCA and a Ward dendrogram.
 
@@ -29,7 +29,7 @@ By the end you will have:
 ## 1. Initialise the project
 
 ```bash
-tamga init federalist
+bitig init federalist
 cd federalist
 ```
 
@@ -37,7 +37,7 @@ This scaffolds a project directory with an empty `corpus/` and a starter `study.
 
 ## 2. Drop in the papers
 
-The repo's [`examples/federalist/`](https://github.com/fatihbozdag/tamga/tree/main/examples/federalist)
+The repo's [`examples/federalist/`](https://github.com/fatihbozdag/bitig/tree/main/examples/federalist)
 directory has all 85 papers as individual `.txt` files plus a ready-made
 `metadata.tsv`. Copy `corpus/` and `metadata.tsv` over, or follow the example's
 own `README.md` to build it from Project Gutenberg.
@@ -100,7 +100,7 @@ analysis step.
 ## 4. Run the study
 
 ```bash
-tamga run study.yaml --name demo
+bitig run study.yaml --name demo
 ```
 
 Expect per-method directories under `results/demo/`:
@@ -134,7 +134,7 @@ This produces `pca.png`, `ward.png`, and `zeta.png` inside each method directory
 ## 6. Report
 
 ```bash
-tamga report results/demo --output results/demo/report.html
+bitig report results/demo --output results/demo/report.html
 ```
 
 Open the HTML in a browser — you get a single-page report with the method sections,
@@ -148,5 +148,5 @@ Delta at MFW=200 attributes every disputed paper to Madison — matching Mostell
 Wallace's 1964 result.
 
 The quickstart mini-version of this tutorial is at
-[`examples/quickstart/`](https://github.com/fatihbozdag/tamga/tree/main/examples/quickstart)
+[`examples/quickstart/`](https://github.com/fatihbozdag/bitig/tree/main/examples/quickstart)
 if you want to run through the pipeline on just 9 papers first.

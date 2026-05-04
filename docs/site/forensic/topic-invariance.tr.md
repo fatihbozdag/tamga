@@ -4,11 +4,11 @@
 *Şu durumda kullanmayın:* konu sorunun bir parçasıysa (örneğin, iki belgenin içerik paylaşması *gereken* bir intihal kontrolü). Bu durumda normal öznitelikleri kullanın.
 *Beklenen sonuç:* içerik sözcüğü sinyalinin büyük bölümünü atar; işlev sözcüğü, morfoloji ve noktalama kalıplarını korur.
 
-`tamga.forensic` altında iki teknik bulunur: Sapkota karakter n-gram *kategorilendirmesi* ve Stamatatos *bozunumu*. Her ikisi de herhangi bir aşağı akış doğrulayıcısıyla birleştirilebilir.
+`bitig.forensic` altında iki teknik bulunur: Sapkota karakter n-gram *kategorilendirmesi* ve Stamatatos *bozunumu*. Her ikisi de herhangi bir aşağı akış doğrulayıcısıyla birleştirilebilir.
 
 Konu geçişleri, klasik stilometrinin gerçek adli veriler üzerindeki en yaygın başarısızlık nedenidir. Bir şüphelinin tehdit mektubu ile kişisel e-postası tipik olarak farklı konulardadır; ancak muhtemelen aynı yazara aittir. Bu durumda filtrelenmemiş karakter n-gram ve sözcük n-gram öznitelikleri konu tespitine dönüşür.
 
-tamga iki tamamlayıcı araç sunar.
+bitig iki tamamlayıcı araç sunar.
 
 ## Sapkota karakter n-gram kategorileri
 
@@ -33,7 +33,7 @@ Yedi kategori:
 Sapkota et al. (2015), yalnızca **ek (prefix + suffix) + punct** seçiminin konu geçişli atıflamayı önemli ölçüde iyileştirdiğini göstermiştir — adli dilbilim varsayılanı budur.
 
 ```python
-from tamga.forensic import CategorizedCharNgramExtractor
+from bitig.forensic import CategorizedCharNgramExtractor
 
 extractor = CategorizedCharNgramExtractor(
     n=3,
@@ -59,8 +59,8 @@ fm = extractor.fit_transform(corpus)
 **DV-SA** (*Bozunum Görünümü — Tek Yıldız*): her içerik sözcüğü → tek `*`. Agresif; yalnızca işlev-sözcük ve noktalama deseni hayatta kalır.
 
 ```python
-from tamga.forensic import distort_corpus
-from tamga import MFWExtractor
+from bitig.forensic import distort_corpus
+from bitig import MFWExtractor
 
 distorted = distort_corpus(corpus, mode="dv_ma")
 
@@ -100,12 +100,12 @@ Bu, **çift** konudan bağımsız bir öznitelik kümesi üretir — içerik mas
 
 ## Referans
 
-::: tamga.forensic.char_ngrams.CategorizedCharNgramExtractor
+::: bitig.forensic.char_ngrams.CategorizedCharNgramExtractor
     options:
       show_root_full_path: false
 
-::: tamga.forensic.char_ngrams.classify_ngram
+::: bitig.forensic.char_ngrams.classify_ngram
 
-::: tamga.forensic.distortion.distort_corpus
+::: bitig.forensic.distortion.distort_corpus
 
-::: tamga.forensic.distortion.distort_text
+::: bitig.forensic.distortion.distort_text

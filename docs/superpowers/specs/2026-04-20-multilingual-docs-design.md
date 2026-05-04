@@ -2,7 +2,7 @@
 
 ## Goal
 
-Turn the tamga MkDocs Material site into a multilingual site, launching with English
+Turn the bitig MkDocs Material site into a multilingual site, launching with English
 (default) and Turkish. Lay down infrastructure so German, Spanish, and French can be added
 later without further refactors. The analyzer advertises EN/TR/DE/ES/FR as first-class
 languages — the docs site is the one user-facing surface where a half-finished multilingual
@@ -15,12 +15,12 @@ story would directly undermine that claim, so the Turkish rollout must read as n
   is a translation-content task, not an engineering task.
 - **Pages to translate now:** all 22 markdown pages under `docs/site/`.
 - **Not in scope:** README translation, CHANGELOG translation, docstring translation in
-  `src/tamga/`, CLI help-text localization. These stay English; the package API and tool
+  `src/bitig/`, CLI help-text localization. These stay English; the package API and tool
   output remain English (see *Translation policy* below).
 
 ## Constraints
 
-- Must preserve every existing public URL (`https://fatihbozdag.github.io/tamga/...`) —
+- Must preserve every existing public URL (`https://fatihbozdag.github.io/bitig/...`) —
   breaking permalinks costs reputational capital and inbound links on a freshly published
   site. English stays at the root; Turkish goes to `/tr/`.
 - Must keep `mkdocs build --strict` passing in CI.
@@ -28,7 +28,7 @@ story would directly undermine that claim, so the Turkish rollout must read as n
   Pages deploy.
 - Turkish rendering must read as native Turkish, not machine-translated Turkish. The user
   (native speaker, linguistics researcher) reviews every page.
-- Brand and API names stay untranslated: `tamga`, `Corpus`, `Delta`, `Zeta`, `Burrows`,
+- Brand and API names stay untranslated: `bitig`, `Corpus`, `Delta`, `Zeta`, `Burrows`,
   `PANReport`, CLI flags, YAML keys, Python identifiers.
 
 ## Approach
@@ -50,8 +50,8 @@ across pages and across updates.
 
 | Language | URL prefix | Example |
 |---|---|---|
-| English (default) | `/` | `https://fatihbozdag.github.io/tamga/getting-started/` |
-| Turkish | `/tr/` | `https://fatihbozdag.github.io/tamga/tr/getting-started/` |
+| English (default) | `/` | `https://fatihbozdag.github.io/bitig/getting-started/` |
+| Turkish | `/tr/` | `https://fatihbozdag.github.io/bitig/tr/getting-started/` |
 
 Default-at-root means every existing permalink keeps working. The language switcher in the
 Material header offers a toggle between the two.
@@ -106,10 +106,10 @@ Add `mkdocs-static-i18n>=1.2` to the `docs` extra.
 | Prose paragraphs, headings, captions, admonition bodies | Translate |
 | Navigation labels, tab titles | Translate (`nav_translations`) |
 | Code blocks (Python, YAML, shell) | Do **not** translate |
-| CLI command examples (`tamga ingest ...`) | Do **not** translate — tool output is English |
+| CLI command examples (`bitig ingest ...`) | Do **not** translate — tool output is English |
 | Python identifiers, CLI flags, YAML keys | Do **not** translate |
 | Citations, bibliography, URLs, DOIs | Do **not** translate |
-| The word "tamga" and method names (Burrows, Delta, Zeta, General Impostors, Unmasking) | Do **not** translate — proper nouns |
+| The word "bitig" and method names (Burrows, Delta, Zeta, General Impostors, Unmasking) | Do **not** translate — proper nouns |
 | Mermaid diagram node labels | Translate if the label is prose; keep English if the label is an API name |
 | Image alt text and figure captions | Translate |
 

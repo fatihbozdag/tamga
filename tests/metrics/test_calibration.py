@@ -1,11 +1,11 @@
-"""Unit tests for `tamga.metrics.calibration`."""
+"""Unit tests for `bitig.metrics.calibration`."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from tamga.metrics.calibration import (
+from bitig.metrics.calibration import (
     brier_score,
     calibration_curve,
     expected_calibration_error,

@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.features import FeatureMatrix
-from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
+from bitig.features import FeatureMatrix
+from bitig.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
 
 
 def _fm() -> FeatureMatrix:

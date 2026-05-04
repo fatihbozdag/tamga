@@ -17,7 +17,7 @@ nearest-centroid classifier.
 | `EderDelta` / `EderSimpleDelta` | weighted Delta variants | Eder 2015 |
 
 ```python
-from tamga import MFWExtractor, BurrowsDelta
+from bitig import MFWExtractor, BurrowsDelta
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(corpus)
 y = np.array(corpus.metadata_column("author"))
 clf = BurrowsDelta().fit(fm, y)
@@ -91,7 +91,7 @@ Craig's Zeta (`ZetaClassic`) and Eder's smoothed variant (`ZetaEder`) extract th
 vocabulary most preferred by one author group versus another.
 
 ```python
-from tamga.methods.zeta import ZetaClassic
+from bitig.methods.zeta import ZetaClassic
 result = ZetaClassic(group_by="author", top_k=50, group_a="Hamilton", group_b="Madison").fit_transform(corpus)
 df_a, df_b = result.tables   # top-k A-preferred / B-preferred words with proportions
 ```
@@ -135,7 +135,7 @@ miss curved manifolds.
 structure — typically the best-looking 2-D visualisation of stylometric features.
 *Don't use when:* you need reproducibility without pinning a seed — UMAP is
 stochastic. Always set `random_state`.
-*Expect:* `coords` (n_docs × n_components). Requires `tamga[viz]`.
+*Expect:* `coords` (n_docs × n_components). Requires `bitig[viz]`.
 
 ### TSNEReducer
 `TSNEReducer(n_components=2, perplexity=30)`
@@ -207,7 +207,7 @@ Eder (2017). Integrates out the "how many MFW?" knob by sampling across bands.
 ## Classification + CV
 
 Any sklearn classifier (Logistic Regression, linear / RBF SVM, Random Forest, HistGBM)
-via `build_classifier(name)`, plus `cross_validate_tamga(fm, y, cv_kind=...)` with three
+via `build_classifier(name)`, plus `cross_validate_bitig(fm, y, cv_kind=...)` with three
 stylometry-aware CV strategies:
 
 *Use when:* you have labelled documents (author or group) and want standard ML
@@ -232,7 +232,7 @@ Dirichlet smoothing — the Wallace–Mosteller Federalist approach.
 *Don't use when:* your features are z-scored (it expects raw counts; use
 `MFWExtractor(scale="none")`).
 *Expect:* `predict_proba` returns per-document posterior probability vectors over
-candidates. No need for `tamga[bayesian]` — this variant is pure NumPy.
+candidates. No need for `bitig[bayesian]` — this variant is pure NumPy.
 
 ### HierarchicalGroupComparison
 `HierarchicalGroupComparison(group_a=..., group_b=..., feature_name=...)`
@@ -242,13 +242,13 @@ stylistic feature, with full per-author uncertainty — a PyMC varying-intercept
 *Don't use when:* you only have one author per group (no pooling signal) or need a
 fast screening method (MCMC sampling is slow; use a frequentist Zeta first).
 *Expect:* an arviz `InferenceData` with posterior draws for the group-difference
-parameter. Requires `tamga[bayesian]`.
+parameter. Requires `bitig[bayesian]`.
 
 ## Forensic methods
 
-Under `tamga.forensic`:
+Under `bitig.forensic`:
 
-*Use when:* you want tamga's one-case verification or calibration layer — see the
+*Use when:* you want bitig's one-case verification or calibration layer — see the
 dedicated [Forensic toolkit](../forensic/index.md) pages for gloss-per-method detail.
 *Don't use when:* you have a closed candidate set and just want attribution — use
 Delta variants above.

@@ -1,6 +1,6 @@
-"""Render matplotlib figures for each method in a tamga run directory.
+"""Render matplotlib figures for each method in a bitig run directory.
 
-Run after `tamga run examples/federalist/study.yaml --name demo`, then `tamga report ...`
+Run after `bitig run examples/federalist/study.yaml --name demo`, then `bitig report ...`
 will pick up the PNGs automatically.
 """
 
@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from tamga.viz import (
+from bitig.viz import (
     apply_publication_style,
     plot_dendrogram,
     plot_scatter_2d,

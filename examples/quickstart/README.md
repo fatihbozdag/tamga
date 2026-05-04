@@ -1,6 +1,6 @@
 # Quickstart — Who wrote the mystery essay?
 
-A 10-minute, plain-English tour of `tamga`. No stats background required.
+A 10-minute, plain-English tour of `bitig`. No stats background required.
 You'll run the same techniques scholars use to settle authorship disputes,
 on a corpus small enough to eyeball.
 
@@ -18,7 +18,7 @@ study here.
 ## What you need
 
 - Python 3.11+
-- `tamga` installed (see the main `README.md` — `uv pip install -e .` from the
+- `bitig` installed (see the main `README.md` — `uv pip install -e .` from the
   project root also works)
 - A terminal
 
@@ -37,13 +37,13 @@ quickstart/
 │   ├── fed_47.txt       ← Madison, known
 │   └── fed_50.txt       ← ??? ("Unknown" — the mystery)
 ├── metadata.tsv         ← who wrote what (fed_50 is marked Unknown)
-├── study.yaml           ← the recipe tamga follows
+├── study.yaml           ← the recipe bitig follows
 └── render_figures.py    ← turns the numeric results into PNGs
 ```
 
 There are **four** essays known to be Hamilton's and **four** known to be
 Madison's. Our **mystery essay** is Federalist No. 50. Historians disputed this
-one for a long time — and we'll see if tamga can pick the author.
+one for a long time — and we'll see if bitig can pick the author.
 
 ---
 
@@ -54,7 +54,7 @@ published in a New York newspaper in October 1787. These are real historical
 documents from Project Gutenberg — we only stripped an editor's attribution
 header so the author's name isn't literally sitting at the top of the file.
 
-**Why this matters:** tamga looks only at what's *in* the text. If the author's
+**Why this matters:** bitig looks only at what's *in* the text. If the author's
 name were inside the document, we'd be cheating.
 
 ---
@@ -70,7 +70,7 @@ fed_50.txt  Unknown  test   Periodical Appeals to the People Considered (dispute
 ```
 
 Two things to notice:
-- **`author`** tells tamga who wrote each essay (where we know).
+- **`author`** tells bitig who wrote each essay (where we know).
 - **`role`** splits the corpus into `train` (used to learn each author's style)
   and `test` (the mystery, set aside for attribution).
 
@@ -81,10 +81,10 @@ Two things to notice:
 From the repository root:
 
 ```bash
-tamga run examples/quickstart/study.yaml --name demo
+bitig run examples/quickstart/study.yaml --name demo
 ```
 
-This takes about 2 seconds. Under the hood, tamga:
+This takes about 2 seconds. Under the hood, bitig:
 
 1. Reads the 9 essays.
 2. Keeps only the 8 `train` essays (the mystery is held back for later).
@@ -156,13 +156,13 @@ thing in 1964.
 Now the moment of truth. Run:
 
 ```bash
-tamga delta examples/quickstart/corpus \
+bitig delta examples/quickstart/corpus \
     --method burrows --mfw 200 \
     --metadata examples/quickstart/metadata.tsv \
     --group-by author --test-filter role=test
 ```
 
-tamga compares fed_50's fingerprint against the average Hamilton fingerprint
+bitig compares fed_50's fingerprint against the average Hamilton fingerprint
 and the average Madison fingerprint. Whichever is closer wins.
 
 You should see:
@@ -176,8 +176,8 @@ You should see:
 └────────┴───────────────────┴────────────────────┴───────┘
 ```
 
-- **`author (predicted): Madison`** — tamga thinks Madison wrote fed_50.
-- **`match: no`** — tamga is comparing the prediction against our label
+- **`author (predicted): Madison`** — bitig thinks Madison wrote fed_50.
+- **`match: no`** — bitig is comparing the prediction against our label
   `Unknown`, which isn't "Madison", so it reports "no" match. That's fine —
   the prediction itself is what we care about.
 
@@ -192,7 +192,7 @@ scholarly consensus**: Madison is the author of Federalist No. 50.
 ## Step 7 — (Optional) The full report
 
 ```bash
-tamga report examples/quickstart/results/demo \
+bitig report examples/quickstart/results/demo \
     --output examples/quickstart/results/demo/report.html \
     --title "Quickstart — Who wrote the mystery essay?"
 ```
@@ -224,27 +224,27 @@ attribution on top).
 - **Try your own corpus.** Drop your own `.txt` files into a new folder,
   write a 2-column `metadata.tsv`, and point `study.yaml` at it.
 - **Swap in other authors.** Project Gutenberg has thousands of public-domain
-  books. Pick three authors, grab 5 novels each, and ask tamga who wrote
+  books. Pick three authors, grab 5 novels each, and ask bitig who wrote
   your favourite anonymous chapter.
-- **Read the full design.** `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`
+- **Read the full design.** `docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md`
   explains every method and feature in detail.
 
 ## One-page cheatsheet
 
 ```bash
 # 1. scaffold a study
-tamga init my-study && cd my-study
+bitig init my-study && cd my-study
 # 2. put .txt files into corpus/ and write metadata.tsv
 # 3. run
-tamga run study.yaml --name demo
+bitig run study.yaml --name demo
 # 4. render
 python examples/quickstart/render_figures.py  # or your own variant
 # 5. attribute an unknown document
-tamga delta corpus --method burrows --mfw 500 \
+bitig delta corpus --method burrows --mfw 500 \
     --metadata metadata.tsv --group-by author \
     --test-filter role=test
 # 6. report
-tamga report results/demo --output results/demo/report.html
+bitig report results/demo --output results/demo/report.html
 ```
 
 That's it. Happy sleuthing.

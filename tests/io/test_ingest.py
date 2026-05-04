@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus
-from tamga.io import load_corpus, load_metadata
+from bitig.corpus import Corpus
+from bitig.io import load_corpus, load_metadata
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "mini_corpus"
 
@@ -71,7 +71,7 @@ def test_load_corpus_non_strict_allows_missing_metadata(tmp_path: Path):
 
 
 def test_load_corpus_stamps_language_argument(tmp_path) -> None:
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     (tmp_path / "d.txt").write_text("hola mundo")
     corpus = load_corpus(tmp_path, language="es", strict=False)
@@ -79,7 +79,7 @@ def test_load_corpus_stamps_language_argument(tmp_path) -> None:
 
 
 def test_load_corpus_defaults_to_english(tmp_path) -> None:
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     (tmp_path / "d.txt").write_text("hello")
     corpus = load_corpus(tmp_path, strict=False)
@@ -89,7 +89,7 @@ def test_load_corpus_defaults_to_english(tmp_path) -> None:
 def test_load_corpus_rejects_unknown_language_code(tmp_path) -> None:
     import pytest
 
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     (tmp_path / "d.txt").write_text("x")
     with pytest.raises(ValueError, match="Unknown language code"):

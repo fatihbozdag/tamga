@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.forensic.metrics import brier, cllr, ece, tippett
+from bitig.forensic.metrics import brier, cllr, ece, tippett
 
 
 class TestCllr:

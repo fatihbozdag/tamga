@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.methods.zeta import ZetaClassic, ZetaEder
+from bitig.corpus import Corpus, Document
+from bitig.methods.zeta import ZetaClassic, ZetaEder
 
 
 def _corpus(*texts: str, groups: list[str]) -> Corpus:

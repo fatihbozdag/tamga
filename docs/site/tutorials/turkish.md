@@ -7,9 +7,9 @@ Turkish Wikisource.
 ## Setup
 
 ```bash
-uv pip install 'tamga[turkish]'
+uv pip install 'bitig[turkish]'
 python -c "import stanza; stanza.download('tr')"
-tamga init seyfettin --language tr
+bitig init seyfettin --language tr
 cd seyfettin
 ```
 
@@ -17,7 +17,7 @@ This scaffolds a project directory with `study.yaml` pre-configured for Turkish.
 with:
 
 ```bash
-tamga info
+bitig info
 ```
 
 The `language` row shows `tr`.
@@ -46,11 +46,11 @@ discriminate.
 ## Running the study
 
 ```bash
-tamga ingest corpus/ --language tr --metadata corpus/metadata.tsv
-tamga run study.yaml --name first-run
+bitig ingest corpus/ --language tr --metadata corpus/metadata.tsv
+bitig run study.yaml --name first-run
 ```
 
-`tamga ingest` runs Stanza through `spacy-stanza`. The first run parses every document and
+`bitig ingest` runs Stanza through `spacy-stanza`. The first run parses every document and
 caches the DocBins; subsequent runs hit the cache and finish in seconds.
 
 ## What you get
@@ -108,7 +108,7 @@ features:
 ## Troubleshooting
 
 - **`ModuleNotFoundError: No module named 'spacy_stanza'`** — run
-  `uv pip install 'tamga[turkish]'`.
+  `uv pip install 'bitig[turkish]'`.
 - **`FileNotFoundError: ... stanza_resources/tr/default.zip`** — run
   `python -c "import stanza; stanza.download('tr')"`. The model is about 600 MB.
 - **Very slow first ingest on MPS.** Stanza's Turkish model does not yet support Apple

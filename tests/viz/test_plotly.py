@@ -8,9 +8,9 @@ import numpy as np
 import pytest
 from scipy.cluster.hierarchy import linkage
 
-pytest.importorskip("plotly")  # everything below requires the optional `tamga[interactive]` extra.
+pytest.importorskip("plotly")  # everything below requires the optional `bitig[interactive]` extra.
 
-from tamga.viz.plotly import (
+from bitig.viz.plotly import (
     plot_confusion_matrix,
     plot_dendrogram,
     plot_distance_heatmap,

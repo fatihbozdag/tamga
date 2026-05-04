@@ -1,14 +1,14 @@
-# tamga — Phase 2: Features & Delta Family — Implementation Plan
+# bitig — Phase 2: Features & Delta Family — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the feature-extraction layer (`tamga.features`), the Delta family of distance-based classifiers (`tamga.methods.delta`), the associated CLI commands (`tamga features`, `tamga delta`), and a Federalist Papers parity suite that validates Burrows Delta against the canonical Hamilton-vs-Madison attributions. End state: `tamga delta` reproduces Stylo's classical Burrows Delta on the Federalist Papers to within 1e-6 tolerance; all feature extractors implement sklearn's transformer protocol and compose cleanly in `sklearn.pipeline.Pipeline`.
+**Goal:** Build the feature-extraction layer (`bitig.features`), the Delta family of distance-based classifiers (`bitig.methods.delta`), the associated CLI commands (`bitig features`, `bitig delta`), and a Federalist Papers parity suite that validates Burrows Delta against the canonical Hamilton-vs-Madison attributions. End state: `bitig delta` reproduces Stylo's classical Burrows Delta on the Federalist Papers to within 1e-6 tolerance; all feature extractors implement sklearn's transformer protocol and compose cleanly in `sklearn.pipeline.Pipeline`.
 
-**Architecture:** Each feature extractor is a focused module under `tamga/features/`, inheriting `BaseEstimator, TransformerMixin` from scikit-learn and producing a `FeatureMatrix` (thin wrapper over `np.ndarray` with feature names, document ids, and a provenance hash). Each Delta variant is a `ClassifierMixin` subclass in `tamga/methods/delta/`, wrapping a shared `_DeltaBase` that implements the nearest-author-centroid pattern; subclasses differ only in the distance kernel and optional pre-scaling. The CLI commands are thin glue over `load_corpus → SpacyPipeline.parse → FeatureExtractor.fit_transform → DeltaClassifier.fit → predict`.
+**Architecture:** Each feature extractor is a focused module under `bitig/features/`, inheriting `BaseEstimator, TransformerMixin` from scikit-learn and producing a `FeatureMatrix` (thin wrapper over `np.ndarray` with feature names, document ids, and a provenance hash). Each Delta variant is a `ClassifierMixin` subclass in `bitig/methods/delta/`, wrapping a shared `_DeltaBase` that implements the nearest-author-centroid pattern; subclasses differ only in the distance kernel and optional pre-scaling. The CLI commands are thin glue over `load_corpus → SpacyPipeline.parse → FeatureExtractor.fit_transform → DeltaClassifier.fit → predict`.
 
 **Tech Stack:** Phase 1 stack (Python 3.11+, uv, pydantic v2, Typer, spaCy) plus scikit-learn transformers, numpy, pandas, scipy (`scipy.stats` for skew), and the `textstat` library for readability indices.
 
-**Reference spec:** `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md` (§5 Feature Extractors; §6.1 Delta family; §7 sklearn interoperability).
+**Reference spec:** `docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md` (§5 Feature Extractors; §6.1 Delta family; §7 sklearn interoperability).
 
 **Phase 1 baseline:** tag `phase-1-foundation`, 92 tests, 95.8% coverage. This plan adds on top.
 
@@ -17,7 +17,7 @@
 ## File Layout (new in Phase 2)
 
 ```
-src/tamga/
+src/bitig/
 ├── features/
 │   ├── __init__.py               # public re-exports
 │   ├── base.py                   # BaseFeatureExtractor + FeatureMatrix
@@ -42,8 +42,8 @@ src/tamga/
 ├── resources/
 │   └── function_words_en.txt     # bundled English function-word list
 └── cli/
-    ├── features_cmd.py           # `tamga features`
-    └── delta_cmd.py              # `tamga delta`
+    ├── features_cmd.py           # `bitig features`
+    └── delta_cmd.py              # `bitig delta`
 
 tests/
 ├── features/
@@ -121,19 +121,19 @@ git commit -m "build: add textstat dependency for readability indices"
 ## Task 2: `FeatureMatrix` — the shared return type
 
 **Files:**
-- Create: `src/tamga/features/__init__.py`
-- Create: `src/tamga/features/base.py`
+- Create: `src/bitig/features/__init__.py`
+- Create: `src/bitig/features/base.py`
 - Create: `tests/features/__init__.py`
 - Create: `tests/features/test_feature_matrix.py`
 
 **TDD task.**
 
-- [ ] **Step 2.1:** `src/tamga/features/__init__.py`:
+- [ ] **Step 2.1:** `src/bitig/features/__init__.py`:
 
 ```python
 """Feature extractors producing FeatureMatrix objects."""
 
-from tamga.features.base import BaseFeatureExtractor, FeatureMatrix
+from bitig.features.base import BaseFeatureExtractor, FeatureMatrix
 
 __all__ = ["BaseFeatureExtractor", "FeatureMatrix"]
 ```
@@ -149,7 +149,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from tamga.features import FeatureMatrix
+from bitig.features import FeatureMatrix
 
 
 def _fm(X: np.ndarray, feature_names: list[str], doc_ids: list[str] | None = None) -> FeatureMatrix:
@@ -216,7 +216,7 @@ def test_feature_matrix_n_features_property():
 
 - [ ] **Step 2.4:** Run — expect FAIL (ImportError on `BaseFeatureExtractor, FeatureMatrix`).
 
-- [ ] **Step 2.5:** Implement `src/tamga/features/base.py`:
+- [ ] **Step 2.5:** Implement `src/bitig/features/base.py`:
 
 ```python
 """FeatureMatrix — the shared return type for every feature extractor — plus the sklearn-compatible
@@ -236,7 +236,7 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from tamga.corpus import Corpus
+from bitig.corpus import Corpus
 
 
 @dataclass
@@ -329,7 +329,7 @@ class BaseFeatureExtractor(BaseEstimator, TransformerMixin):
         return self.fit(corpus).transform(corpus)
 
     def _provenance(self, corpus: Corpus) -> str:
-        from tamga.plumbing.hashing import hash_mapping
+        from bitig.plumbing.hashing import hash_mapping
 
         payload = {
             "extractor": type(self).__name__,
@@ -345,7 +345,7 @@ class BaseFeatureExtractor(BaseEstimator, TransformerMixin):
 - [ ] **Step 2.7:** Commit.
 
 ```bash
-git add src/tamga/features/__init__.py src/tamga/features/base.py tests/features/__init__.py tests/features/test_feature_matrix.py
+git add src/bitig/features/__init__.py src/bitig/features/base.py tests/features/__init__.py tests/features/test_feature_matrix.py
 git commit -m "feat(features): FeatureMatrix + BaseFeatureExtractor (sklearn-transformer base)"
 ```
 
@@ -354,9 +354,9 @@ git commit -m "feat(features): FeatureMatrix + BaseFeatureExtractor (sklearn-tra
 ## Task 3: `MFWExtractor` — Most Frequent Words
 
 **Files:**
-- Create: `src/tamga/features/mfw.py`
+- Create: `src/bitig/features/mfw.py`
 - Create: `tests/features/test_mfw.py`
-- Modify: `src/tamga/features/__init__.py` (re-export `MFWExtractor`)
+- Modify: `src/bitig/features/__init__.py` (re-export `MFWExtractor`)
 
 **TDD task. Core extractor. Every Delta method depends on this.**
 
@@ -368,9 +368,9 @@ git commit -m "feat(features): FeatureMatrix + BaseFeatureExtractor (sklearn-tra
 import numpy as np
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features import FeatureMatrix
-from tamga.features.mfw import MFWExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features import FeatureMatrix
+from bitig.features.mfw import MFWExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -474,7 +474,7 @@ def test_mfw_case_folding_when_enabled():
 
 - [ ] **Step 3.2:** Run — FAIL.
 
-- [ ] **Step 3.3:** Implement `src/tamga/features/mfw.py`:
+- [ ] **Step 3.3:** Implement `src/bitig/features/mfw.py`:
 
 ```python
 """MFWExtractor — the most-frequent-words feature table, the classical stylometric input.
@@ -492,8 +492,8 @@ from typing import Literal
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
 
 Scale = Literal["none", "zscore", "l1", "l2"]
 
@@ -600,13 +600,13 @@ class MFWExtractor(BaseFeatureExtractor):
         return X
 ```
 
-- [ ] **Step 3.4:** Update `src/tamga/features/__init__.py`:
+- [ ] **Step 3.4:** Update `src/bitig/features/__init__.py`:
 
 ```python
 """Feature extractors producing FeatureMatrix objects."""
 
-from tamga.features.base import BaseFeatureExtractor, FeatureMatrix
-from tamga.features.mfw import MFWExtractor
+from bitig.features.base import BaseFeatureExtractor, FeatureMatrix
+from bitig.features.mfw import MFWExtractor
 
 __all__ = ["BaseFeatureExtractor", "FeatureMatrix", "MFWExtractor"]
 ```
@@ -616,7 +616,7 @@ __all__ = ["BaseFeatureExtractor", "FeatureMatrix", "MFWExtractor"]
 - [ ] **Step 3.6:** Commit.
 
 ```bash
-git add src/tamga/features/mfw.py src/tamga/features/__init__.py tests/features/test_mfw.py
+git add src/bitig/features/mfw.py src/bitig/features/__init__.py tests/features/test_mfw.py
 git commit -m "feat(features): MFWExtractor with min_df/max_df/scale and sklearn API"
 ```
 
@@ -625,9 +625,9 @@ git commit -m "feat(features): MFWExtractor with min_df/max_df/scale and sklearn
 ## Task 4: `CharNgramExtractor` + `WordNgramExtractor`
 
 **Files:**
-- Create: `src/tamga/features/ngrams.py`
+- Create: `src/bitig/features/ngrams.py`
 - Create: `tests/features/test_ngrams.py`
-- Modify: `src/tamga/features/__init__.py` (export both extractors)
+- Modify: `src/bitig/features/__init__.py` (export both extractors)
 
 **TDD task.**
 
@@ -636,8 +636,8 @@ git commit -m "feat(features): MFWExtractor with min_df/max_df/scale and sklearn
 ```python
 """Tests for Char/Word n-gram extractors."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.ngrams import CharNgramExtractor, WordNgramExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.ngrams import CharNgramExtractor, WordNgramExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -699,7 +699,7 @@ def test_word_ngram_range_1_to_2():
 
 - [ ] **Step 4.2:** Run — FAIL.
 
-- [ ] **Step 4.3:** Implement `src/tamga/features/ngrams.py`:
+- [ ] **Step 4.3:** Implement `src/bitig/features/ngrams.py`:
 
 ```python
 """Character and word n-gram feature extractors.
@@ -716,8 +716,8 @@ from typing import Literal
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
 
 Scale = Literal["none", "zscore", "l1", "l2"]
 
@@ -831,14 +831,14 @@ class WordNgramExtractor(BaseFeatureExtractor):
         return X, list(self._vectorizer.get_feature_names_out())
 ```
 
-- [ ] **Step 4.4:** Update `src/tamga/features/__init__.py` to export both.
+- [ ] **Step 4.4:** Update `src/bitig/features/__init__.py` to export both.
 
 - [ ] **Step 4.5:** Run — 6/6 PASS.
 
 - [ ] **Step 4.6:** Commit.
 
 ```bash
-git add src/tamga/features/ngrams.py src/tamga/features/__init__.py tests/features/test_ngrams.py
+git add src/bitig/features/ngrams.py src/bitig/features/__init__.py tests/features/test_ngrams.py
 git commit -m "feat(features): CharNgramExtractor and WordNgramExtractor via sklearn CountVectorizer"
 ```
 
@@ -847,17 +847,17 @@ git commit -m "feat(features): CharNgramExtractor and WordNgramExtractor via skl
 ## Task 5: spaCy-based extractors (POS / Dependency / Function-Word / Punctuation) batch
 
 **Files:**
-- Create: `src/tamga/features/pos.py`
-- Create: `src/tamga/features/dependency.py`
-- Create: `src/tamga/features/function_words.py`
-- Create: `src/tamga/features/punctuation.py`
-- Create: `src/tamga/resources/__init__.py` (empty)
-- Create: `src/tamga/resources/function_words_en.txt`
+- Create: `src/bitig/features/pos.py`
+- Create: `src/bitig/features/dependency.py`
+- Create: `src/bitig/features/function_words.py`
+- Create: `src/bitig/features/punctuation.py`
+- Create: `src/bitig/resources/__init__.py` (empty)
+- Create: `src/bitig/resources/function_words_en.txt`
 - Create: `tests/features/test_pos.py`
 - Create: `tests/features/test_dependency.py`
 - Create: `tests/features/test_function_words.py`
 - Create: `tests/features/test_punctuation.py`
-- Modify: `src/tamga/features/__init__.py`
+- Modify: `src/bitig/features/__init__.py`
 - Modify: `pyproject.toml` (include resources/ in wheel)
 
 **This task bundles four spaCy-based extractors because they share the pattern of `SpacyPipeline.parse(corpus) → iterate token attributes → tabulate`.**
@@ -869,10 +869,10 @@ All tests are marked `pytestmark = pytest.mark.spacy` and use `en_core_web_sm`.
 Add to the existing `[tool.hatch.build.targets.wheel.force-include]` block:
 
 ```toml
-"src/tamga/resources" = "tamga/resources"
+"src/bitig/resources" = "bitig/resources"
 ```
 
-### Step 5.2 — `src/tamga/resources/function_words_en.txt`
+### Step 5.2 — `src/bitig/resources/function_words_en.txt`
 
 Use a standard English function-word list (determiners, prepositions, pronouns, conjunctions, auxiliaries). The following 175-word list is derived from the Stylo-compatible English function word set used in stylometric research:
 
@@ -1021,8 +1021,8 @@ Each test file follows the same skeleton. For brevity, see the full verbatim con
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features.pos import PosNgramExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.pos import PosNgramExtractor
 
 pytestmark = pytest.mark.spacy
 
@@ -1064,8 +1064,8 @@ def test_pos_ngram_fine_tagset_differs_from_coarse(tmp_path):
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features.dependency import DependencyBigramExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.dependency import DependencyBigramExtractor
 
 pytestmark = pytest.mark.spacy
 
@@ -1096,8 +1096,8 @@ def test_dependency_bigram_counts_are_integers(tmp_path):
 ```python
 """Tests for FunctionWordExtractor."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.function_words import FunctionWordExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.function_words import FunctionWordExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -1137,8 +1137,8 @@ def test_function_word_accepts_custom_list():
 ```python
 """Tests for PunctuationExtractor."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.punctuation import PunctuationExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.punctuation import PunctuationExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -1169,7 +1169,7 @@ def test_punctuation_includes_question_exclamation():
 
 ### Step 5.4 — Implementations
 
-**`src/tamga/features/pos.py`:**
+**`src/bitig/features/pos.py`:**
 
 ```python
 """POS n-gram feature extractor — spaCy-backed tokens tagged with Universal or fine POS labels."""
@@ -1182,9 +1182,9 @@ from typing import Literal
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
-from tamga.preprocess.pipeline import SpacyPipeline
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
+from bitig.preprocess.pipeline import SpacyPipeline
 
 Tagset = Literal["coarse", "fine"]
 
@@ -1198,7 +1198,7 @@ class PosNgramExtractor(BaseFeatureExtractor):
         *,
         tagset: Tagset = "coarse",
         spacy_model: str = "en_core_web_trf",
-        cache_dir: str | Path = ".tamga/cache/docbin",
+        cache_dir: str | Path = ".bitig/cache/docbin",
     ) -> None:
         self.n = n
         self.tagset = tagset
@@ -1240,7 +1240,7 @@ class PosNgramExtractor(BaseFeatureExtractor):
         return X, list(self._vocabulary)
 ```
 
-**`src/tamga/features/dependency.py`:**
+**`src/bitig/features/dependency.py`:**
 
 ```python
 """Dependency bigram feature extractor — (head_lemma, dep_label, child_lemma) triples."""
@@ -1252,9 +1252,9 @@ from pathlib import Path
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
-from tamga.preprocess.pipeline import SpacyPipeline
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
+from bitig.preprocess.pipeline import SpacyPipeline
 
 
 class DependencyBigramExtractor(BaseFeatureExtractor):
@@ -1264,7 +1264,7 @@ class DependencyBigramExtractor(BaseFeatureExtractor):
         self,
         *,
         spacy_model: str = "en_core_web_trf",
-        cache_dir: str | Path = ".tamga/cache/docbin",
+        cache_dir: str | Path = ".bitig/cache/docbin",
         lowercase: bool = True,
     ) -> None:
         self.spacy_model = spacy_model
@@ -1306,7 +1306,7 @@ class DependencyBigramExtractor(BaseFeatureExtractor):
         return X, list(self._vocabulary)
 ```
 
-**`src/tamga/features/function_words.py`:**
+**`src/bitig/features/function_words.py`:**
 
 ```python
 """Function-word frequency extractor with a bundled English word list."""
@@ -1319,8 +1319,8 @@ from typing import Literal
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
 
 Scale = Literal["none", "zscore", "l1", "l2"]
 
@@ -1328,7 +1328,7 @@ _WORD_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
 
 
 def _load_bundled_list() -> list[str]:
-    path = resources.files("tamga.resources") / "function_words_en.txt"
+    path = resources.files("bitig.resources") / "function_words_en.txt"
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
@@ -1367,7 +1367,7 @@ class FunctionWordExtractor(BaseFeatureExtractor):
         return X, list(self._words)
 ```
 
-**`src/tamga/features/punctuation.py`:**
+**`src/bitig/features/punctuation.py`:**
 
 ```python
 """Punctuation-symbol frequency extractor."""
@@ -1378,8 +1378,8 @@ import string
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
 
 _PUNCT = sorted(string.punctuation)  # deterministic column order
 
@@ -1404,18 +1404,18 @@ class PunctuationExtractor(BaseFeatureExtractor):
         return X, list(self._symbols)
 ```
 
-### Step 5.5 — Update `src/tamga/features/__init__.py`
+### Step 5.5 — Update `src/bitig/features/__init__.py`
 
 ```python
 """Feature extractors producing FeatureMatrix objects."""
 
-from tamga.features.base import BaseFeatureExtractor, FeatureMatrix
-from tamga.features.dependency import DependencyBigramExtractor
-from tamga.features.function_words import FunctionWordExtractor
-from tamga.features.mfw import MFWExtractor
-from tamga.features.ngrams import CharNgramExtractor, WordNgramExtractor
-from tamga.features.pos import PosNgramExtractor
-from tamga.features.punctuation import PunctuationExtractor
+from bitig.features.base import BaseFeatureExtractor, FeatureMatrix
+from bitig.features.dependency import DependencyBigramExtractor
+from bitig.features.function_words import FunctionWordExtractor
+from bitig.features.mfw import MFWExtractor
+from bitig.features.ngrams import CharNgramExtractor, WordNgramExtractor
+from bitig.features.pos import PosNgramExtractor
+from bitig.features.punctuation import PunctuationExtractor
 
 __all__ = [
     "BaseFeatureExtractor",
@@ -1439,7 +1439,7 @@ Expected: 3 + 2 + 4 + 3 = 12 tests PASS (the POS/Dep ones need spaCy, which is i
 ### Step 5.7 — Commit (single commit for the batch)
 
 ```bash
-git add src/tamga/features/pos.py src/tamga/features/dependency.py src/tamga/features/function_words.py src/tamga/features/punctuation.py src/tamga/resources/ tests/features/test_pos.py tests/features/test_dependency.py tests/features/test_function_words.py tests/features/test_punctuation.py src/tamga/features/__init__.py pyproject.toml
+git add src/bitig/features/pos.py src/bitig/features/dependency.py src/bitig/features/function_words.py src/bitig/features/punctuation.py src/bitig/resources/ tests/features/test_pos.py tests/features/test_dependency.py tests/features/test_function_words.py tests/features/test_punctuation.py src/bitig/features/__init__.py pyproject.toml
 git commit -m "feat(features): POS n-gram, dependency-bigram, function-word, punctuation extractors"
 ```
 
@@ -1448,13 +1448,13 @@ git commit -m "feat(features): POS n-gram, dependency-bigram, function-word, pun
 ## Task 6: `LexicalDiversityExtractor` + `ReadabilityExtractor` + `SentenceLengthExtractor` batch
 
 **Files:**
-- Create: `src/tamga/features/lexical_diversity.py`
-- Create: `src/tamga/features/readability.py`
-- Create: `src/tamga/features/sentence_length.py`
+- Create: `src/bitig/features/lexical_diversity.py`
+- Create: `src/bitig/features/readability.py`
+- Create: `src/bitig/features/sentence_length.py`
 - Create: `tests/features/test_lexical_diversity.py`
 - Create: `tests/features/test_readability.py`
 - Create: `tests/features/test_sentence_length.py`
-- Modify: `src/tamga/features/__init__.py` (export the three new extractors)
+- Modify: `src/bitig/features/__init__.py` (export the three new extractors)
 
 ### Step 6.1 — `tests/features/test_lexical_diversity.py`
 
@@ -1463,8 +1463,8 @@ git commit -m "feat(features): POS n-gram, dependency-bigram, function-word, pun
 
 import numpy as np
 
-from tamga.corpus import Corpus, Document
-from tamga.features.lexical_diversity import LexicalDiversityExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.lexical_diversity import LexicalDiversityExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -1502,8 +1502,8 @@ def test_ldiv_feature_matrix_is_2d_numeric():
 ```python
 """Tests for ReadabilityExtractor."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.readability import ReadabilityExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.readability import ReadabilityExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -1536,8 +1536,8 @@ def test_readability_per_document():
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features.sentence_length import SentenceLengthExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.sentence_length import SentenceLengthExtractor
 
 pytestmark = pytest.mark.spacy
 
@@ -1563,7 +1563,7 @@ def test_sentence_length_uniform_has_zero_sd(tmp_path):
 
 ### Step 6.4 — Implementations
 
-**`src/tamga/features/lexical_diversity.py`:**
+**`src/bitig/features/lexical_diversity.py`:**
 
 ```python
 """Lexical-diversity indices: TTR, MATTR, MTLD, HD-D, Yule's K, Yule's I, Herdan's C, Simpson's D."""
@@ -1575,8 +1575,8 @@ from collections import Counter
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
 
 _WORD_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
 
@@ -1723,7 +1723,7 @@ class LexicalDiversityExtractor(BaseFeatureExtractor):
         return X, list(self.indices)
 ```
 
-**`src/tamga/features/readability.py`:**
+**`src/bitig/features/readability.py`:**
 
 ```python
 """Readability indices via the `textstat` library: Flesch, Flesch-Kincaid, Gunning Fog, Coleman-Liau, ARI, SMOG."""
@@ -1733,8 +1733,8 @@ from __future__ import annotations
 import numpy as np
 import textstat
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
 
 _INDEX_FN = {
     "flesch": textstat.flesch_reading_ease,
@@ -1767,7 +1767,7 @@ class ReadabilityExtractor(BaseFeatureExtractor):
         return X, list(self.indices)
 ```
 
-**`src/tamga/features/sentence_length.py`:**
+**`src/bitig/features/sentence_length.py`:**
 
 ```python
 """Sentence-length distribution features: mean, standard deviation, skew."""
@@ -1779,9 +1779,9 @@ from pathlib import Path
 import numpy as np
 from scipy.stats import skew
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
-from tamga.preprocess.pipeline import SpacyPipeline
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
+from bitig.preprocess.pipeline import SpacyPipeline
 
 
 class SentenceLengthExtractor(BaseFeatureExtractor):
@@ -1791,7 +1791,7 @@ class SentenceLengthExtractor(BaseFeatureExtractor):
         self,
         *,
         spacy_model: str = "en_core_web_trf",
-        cache_dir: str | Path = ".tamga/cache/docbin",
+        cache_dir: str | Path = ".bitig/cache/docbin",
     ) -> None:
         self.spacy_model = spacy_model
         self.cache_dir = cache_dir
@@ -1818,14 +1818,14 @@ class SentenceLengthExtractor(BaseFeatureExtractor):
         return X, ["mean", "sd", "skew"]
 ```
 
-### Step 6.5 — Update `src/tamga/features/__init__.py`
+### Step 6.5 — Update `src/bitig/features/__init__.py`
 
 Add imports and names:
 
 ```python
-from tamga.features.lexical_diversity import LexicalDiversityExtractor
-from tamga.features.readability import ReadabilityExtractor
-from tamga.features.sentence_length import SentenceLengthExtractor
+from bitig.features.lexical_diversity import LexicalDiversityExtractor
+from bitig.features.readability import ReadabilityExtractor
+from bitig.features.sentence_length import SentenceLengthExtractor
 ```
 
 And include them in `__all__` in alphabetical order.
@@ -1841,7 +1841,7 @@ Expected: 4 + 3 + 2 = 9 passing.
 ### Step 6.7 — Commit
 
 ```bash
-git add src/tamga/features/lexical_diversity.py src/tamga/features/readability.py src/tamga/features/sentence_length.py tests/features/test_lexical_diversity.py tests/features/test_readability.py tests/features/test_sentence_length.py src/tamga/features/__init__.py
+git add src/bitig/features/lexical_diversity.py src/bitig/features/readability.py src/bitig/features/sentence_length.py tests/features/test_lexical_diversity.py tests/features/test_readability.py tests/features/test_sentence_length.py src/bitig/features/__init__.py
 git commit -m "feat(features): lexical-diversity, readability, sentence-length extractors"
 ```
 
@@ -1850,9 +1850,9 @@ git commit -m "feat(features): lexical-diversity, readability, sentence-length e
 ## Task 7: `_DeltaBase` — nearest-author-centroid shared logic
 
 **Files:**
-- Create: `src/tamga/methods/__init__.py`
-- Create: `src/tamga/methods/delta/__init__.py`
-- Create: `src/tamga/methods/delta/base.py`
+- Create: `src/bitig/methods/__init__.py`
+- Create: `src/bitig/methods/delta/__init__.py`
+- Create: `src/bitig/methods/delta/base.py`
 - Create: `tests/methods/__init__.py`
 - Create: `tests/methods/delta/__init__.py`
 - Create: `tests/methods/delta/test_base.py`
@@ -1861,18 +1861,18 @@ git commit -m "feat(features): lexical-diversity, readability, sentence-length e
 
 ### Step 7.1 — Package `__init__.py` files
 
-`src/tamga/methods/__init__.py`:
+`src/bitig/methods/__init__.py`:
 
 ```python
 """Analytical methods: delta, zeta, reduce, cluster, classify, bayesian (stubs land in later phases)."""
 ```
 
-`src/tamga/methods/delta/__init__.py` (placeholder — will grow as variants land):
+`src/bitig/methods/delta/__init__.py` (placeholder — will grow as variants land):
 
 ```python
 """Delta family of distance-based nearest-author-centroid classifiers."""
 
-from tamga.methods.delta.base import _DeltaBase
+from bitig.methods.delta.base import _DeltaBase
 
 __all__ = ["_DeltaBase"]
 ```
@@ -1887,8 +1887,8 @@ __all__ = ["_DeltaBase"]
 import numpy as np
 import pytest
 
-from tamga.features import FeatureMatrix
-from tamga.methods.delta.base import _DeltaBase
+from bitig.features import FeatureMatrix
+from bitig.methods.delta.base import _DeltaBase
 
 
 class _L2Delta(_DeltaBase):
@@ -1957,7 +1957,7 @@ def test_predict_accepts_numpy_array_for_sklearn_compat():
     assert list(preds) == ["A", "B"]
 ```
 
-### Step 7.3 — Implement `src/tamga/methods/delta/base.py`
+### Step 7.3 — Implement `src/bitig/methods/delta/base.py`
 
 ```python
 """_DeltaBase — shared fit/predict logic for every Delta variant.
@@ -1978,7 +1978,7 @@ from abc import abstractmethod
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 
-from tamga.features import FeatureMatrix
+from bitig.features import FeatureMatrix
 
 
 def _as_ndarray(X: FeatureMatrix | np.ndarray) -> np.ndarray:
@@ -2028,7 +2028,7 @@ class _DeltaBase(BaseEstimator, ClassifierMixin):
 ### Step 7.5 — Commit
 
 ```bash
-git add src/tamga/methods/ tests/methods/
+git add src/bitig/methods/ tests/methods/
 git commit -m "feat(methods): _DeltaBase nearest-author-centroid classifier scaffold"
 ```
 
@@ -2037,19 +2037,19 @@ git commit -m "feat(methods): _DeltaBase nearest-author-centroid classifier scaf
 ## Task 8: Delta variants — Burrows, Eder, Eder-Simple, Argamon, Cosine, Quadratic (batch)
 
 **Files:**
-- Create: `src/tamga/methods/delta/burrows.py`
-- Create: `src/tamga/methods/delta/eder.py`
-- Create: `src/tamga/methods/delta/argamon.py`
-- Create: `src/tamga/methods/delta/cosine.py`
+- Create: `src/bitig/methods/delta/burrows.py`
+- Create: `src/bitig/methods/delta/eder.py`
+- Create: `src/bitig/methods/delta/argamon.py`
+- Create: `src/bitig/methods/delta/cosine.py`
 - Create: `tests/methods/delta/test_burrows.py`
 - Create: `tests/methods/delta/test_eder.py`
 - Create: `tests/methods/delta/test_argamon.py`
 - Create: `tests/methods/delta/test_cosine.py`
-- Modify: `src/tamga/methods/delta/__init__.py` (export all six variants)
+- Modify: `src/bitig/methods/delta/__init__.py` (export all six variants)
 
 All six distance kernels operate on **z-scored** feature matrices — the caller is responsible for passing z-scored input (e.g., `MFWExtractor(scale="zscore")` or `StandardScaler` in a `Pipeline`).
 
-### Step 8.1 — `src/tamga/methods/delta/burrows.py`
+### Step 8.1 — `src/bitig/methods/delta/burrows.py`
 
 ```python
 """Burrows Classic Delta (Burrows 2002) — mean absolute difference of z-scored features."""
@@ -2058,7 +2058,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tamga.methods.delta.base import _DeltaBase
+from bitig.methods.delta.base import _DeltaBase
 
 
 class BurrowsDelta(_DeltaBase):
@@ -2072,7 +2072,7 @@ class BurrowsDelta(_DeltaBase):
         return np.abs(X - centroid).mean(axis=1)
 ```
 
-### Step 8.2 — `src/tamga/methods/delta/eder.py`
+### Step 8.2 — `src/bitig/methods/delta/eder.py`
 
 ```python
 """Eder Delta (Eder 2015) — rank-weighted Burrows — and Eder's Simple Delta (Eder 2017)."""
@@ -2081,7 +2081,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tamga.methods.delta.base import _DeltaBase
+from bitig.methods.delta.base import _DeltaBase
 
 
 class EderDelta(_DeltaBase):
@@ -2125,7 +2125,7 @@ class EderSimpleDelta(_DeltaBase):
         return np.abs(X - centroid).sum(axis=1)
 ```
 
-### Step 8.3 — `src/tamga/methods/delta/argamon.py`
+### Step 8.3 — `src/bitig/methods/delta/argamon.py`
 
 ```python
 """Argamon Linear Delta (Argamon 2008) — L2 distance on z-scored features — and Quadratic Delta — squared-L2."""
@@ -2134,7 +2134,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tamga.methods.delta.base import _DeltaBase
+from bitig.methods.delta.base import _DeltaBase
 
 
 class ArgamonLinearDelta(_DeltaBase):
@@ -2152,7 +2152,7 @@ class QuadraticDelta(_DeltaBase):
         return (diff * diff).sum(axis=1)
 ```
 
-### Step 8.4 — `src/tamga/methods/delta/cosine.py`
+### Step 8.4 — `src/bitig/methods/delta/cosine.py`
 
 ```python
 """Cosine Delta (Smith & Aldridge 2011; Evert et al. 2017) — 1 - cosine similarity on z-scored features."""
@@ -2161,7 +2161,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tamga.methods.delta.base import _DeltaBase
+from bitig.methods.delta.base import _DeltaBase
 
 
 class CosineDelta(_DeltaBase):
@@ -2186,8 +2186,8 @@ Each variant's test file follows the same pattern — a sanity test that the dis
 
 import numpy as np
 
-from tamga.features import FeatureMatrix
-from tamga.methods.delta.burrows import BurrowsDelta
+from bitig.features import FeatureMatrix
+from bitig.methods.delta.burrows import BurrowsDelta
 
 
 def _fm(X: np.ndarray) -> FeatureMatrix:
@@ -2233,16 +2233,16 @@ def test_burrows_is_sklearn_compatible():
 
 Write each test file with verbatim imports, `_fm` helper, and 2-3 tests following the Burrows pattern.
 
-### Step 8.6 — Update `src/tamga/methods/delta/__init__.py`
+### Step 8.6 — Update `src/bitig/methods/delta/__init__.py`
 
 ```python
 """Delta family of distance-based nearest-author-centroid classifiers."""
 
-from tamga.methods.delta.argamon import ArgamonLinearDelta, QuadraticDelta
-from tamga.methods.delta.base import _DeltaBase
-from tamga.methods.delta.burrows import BurrowsDelta
-from tamga.methods.delta.cosine import CosineDelta
-from tamga.methods.delta.eder import EderDelta, EderSimpleDelta
+from bitig.methods.delta.argamon import ArgamonLinearDelta, QuadraticDelta
+from bitig.methods.delta.base import _DeltaBase
+from bitig.methods.delta.burrows import BurrowsDelta
+from bitig.methods.delta.cosine import CosineDelta
+from bitig.methods.delta.eder import EderDelta, EderSimpleDelta
 
 __all__ = [
     "ArgamonLinearDelta",
@@ -2262,7 +2262,7 @@ __all__ = [
 ### Step 8.8 — Commit
 
 ```bash
-git add src/tamga/methods/delta/ tests/methods/delta/
+git add src/bitig/methods/delta/ tests/methods/delta/
 git commit -m "feat(methods): Burrows, Eder(+Simple), Argamon(+Quadratic), Cosine Delta variants"
 ```
 
@@ -2372,9 +2372,9 @@ This is the release gate for Phase 2: we ship if this test passes.
 
 import pytest
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.delta import BurrowsDelta, CosineDelta, EderDelta
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.delta import BurrowsDelta, CosineDelta, EderDelta
 
 
 pytestmark = pytest.mark.integration
@@ -2439,17 +2439,17 @@ git commit -m "test: Federalist Papers parity — Burrows/Eder/Cosine Delta attr
 
 ---
 
-## Task 11: `tamga features` CLI command
+## Task 11: `bitig features` CLI command
 
 **Files:**
-- Create: `src/tamga/cli/features_cmd.py`
+- Create: `src/bitig/cli/features_cmd.py`
 - Create: `tests/cli/test_features_cmd.py`
-- Modify: `src/tamga/cli/__init__.py` (register)
+- Modify: `src/bitig/cli/__init__.py` (register)
 
-### Step 11.1 — Implement `src/tamga/cli/features_cmd.py`
+### Step 11.1 — Implement `src/bitig/cli/features_cmd.py`
 
 ```python
-"""`tamga features <corpus>` — build a feature matrix and persist to parquet."""
+"""`bitig features <corpus>` — build a feature matrix and persist to parquet."""
 
 from __future__ import annotations
 
@@ -2458,14 +2458,14 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.features import (
+from bitig.features import (
     CharNgramExtractor,
     FunctionWordExtractor,
     MFWExtractor,
     PunctuationExtractor,
     WordNgramExtractor,
 )
-from tamga.io import load_corpus
+from bitig.io import load_corpus
 
 console = Console()
 
@@ -2515,14 +2515,14 @@ def features_command(
 ### Step 11.2 — Tests `tests/cli/test_features_cmd.py`
 
 ```python
-"""Tests for `tamga features`."""
+"""Tests for `bitig features`."""
 
 from pathlib import Path
 
 import pandas as pd
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "mini_corpus"
@@ -2568,12 +2568,12 @@ def test_features_char_ngram_works(tmp_path: Path) -> None:
     assert out.is_file()
 ```
 
-### Step 11.3 — Register in `src/tamga/cli/__init__.py`
+### Step 11.3 — Register in `src/bitig/cli/__init__.py`
 
 Add import and registration at the appropriate lines (keep commands alphabetically ordered):
 
 ```python
-from tamga.cli.features_cmd import features_command
+from bitig.cli.features_cmd import features_command
 ...
 app.command(name="features")(features_command)
 ```
@@ -2581,23 +2581,23 @@ app.command(name="features")(features_command)
 ### Step 11.4 — Run tests → PASS (3/3) and commit
 
 ```bash
-git add src/tamga/cli/features_cmd.py tests/cli/test_features_cmd.py src/tamga/cli/__init__.py
-git commit -m "feat(cli): tamga features — build feature matrix from corpus, save to parquet"
+git add src/bitig/cli/features_cmd.py tests/cli/test_features_cmd.py src/bitig/cli/__init__.py
+git commit -m "feat(cli): bitig features — build feature matrix from corpus, save to parquet"
 ```
 
 ---
 
-## Task 12: `tamga delta` CLI command
+## Task 12: `bitig delta` CLI command
 
 **Files:**
-- Create: `src/tamga/cli/delta_cmd.py`
+- Create: `src/bitig/cli/delta_cmd.py`
 - Create: `tests/cli/test_delta_cmd.py`
-- Modify: `src/tamga/cli/__init__.py` (register)
+- Modify: `src/bitig/cli/__init__.py` (register)
 
-### Step 12.1 — Implement `src/tamga/cli/delta_cmd.py`
+### Step 12.1 — Implement `src/bitig/cli/delta_cmd.py`
 
 ```python
-"""`tamga delta <corpus>` — fit Burrows-family Delta and attribute held-out documents."""
+"""`bitig delta <corpus>` — fit Burrows-family Delta and attribute held-out documents."""
 
 from __future__ import annotations
 
@@ -2607,9 +2607,9 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.delta import (
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.delta import (
     ArgamonLinearDelta,
     BurrowsDelta,
     CosineDelta,
@@ -2657,7 +2657,7 @@ def delta_command(
             raise typer.Exit(code=1)
         test = corpus.filter(**{key: value})
         train_docs = [d for d in corpus.documents if d not in test.documents]
-        from tamga.corpus import Corpus
+        from bitig.corpus import Corpus
         train = Corpus(documents=train_docs)
     else:
         train = corpus
@@ -2686,14 +2686,14 @@ def delta_command(
 ### Step 12.2 — Tests `tests/cli/test_delta_cmd.py`
 
 ```python
-"""Tests for `tamga delta`."""
+"""Tests for `bitig delta`."""
 
 from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"
@@ -2725,10 +2725,10 @@ def test_delta_rejects_unknown_method() -> None:
     assert result.exit_code != 0
 ```
 
-### Step 12.3 — Register in `src/tamga/cli/__init__.py`
+### Step 12.3 — Register in `src/bitig/cli/__init__.py`
 
 ```python
-from tamga.cli.delta_cmd import delta_command
+from bitig.cli.delta_cmd import delta_command
 ...
 app.command(name="delta")(delta_command)
 ```
@@ -2736,8 +2736,8 @@ app.command(name="delta")(delta_command)
 ### Step 12.4 — Run tests → PASS and commit
 
 ```bash
-git add src/tamga/cli/delta_cmd.py tests/cli/test_delta_cmd.py src/tamga/cli/__init__.py
-git commit -m "feat(cli): tamga delta — Burrows-family Delta attribution with metadata-driven train/test split"
+git add src/bitig/cli/delta_cmd.py tests/cli/test_delta_cmd.py src/bitig/cli/__init__.py
+git commit -m "feat(cli): bitig delta — Burrows-family Delta attribution with metadata-driven train/test split"
 ```
 
 ---
@@ -2750,7 +2750,7 @@ git commit -m "feat(cli): tamga delta — Burrows-family Delta attribution with 
 ### Step 13.1 — Write the test
 
 ```python
-"""Integration test — tamga extractors and delta classifiers compose cleanly in sklearn.Pipeline
+"""Integration test — bitig extractors and delta classifiers compose cleanly in sklearn.Pipeline
 with cross_validate + LeaveOneGroupOut CV.
 
 This is the load-bearing demonstration that our architectural promise of sklearn compatibility
@@ -2764,9 +2764,9 @@ import pytest
 from sklearn.model_selection import LeaveOneGroupOut, cross_val_score
 from sklearn.pipeline import Pipeline
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.delta import BurrowsDelta
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.delta import BurrowsDelta
 
 pytestmark = pytest.mark.integration
 
@@ -2825,18 +2825,18 @@ git commit -m "test: sklearn Pipeline + cross_val_score + LeaveOneGroupOut integ
 ## Task 14: Public API + docstrings + phase-2 tag
 
 **Files:**
-- Modify: `src/tamga/__init__.py` (re-export new public surface)
+- Modify: `src/bitig/__init__.py` (re-export new public surface)
 - Modify: `README.md` (update Phase 2 status)
 
-### Step 14.1 — `src/tamga/__init__.py`
+### Step 14.1 — `src/bitig/__init__.py`
 
 ```python
-"""tamga — next-generation computational stylometry."""
+"""bitig — next-generation computational stylometry."""
 
-from tamga._version import __version__
-from tamga.config import StudyConfig, load_config, resolve_config
-from tamga.corpus import Corpus, Document
-from tamga.features import (
+from bitig._version import __version__
+from bitig.config import StudyConfig, load_config, resolve_config
+from bitig.corpus import Corpus, Document
+from bitig.features import (
     BaseFeatureExtractor,
     CharNgramExtractor,
     DependencyBigramExtractor,
@@ -2850,8 +2850,8 @@ from tamga.features import (
     SentenceLengthExtractor,
     WordNgramExtractor,
 )
-from tamga.io import load_corpus, load_metadata
-from tamga.methods.delta import (
+from bitig.io import load_corpus, load_metadata
+from bitig.methods.delta import (
     ArgamonLinearDelta,
     BurrowsDelta,
     CosineDelta,
@@ -2859,8 +2859,8 @@ from tamga.methods.delta import (
     EderSimpleDelta,
     QuadraticDelta,
 )
-from tamga.preprocess.pipeline import ParsedCorpus, SpacyPipeline
-from tamga.provenance import Provenance
+from bitig.preprocess.pipeline import ParsedCorpus, SpacyPipeline
+from bitig.provenance import Provenance
 
 __all__ = [
     "__version__",
@@ -2887,7 +2887,7 @@ Change the `## Status` paragraph to:
 **Phase 2 — Features & Delta.** Ships feature extractors (MFW, char/word/POS n-grams,
 dependency bigrams, function words, punctuation, lexical diversity, readability, sentence length)
 and the full Delta family (Burrows, Eder, Eder-Simple, Argamon Linear, Cosine, Quadratic).
-`tamga features` and `tamga delta` CLI commands work end-to-end; the Federalist Papers parity
+`bitig features` and `bitig delta` CLI commands work end-to-end; the Federalist Papers parity
 test attributes the disputed paper 49 to Madison using Burrows/Eder/Cosine Delta on 500 MFW.
 
 Phases 3 (Zeta/reducers/clustering/consensus/classify), 4 (embeddings + Bayesian),
@@ -2898,7 +2898,7 @@ Phases 3 (Zeta/reducers/clustering/consensus/classify), 4 (embeddings + Bayesian
 
 ```bash
 source .venv/bin/activate
-pytest -n auto --cov=tamga --cov-report=term-missing -q
+pytest -n auto --cov=bitig --cov-report=term-missing -q
 pre-commit run --all-files
 ```
 
@@ -2907,7 +2907,7 @@ Expected: all tests pass, coverage ≥88% on feature modules, ≥90% on delta mo
 ### Step 14.4 — Tag and commit
 
 ```bash
-git add src/tamga/__init__.py README.md
+git add src/bitig/__init__.py README.md
 git commit -m "feat: public API re-exports for Phase 2 (features + Delta family)"
 git tag -a phase-2-features-delta -m "Phase 2 complete: 10 feature extractors, 6 Delta variants, Federalist parity test passes"
 ```
@@ -2923,15 +2923,15 @@ uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 python -m spacy download en_core_web_sm
 pre-commit run --all-files
-pytest -n auto --cov=tamga --cov-report=term-missing -q
+pytest -n auto --cov=bitig --cov-report=term-missing -q
 
 # Federalist parity
 pytest tests/integration/test_federalist_parity.py -v -m integration    # must show 3 passing
 
 # CLI end-to-end
-tamga features ./tests/fixtures/mini_corpus \
+bitig features ./tests/fixtures/mini_corpus \
     --type mfw --n 20 --scale none --output /tmp/feats.parquet
-tamga delta ./tests/fixtures/federalist \
+bitig delta ./tests/fixtures/federalist \
     --method burrows --mfw 500 \
     --metadata ./tests/fixtures/federalist/metadata.tsv \
     --group-by author --test-filter role=test
@@ -2944,7 +2944,7 @@ Every command above must exit 0.
 
 ## Self-Review Notes
 
-- **Spec coverage:** every v0.1 feature extractor from spec §5 except `SentenceEmbeddingExtractor` / `ContextualEmbeddingExtractor` (those are Phase 4, the `[embeddings]` extra). All six Delta variants from §6.1. `tamga features` and `tamga delta` from §8.1. sklearn protocol integration from §7. Federalist parity from §13.1.
+- **Spec coverage:** every v0.1 feature extractor from spec §5 except `SentenceEmbeddingExtractor` / `ContextualEmbeddingExtractor` (those are Phase 4, the `[embeddings]` extra). All six Delta variants from §6.1. `bitig features` and `bitig delta` from §8.1. sklearn protocol integration from §7. Federalist parity from §13.1.
 
 - **Deferred to Phase 3:** Craig's Zeta, PCA/MDS/t-SNE/UMAP reducers, hierarchical/k-means/HDBSCAN clustering, bootstrap consensus trees, sklearn classifiers (svm/rf/hgbm/logreg), leave-one-author-out CV helper.
 

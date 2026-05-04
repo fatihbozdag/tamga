@@ -1,7 +1,7 @@
 """Tests for PunctuationExtractor."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.punctuation import PunctuationExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.punctuation import PunctuationExtractor
 
 
 def _corpus(*texts: str) -> Corpus:

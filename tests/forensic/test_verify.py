@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.features import FeatureMatrix
-from tamga.forensic import GeneralImpostors
+from bitig.features import FeatureMatrix
+from bitig.forensic import GeneralImpostors
 
 
 def _make_fm(X: np.ndarray, doc_ids: list[str], feature_names: list[str]) -> FeatureMatrix:  # noqa: N803

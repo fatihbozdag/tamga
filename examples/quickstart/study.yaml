@@ -9,7 +9,7 @@
 #   - Craig's Zeta   → the words that most distinguish Hamilton from Madison
 #
 # Run it with:
-#   tamga run examples/quickstart/study.yaml --name demo
+#   bitig run examples/quickstart/study.yaml --name demo
 
 name: quickstart
 seed: 42

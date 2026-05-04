@@ -1,10 +1,10 @@
-"""Smoke tests for ``tamga gui`` — the full GUI is not launched here."""
+"""Smoke tests for ``bitig gui`` — the full GUI is not launched here."""
 
 from __future__ import annotations
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 

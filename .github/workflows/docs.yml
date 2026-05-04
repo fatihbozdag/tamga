@@ -6,13 +6,13 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
-      - "src/tamga/**/*.py"
+      - "src/bitig/**/*.py"
       - ".github/workflows/docs.yml"
   pull_request:
     paths:
       - "docs/**"
       - "mkdocs.yml"
-      - "src/tamga/**/*.py"
+      - "src/bitig/**/*.py"
       - ".github/workflows/docs.yml"
   workflow_dispatch:
 

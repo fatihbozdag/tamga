@@ -1,6 +1,6 @@
 # study.yaml şeması
 
-`tamga run` tarafından tüketilen bildirimsel çalışma yapılandırması. Minimal bir örnek:
+`bitig run` tarafından tüketilen bildirimsel çalışma yapılandırması. Minimal bir örnek:
 
 ```yaml
 name: my-study
@@ -94,7 +94,7 @@ output:
 
 ```yaml
 cache:
-  dir: .tamga/cache     # spaCy DocBin önbellek konumu
+  dir: .bitig/cache     # spaCy DocBin önbellek konumu
 ```
 
 ## preprocess

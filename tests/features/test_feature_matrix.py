@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from tamga.features import FeatureMatrix
+from bitig.features import FeatureMatrix
 
 
 def _fm(X: np.ndarray, feature_names: list[str], doc_ids: list[str] | None = None) -> FeatureMatrix:  # noqa: N803

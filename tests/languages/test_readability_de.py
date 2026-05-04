@@ -1,6 +1,6 @@
 """Tests for German readability — Flesch-Amstad (1978) and Wiener Sachtextformel."""
 
-from tamga.languages.readability_de import (
+from bitig.languages.readability_de import (
     count_syllables_de,
     flesch_amstad,
     wiener_sachtextformel,
@@ -32,8 +32,8 @@ def test_wiener_sachtextformel_scoring_sense() -> None:
 
 
 def test_german_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(
         documents=[Document(id="d0", text="Der Hund bellt.")],

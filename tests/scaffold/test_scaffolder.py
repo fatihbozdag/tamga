@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tamga.scaffold import scaffold_project
+from bitig.scaffold import scaffold_project
 
 
 def test_scaffold_creates_expected_layout(tmp_path: Path) -> None:
@@ -15,7 +15,7 @@ def test_scaffold_creates_expected_layout(tmp_path: Path) -> None:
     assert (target / "README.md").is_file()
     assert (target / ".gitignore").is_file()
     assert (target / "corpus").is_dir()
-    assert (target / ".tamga" / "cache").is_dir()
+    assert (target / ".bitig" / "cache").is_dir()
 
 
 def test_scaffold_refuses_to_overwrite(tmp_path: Path) -> None:

@@ -6,7 +6,7 @@ from shutil import copytree
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -36,7 +36,7 @@ def test_end_to_end_init_ingest_info(tmp_path: Path) -> None:
             "--metadata",
             str(project / "corpus" / "metadata.tsv"),
             "--cache-dir",
-            str(project / ".tamga" / "cache"),
+            str(project / ".bitig" / "cache"),
             "--spacy-model",
             "en_core_web_sm",
         ],
@@ -44,7 +44,7 @@ def test_end_to_end_init_ingest_info(tmp_path: Path) -> None:
     assert r_ingest.exit_code == 0, r_ingest.stdout
 
     # 4. cache reports 4 entries
-    r_size = runner.invoke(app, ["cache", "size", "--cache-dir", str(project / ".tamga" / "cache")])
+    r_size = runner.invoke(app, ["cache", "size", "--cache-dir", str(project / ".bitig" / "cache")])
     assert r_size.exit_code == 0
     assert "4 entries" in r_size.stdout
 

@@ -6,9 +6,9 @@ This is the release gate for Phase 2: we ship if this test passes.
 
 import pytest
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.delta import BurrowsDelta, CosineDelta, EderDelta
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.delta import BurrowsDelta, CosineDelta, EderDelta
 
 pytestmark = pytest.mark.integration
 

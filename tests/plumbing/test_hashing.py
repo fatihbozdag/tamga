@@ -2,7 +2,7 @@
 
 import pytest
 
-from tamga.plumbing.hashing import hash_bytes, hash_mapping, hash_text, short_hash
+from bitig.plumbing.hashing import hash_bytes, hash_mapping, hash_text, short_hash
 
 
 def test_hash_text_is_stable_across_calls():

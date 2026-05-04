@@ -24,7 +24,7 @@ Key properties:
 
 ## Available extractors
 
-Import from `tamga`:
+Import from `bitig`:
 
 | Extractor | Input | Output |
 |---|---|---|
@@ -38,8 +38,8 @@ Import from `tamga`:
 | `ReadabilityExtractor()` | Corpus | six readability indices (Flesch, FK-grade, Gunning Fog, Coleman-Liau, ARI, SMOG) |
 | `SentenceLengthExtractor()` | Corpus | mean, SD, skew of per-sentence tokens |
 | `LexicalDiversityExtractor()` | Corpus | TTR, MATTR, MTLD, HD-D, Yule's K/I, Herdan's C, Simpson's D |
-| `SentenceEmbeddingExtractor(model=...)` | Corpus | sentence-transformers pooled embedding (extra: `tamga[embeddings]`) |
-| `ContextualEmbeddingExtractor(model=..., pooling=...)` | Corpus | HF transformer hidden-state vectors (extra: `tamga[embeddings]`) |
+| `SentenceEmbeddingExtractor(model=...)` | Corpus | sentence-transformers pooled embedding (extra: `bitig[embeddings]`) |
+| `ContextualEmbeddingExtractor(model=..., pooling=...)` | Corpus | HF transformer hidden-state vectors (extra: `bitig[embeddings]`) |
 
 ### Extractor detail
 
@@ -149,7 +149,7 @@ sentence-transformer output per document. Strong in classification + clustering;
 fast enough for moderate corpora.
 *Don't use when:* your hardware lacks GPU / MPS and your corpus is large (CPU
 inference is slow), or when interpretability matters (these vectors are opaque).
-*Expect:* `(n_docs, embedding_dim)` dense matrix. Requires `tamga[embeddings]`.
+*Expect:* `(n_docs, embedding_dim)` dense matrix. Requires `bitig[embeddings]`.
 
 #### ContextualEmbeddingExtractor
 `ContextualEmbeddingExtractor(model="bert-base-multilingual-cased", pooling="mean")`
@@ -159,7 +159,7 @@ language-specific embeddings (e.g., `dbmdz/bert-base-turkish-cased` for Turkish)
 with configurable pooling.
 *Don't use when:* you don't need a specific model's representation — use
 `SentenceEmbeddingExtractor` for a lighter, faster default.
-*Expect:* `(n_docs, hidden_dim)` dense matrix. Requires `tamga[embeddings]`.
+*Expect:* `(n_docs, hidden_dim)` dense matrix. Requires `bitig[embeddings]`.
 
 ## Composing features
 
@@ -168,7 +168,7 @@ Two ways to build a multi-feature matrix:
 ### Python
 
 ```python
-from tamga import MFWExtractor, PunctuationExtractor
+from bitig import MFWExtractor, PunctuationExtractor
 
 mfw = MFWExtractor(n=200, scale="zscore").fit_transform(corpus)
 punct = PunctuationExtractor().fit_transform(corpus)
@@ -191,7 +191,7 @@ Methods can reference feature ids; the runner builds each matrix once and reuses
 
 ## Forensic feature extractors
 
-Two topic-invariant extractors live under `tamga.forensic`:
+Two topic-invariant extractors live under `bitig.forensic`:
 
 #### CategorizedCharNgramExtractor
 `CategorizedCharNgramExtractor(n=4, categories=("prefix","suffix","punct"))`

@@ -1,11 +1,11 @@
-"""Tests for `tamga delta`."""
+"""Tests for `bitig delta`."""
 
 from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"

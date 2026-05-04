@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from tamga.plumbing.seeds import derive_rng, derive_seed
+from bitig.plumbing.seeds import derive_rng, derive_seed
 
 
 def test_derive_seed_is_deterministic():

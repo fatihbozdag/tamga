@@ -1,14 +1,14 @@
 # Corpus
 
 A `Corpus` is a list of `Document`s plus (implicitly) their metadata. Both are dataclasses
-defined in `tamga.corpus`.
+defined in `bitig.corpus`.
 
 ## Building a Corpus
 
 ### From the filesystem
 
 ```bash
-tamga ingest corpus/ --metadata corpus/metadata.tsv
+bitig ingest corpus/ --metadata corpus/metadata.tsv
 ```
 
 `metadata.tsv` is a tab-separated file where the first column is `filename` (matched
@@ -24,7 +24,7 @@ fed_50.txt	Unknown	1788	political essay
 ### In Python
 
 ```python
-from tamga.io import load_corpus
+from bitig.io import load_corpus
 corpus = load_corpus("corpus/", metadata="corpus/metadata.tsv", strict=True)
 ```
 
@@ -34,7 +34,7 @@ corpus = load_corpus("corpus/", metadata="corpus/metadata.tsv", strict=True)
 ### Programmatically
 
 ```python
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 corpus = Corpus(documents=[
     Document(id="q", text=q_text, metadata={"role": "questioned"}),

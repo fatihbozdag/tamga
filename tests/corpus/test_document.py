@@ -2,7 +2,7 @@
 
 import pytest
 
-from tamga.corpus.document import Document
+from bitig.corpus.document import Document
 
 
 def test_document_basic_construction():

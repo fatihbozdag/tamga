@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.forensic.char_ngrams import (
+from bitig.corpus import Corpus, Document
+from bitig.forensic.char_ngrams import (
     CategorizedCharNgramExtractor,
     classify_ngram,
 )

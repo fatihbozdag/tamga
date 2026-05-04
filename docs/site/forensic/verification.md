@@ -4,7 +4,7 @@ Authorship *verification* is a one-class decision: **did this specific candidate
 this questioned document?** Real case-work rarely offers a closed candidate set, so
 verification — not attribution — is the forensically canonical task.
 
-tamga ships two complementary verifiers.
+bitig ships two complementary verifiers.
 
 ## General Impostors
 
@@ -26,8 +26,8 @@ and a pool of impostor documents I drawn from other authors, repeatedly:
 The fraction of winning iterations is the verification score in [0, 1].
 
 ```python
-from tamga.features import MFWExtractor
-from tamga.forensic import GeneralImpostors
+from bitig.features import MFWExtractor
+from bitig.forensic import GeneralImpostors
 
 # Build features over the pooled corpus so Q, K, and impostors share one vocabulary.
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(pooled_corpus)
@@ -81,8 +81,8 @@ removed, the classifier collapses quickly (large drop). Different-author documen
 yielding discriminating features, so accuracy stays high (small drop).
 
 ```python
-from tamga.features import MFWExtractor
-from tamga.forensic import Unmasking
+from bitig.features import MFWExtractor
+from bitig.forensic import Unmasking
 
 unmasking = Unmasking(chunk_size=500, n_rounds=10, n_eliminate=3, seed=42)
 result = unmasking.verify(
@@ -105,10 +105,10 @@ result.values["eliminated_per_round"]   # auditable per-round feature removal
 
 ## Reference
 
-::: tamga.forensic.verify.GeneralImpostors
+::: bitig.forensic.verify.GeneralImpostors
     options:
       show_root_full_path: false
 
-::: tamga.forensic.unmasking.Unmasking
+::: bitig.forensic.unmasking.Unmasking
     options:
       show_root_full_path: false

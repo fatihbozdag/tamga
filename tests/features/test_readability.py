@@ -1,7 +1,7 @@
 """Tests for ReadabilityExtractor."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.readability import ReadabilityExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.readability import ReadabilityExtractor
 
 
 def _corpus(*texts: str) -> Corpus:
@@ -28,8 +28,8 @@ def test_readability_per_document() -> None:
 
 
 def test_readability_resolves_english_defaults_from_registry() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(documents=[Document(id="d0", text="A short simple sentence.")], language="en")
     ex = ReadabilityExtractor()  # indices=None
@@ -40,8 +40,8 @@ def test_readability_resolves_english_defaults_from_registry() -> None:
 def test_readability_rejects_unsupported_index_for_language() -> None:
     import pytest
 
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(documents=[Document(id="d0", text="x")], language="en")
     ex = ReadabilityExtractor(indices=["atesman"])  # Turkish index on English corpus
@@ -50,8 +50,8 @@ def test_readability_rejects_unsupported_index_for_language() -> None:
 
 
 def test_readability_explicit_language_overrides_corpus() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     # Even if corpus is stamped 'tr', a user may override by passing language='en'.
     c = Corpus(documents=[Document(id="d0", text="A simple sentence.")], language="tr")

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Rewrite 8 existing docs pages and add 1 new "Choosing a method" page so readers can tell *what tamga is for* and *which method/metric to use when*, while experienced readers still get full technical detail.
+**Goal:** Rewrite 8 existing docs pages and add 1 new "Choosing a method" page so readers can tell *what bitig is for* and *which method/metric to use when*, while experienced readers still get full technical detail.
 
 **Architecture:** Each method and metric entry gets a three-line gloss block (*Use when* / *Don't use when* / *Expect*) placed above its existing technical content. A new `concepts/choosing.md` surfaces a task-oriented decision table routing readers to the right method. Turkish mirrors are updated in the same commit per page, using the pinned glossary at `docs/site/_translations/tr-glossary.md`.
 
@@ -100,7 +100,7 @@ Create `docs/site/concepts/choosing.md` with the following verbatim content:
 ````markdown
 # Choosing a method
 
-Not sure which tamga method fits your question? This page answers *"I want to do X —
+Not sure which bitig method fits your question? This page answers *"I want to do X —
 what should I reach for?"* for the most common cases. The method names link to their
 primary entries in [Methods](methods.md) and [Forensic toolkit](../forensic/index.md)
 for the full detail.
@@ -112,7 +112,7 @@ for the full detail.
 | Attribute 1 questioned doc to N candidate authors | N authors × ~2k+ words known each; 1 questioned doc | [`CosineDelta`](methods.md#cosinedelta) (robust default) or [`BurrowsDelta`](methods.md#burrowsdelta) (classic) | nearest-author rank | [Federalist](../tutorials/federalist.md) |
 | Cluster an unknown corpus by stylistic similarity | 20+ docs, labels optional | [`PCAReducer`](methods.md#pcareducer) + [`KMeansCluster`](methods.md#kmeanscluster) or [`HDBSCANCluster`](methods.md#hdbscancluster) | silhouette, visual inspection | — |
 | Compare two pre-defined author groups | 10+ docs per group | [`ZetaClassic`](methods.md#zetaclassic) or [`ZetaEder`](methods.md#zetaeder) | per-word distinctiveness score | — |
-| Classify docs into groups with ML | 20+ docs per class | [`build_classifier`](methods.md#classification--cv) + [`cross_validate_tamga`](methods.md#classification--cv) | CV accuracy / F1 | — |
+| Classify docs into groups with ML | 20+ docs per class | [`build_classifier`](methods.md#classification--cv) + [`cross_validate_bitig`](methods.md#classification--cv) | CV accuracy / F1 | — |
 | Reduce features for visualisation | any `FeatureMatrix` | [`PCAReducer`](methods.md#pcareducer) / [`UMAPReducer`](methods.md#umapreducer) / [`TSNEReducer`](methods.md#tsnereducer) / [`MDSReducer`](methods.md#mdsreducer) | visual inspection | — |
 | Bayesian single-candidate attribution | N candidates × ≥1k words; 1 questioned doc | [`BayesianAuthorshipAttributor`](methods.md#bayesianauthorshipattributor) | posterior probability per candidate | — |
 | Bootstrap-consensus tree across MFW bands | 10+ docs, multiple MFW bands | [`BootstrapConsensus`](methods.md#bootstrapconsensus) | Newick tree with clade support | — |
@@ -151,7 +151,7 @@ Use this exact content:
 ````markdown
 # Yöntem seçimi
 
-Hangi tamga yönteminin sorunuza uyacağından emin değil misiniz? Bu sayfa en yaygın
+Hangi bitig yönteminin sorunuza uyacağından emin değil misiniz? Bu sayfa en yaygın
 durumlar için *"X'i yapmak istiyorum — hangisini kullanmalıyım?"* sorusunu yanıtlar.
 Yöntem adları tam ayrıntı için [Yöntemler](methods.md) ve
 [Adli araç seti](../forensic/index.md) sayfalarındaki birincil girdilere bağlanır.
@@ -163,7 +163,7 @@ Yöntem adları tam ayrıntı için [Yöntemler](methods.md) ve
 | 1 sorgulanan belgeyi N aday yazar arasından tespit etmek | Her aday için ~2k+ sözcük bilinen metin; 1 sorgulanan belge | [`CosineDelta`](methods.md#cosinedelta) (sağlam varsayılan) veya [`BurrowsDelta`](methods.md#burrowsdelta) (klasik) | en yakın yazar sıralaması | [Federalist](../tutorials/federalist.md) |
 | Bilinmeyen bir derlemi biçemsel benzerlikle kümelemek | 20+ belge, etiketler isteğe bağlı | [`PCAReducer`](methods.md#pcareducer) + [`KMeansCluster`](methods.md#kmeanscluster) veya [`HDBSCANCluster`](methods.md#hdbscancluster) | silhouette, görsel inceleme | — |
 | Önceden tanımlı iki yazar grubunu karşılaştırmak | Her grup için 10+ belge | [`ZetaClassic`](methods.md#zetaclassic) veya [`ZetaEder`](methods.md#zetaeder) | sözcük başına ayırt edicilik skoru | — |
-| Belgeleri makine öğrenmesiyle sınıflandırmak | Her sınıf için 20+ belge | [`build_classifier`](methods.md#classification--cv) + [`cross_validate_tamga`](methods.md#classification--cv) | CV doğruluğu / F1 | — |
+| Belgeleri makine öğrenmesiyle sınıflandırmak | Her sınıf için 20+ belge | [`build_classifier`](methods.md#classification--cv) + [`cross_validate_bitig`](methods.md#classification--cv) | CV doğruluğu / F1 | — |
 | Görselleştirme için öznitelikleri boyut indirgemek | herhangi bir `FeatureMatrix` | [`PCAReducer`](methods.md#pcareducer) / [`UMAPReducer`](methods.md#umapreducer) / [`TSNEReducer`](methods.md#tsnereducer) / [`MDSReducer`](methods.md#mdsreducer) | görsel inceleme | — |
 | Bayes yaklaşımıyla tek-aday yazar tespiti | N aday × ≥1k sözcük; 1 sorgulanan belge | [`BayesianAuthorshipAttributor`](methods.md#bayesianauthorshipattributor) | aday başına sonsal olasılık | — |
 | MFW bantları üzerinde bootstrap konsensüs ağacı | 10+ belge, birden fazla MFW bandı | [`BootstrapConsensus`](methods.md#bootstrapconsensus) | klad desteği ile Newick ağacı | — |
@@ -229,20 +229,20 @@ git commit -m "docs(concepts): add \"Choosing a method\" decision-table page (EN
 
 ---
 
-### Task 3: Rewrite `concepts/index.md` with "What tamga is for" intro (EN + TR)
+### Task 3: Rewrite `concepts/index.md` with "What bitig is for" intro (EN + TR)
 
 **Files:**
 - Modify: `docs/site/concepts/index.md`
 - Modify: `docs/site/concepts/index.tr.md`
 
-- [ ] **Step 1: Insert the "What tamga is for" section in the English page**
+- [ ] **Step 1: Insert the "What bitig is for" section in the English page**
 
 Open `docs/site/concepts/index.md`. Immediately after the `# Concepts` heading (and before the existing `## The pipeline` heading), insert this new section verbatim:
 
 ```markdown
-## What tamga is for
+## What bitig is for
 
-tamga answers three questions about who wrote a text:
+bitig answers three questions about who wrote a text:
 
 - **Attribution** — which of a set of candidate authors most likely wrote this document?
 - **Verification** — was this document written by *this specific* person?
@@ -263,9 +263,9 @@ The existing `## The pipeline`, `## Provenance, everywhere`, and `## Read next` 
 Open `docs/site/concepts/index.tr.md`. Immediately after the `# Kavramlar` (or equivalent) heading and before the first existing H2, insert:
 
 ```markdown
-## tamga ne işe yarar
+## bitig ne işe yarar
 
-tamga, bir metni kimin yazdığına dair üç soruyu yanıtlar:
+bitig, bir metni kimin yazdığına dair üç soruyu yanıtlar:
 
 - **Yazar tespiti** — bir aday yazar kümesinden hangisinin bu belgeyi yazma olasılığı
   en yüksektir?
@@ -290,7 +290,7 @@ Expected: PASS.
 
 ```bash
 git add docs/site/concepts/index.md docs/site/concepts/index.tr.md
-git commit -m "docs(concepts): add \"What tamga is for\" intro to concepts landing (EN + TR)"
+git commit -m "docs(concepts): add \"What bitig is for\" intro to concepts landing (EN + TR)"
 ```
 
 ---
@@ -419,7 +419,7 @@ miss curved manifolds.
 structure — typically the best-looking 2-D visualisation of stylometric features.
 *Don't use when:* you need reproducibility without pinning a seed — UMAP is
 stochastic. Always set `random_state`.
-*Expect:* `coords` (n_docs × n_components). Requires `tamga[viz]`.
+*Expect:* `coords` (n_docs × n_components). Requires `bitig[viz]`.
 
 ### TSNEReducer
 `TSNEReducer(n_components=2, perplexity=30)`
@@ -530,7 +530,7 @@ Dirichlet smoothing — the Wallace–Mosteller Federalist approach.
 *Don't use when:* your features are z-scored (it expects raw counts; use
 `MFWExtractor(scale="none")`).
 *Expect:* `predict_proba` returns per-document posterior probability vectors over
-candidates. No need for `tamga[bayesian]` — this variant is pure NumPy.
+candidates. No need for `bitig[bayesian]` — this variant is pure NumPy.
 
 ### HierarchicalGroupComparison
 `HierarchicalGroupComparison(group_a=..., group_b=..., feature_name=...)`
@@ -540,15 +540,15 @@ stylistic feature, with full per-author uncertainty — a PyMC varying-intercept
 *Don't use when:* you only have one author per group (no pooling signal) or need a
 fast screening method (MCMC sampling is slow; use a frequentist Zeta first).
 *Expect:* an arviz `InferenceData` with posterior draws for the group-difference
-parameter. Requires `tamga[bayesian]`.
+parameter. Requires `bitig[bayesian]`.
 ```
 
 - [ ] **Step 8: Add a gloss block before the "Forensic methods" table**
 
-Under `## Forensic methods`, right after the `Under tamga.forensic:` line and before the table, insert:
+Under `## Forensic methods`, right after the `Under bitig.forensic:` line and before the table, insert:
 
 ```markdown
-*Use when:* you want tamga's one-case verification or calibration layer — see the
+*Use when:* you want bitig's one-case verification or calibration layer — see the
 dedicated [Forensic toolkit](../forensic/index.md) pages for gloss-per-method detail.
 *Don't use when:* you have a closed candidate set and just want attribution — use
 Delta variants above.
@@ -710,7 +710,7 @@ sentence-transformer output per document. Strong in classification + clustering;
 fast enough for moderate corpora.
 *Don't use when:* your hardware lacks GPU / MPS and your corpus is large (CPU
 inference is slow), or when interpretability matters (these vectors are opaque).
-*Expect:* `(n_docs, embedding_dim)` dense matrix. Requires `tamga[embeddings]`.
+*Expect:* `(n_docs, embedding_dim)` dense matrix. Requires `bitig[embeddings]`.
 
 #### ContextualEmbeddingExtractor
 `ContextualEmbeddingExtractor(model="bert-base-multilingual-cased", pooling="mean")`
@@ -720,7 +720,7 @@ language-specific embeddings (e.g., `dbmdz/bert-base-turkish-cased` for Turkish)
 with configurable pooling.
 *Don't use when:* you don't need a specific model's representation — use
 `SentenceEmbeddingExtractor` for a lighter, faster default.
-*Expect:* `(n_docs, hidden_dim)` dense matrix. Requires `tamga[embeddings]`.
+*Expect:* `(n_docs, hidden_dim)` dense matrix. Requires `bitig[embeddings]`.
 ````
 
 - [ ] **Step 2: Add gloss blocks to the "Forensic feature extractors" section**
@@ -808,7 +808,7 @@ Replace it with a four-column table that adds "Use for":
 
 - [ ] **Step 2: Add a gloss block before each `:::` autodoc directive**
 
-Under `## Reference` (which is a list of `::: tamga.forensic.metrics.<fn>` directives), insert a gloss paragraph immediately before each directive. For example, before `::: tamga.forensic.metrics.auc`:
+Under `## Reference` (which is a list of `::: bitig.forensic.metrics.<fn>` directives), insert a gloss paragraph immediately before each directive. For example, before `::: bitig.forensic.metrics.auc`:
 
 ```markdown
 ### AUC
@@ -820,7 +820,7 @@ set the threshold.
 *Expect:* a single number in `[0.5, 1]`. Does not depend on predicted probabilities
 being calibrated.
 
-::: tamga.forensic.metrics.auc
+::: bitig.forensic.metrics.auc
 ```
 
 Apply the same pattern before the other six autodoc directives:
@@ -833,7 +833,7 @@ honestly — accuracy plus a partial-credit bonus for abstention.
 *Don't use when:* your system always outputs a decision; `c@1` reduces to accuracy.
 *Expect:* a single number in `[0, 1]`. Dominates accuracy only when abstention rate > 0.
 
-::: tamga.forensic.metrics.c_at_1
+::: bitig.forensic.metrics.c_at_1
 
 ### F0.5u
 
@@ -842,7 +842,7 @@ since PAN 2022, precision-weighted and with a non-answer penalty.
 *Don't use when:* you're reporting to a non-PAN audience; it's a specialist metric.
 *Expect:* a single number in `[0, 1]`.
 
-::: tamga.forensic.metrics.f05u
+::: bitig.forensic.metrics.f05u
 
 ### C_llr
 
@@ -853,7 +853,7 @@ log-likelihood ratios.
 *Expect:* a single non-negative number; 0 is perfect; 1 is uninformative (matches a
 coin flip).
 
-::: tamga.forensic.metrics.cllr
+::: bitig.forensic.metrics.cllr
 
 ### ECE
 
@@ -863,7 +863,7 @@ claimed confidence and checks whether actual accuracy matches.
 noisy.
 *Expect:* a single number in `[0, 1]`; 0 is perfect calibration.
 
-::: tamga.forensic.metrics.ece
+::: bitig.forensic.metrics.ece
 
 ### Brier
 
@@ -872,7 +872,7 @@ outputs) — classic squared-error between predicted probability and ground trut
 *Don't use when:* you need a forensic LR-specific metric — use `C_llr`.
 *Expect:* a single number in `[0, 1]`; 0 is perfect.
 
-::: tamga.forensic.metrics.brier
+::: bitig.forensic.metrics.brier
 
 ### Tippett
 
@@ -882,10 +882,10 @@ log-LRs as cumulative distributions.
 *Expect:* two arrays of cumulative LRs (target and non-target) ready for a matplotlib
 plot.
 
-::: tamga.forensic.metrics.tippett
+::: bitig.forensic.metrics.tippett
 ```
 
-Also add a gloss block above the `::: tamga.forensic.metrics.compute_pan_report` directive near the top of the `## Reference` section:
+Also add a gloss block above the `::: bitig.forensic.metrics.compute_pan_report` directive near the top of the `## Reference` section:
 
 ```markdown
 ### compute_pan_report
@@ -895,9 +895,9 @@ metric in one call — AUC, c@1, F0.5u, Brier, ECE, (optionally) C_llr.
 *Don't use when:* you only need one metric; each metric function is callable directly.
 *Expect:* a `PANReport` dataclass with every field populated.
 
-::: tamga.forensic.metrics.compute_pan_report
+::: bitig.forensic.metrics.compute_pan_report
 
-::: tamga.forensic.metrics.PANReport
+::: bitig.forensic.metrics.PANReport
 ```
 
 - [ ] **Step 3: Mirror the changes in `evaluation.tr.md`**
@@ -1085,7 +1085,7 @@ where the two documents *should* share content). Use regular features then.
 *Expect:* feature extractors that discard most content-word signal while preserving
 function-word, morphology, and punctuation patterns.
 
-Two techniques live under `tamga.forensic`: Sapkota char-n-gram *categorisation* and
+Two techniques live under `bitig.forensic`: Sapkota char-n-gram *categorisation* and
 Stamatatos *distortion*. Both compose with any downstream verifier.
 ```
 
@@ -1175,16 +1175,16 @@ its `C_llr` directly.
 
 - [ ] **Step 3: Add gloss for `build_forensic_report`**
 
-Find the `## build_forensic_report` (or `::: tamga.report.build_forensic_report`) section. Insert before the autodoc directive:
+Find the `## build_forensic_report` (or `::: bitig.report.build_forensic_report`) section. Insert before the autodoc directive:
 
 ```markdown
 *Use when:* you want a single-call path from `Result` to court-ready HTML — hands the
 chain-of-custody fields, calibrated scores, verbal scale, and Tippett plot into a
 Jinja2 template.
 *Don't use when:* you're producing a research paper figure — use the standard
-`tamga report` CLI or the plotting helpers in `concepts/methods.md`.
+`bitig report` CLI or the plotting helpers in `concepts/methods.md`.
 *Expect:* a path to the rendered HTML file; optional PDF export requires
-`tamga[reports]`.
+`bitig[reports]`.
 ```
 
 - [ ] **Step 4: Mirror in `reporting.tr.md`**
@@ -1320,7 +1320,7 @@ Append a line to `/Users/fatihbozdag/.claude/projects/-Users-fatihbozdag-Downloa
 **Spec coverage check:**
 
 - ✅ New `concepts/choosing.md` with task-oriented decision table — Task 2.
-- ✅ `concepts/index.md` "What tamga is for" intro — Task 3.
+- ✅ `concepts/index.md` "What bitig is for" intro — Task 3.
 - ✅ `concepts/methods.md` per-method gloss blocks — Task 4.
 - ✅ `concepts/features.md` per-extractor gloss blocks — Task 5.
 - ✅ `forensic/evaluation.md` metric "Use for" column + per-metric glosses — Task 6.

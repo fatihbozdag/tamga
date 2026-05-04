@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from tamga.features import FeatureMatrix
-from tamga.methods.delta.base import _DeltaBase
+from bitig.features import FeatureMatrix
+from bitig.methods.delta.base import _DeltaBase
 
 
 class _L2Delta(_DeltaBase):

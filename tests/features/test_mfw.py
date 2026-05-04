@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features import FeatureMatrix
-from tamga.features.mfw import MFWExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features import FeatureMatrix
+from bitig.features.mfw import MFWExtractor
 
 
 def _corpus(*texts: str) -> Corpus:

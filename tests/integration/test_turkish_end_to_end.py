@@ -1,7 +1,7 @@
 """End-to-end Turkish pipeline: Stanza parse -> features -> readability.
 
 Skipped unless:
-  - ``spacy-stanza`` and ``stanza`` are installed (``pip install 'tamga[turkish]'``)
+  - ``spacy-stanza`` and ``stanza`` are installed (``pip install 'bitig[turkish]'``)
   - Stanza's Turkish model has been downloaded (``stanza.download('tr')``)
 
 Runs under the ``slow`` marker only, so the default ``-m "not slow"`` CI grid stays green on
@@ -22,10 +22,10 @@ pytestmark = pytest.mark.slow
 
 
 def test_turkish_pipeline_smoke(tmp_path) -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
-    from tamga.features.readability import ReadabilityExtractor
-    from tamga.preprocess.pipeline import SpacyPipeline
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
+    from bitig.features.readability import ReadabilityExtractor
+    from bitig.preprocess.pipeline import SpacyPipeline
 
     texts = [
         "Ali topu tuttu. Kedi uyudu. Hava güzeldi.",

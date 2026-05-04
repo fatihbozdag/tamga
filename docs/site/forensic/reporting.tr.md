@@ -9,11 +9,11 @@ Adli raporlar bir puandan fazlasını gerektirir: test edilen **hipotez çifti (
 ## build_forensic_report
 
 *Şu durumda kullanın:* `Result` nesnesinden mahkemeye hazır HTML'e tek çağrıyla ulaşmak istiyorsanız — delil zinciri alanlarını, kalibre edilmiş skorları, sözel ölçeği ve Tippett grafiğini bir Jinja2 şablonuna aktarır.
-*Şu durumda kullanmayın:* araştırma makalesi şekli üretiyorsanız — standart `tamga report` CLI'yı veya `concepts/methods.md` içindeki çizim yardımcılarını kullanın.
-*Beklenen sonuç:* oluşturulan HTML dosyasının yolu; isteğe bağlı PDF dışa aktarma `tamga[reports]` gerektirir.
+*Şu durumda kullanmayın:* araştırma makalesi şekli üretiyorsanız — standart `bitig report` CLI'yı veya `concepts/methods.md` içindeki çizim yardımcılarını kullanın.
+*Beklenen sonuç:* oluşturulan HTML dosyasının yolu; isteğe bağlı PDF dışa aktarma `bitig[reports]` gerektirir.
 
 ```python
-from tamga.report import build_forensic_report
+from bitig.report import build_forensic_report
 
 build_forensic_report(
     "results/case_001",
@@ -40,7 +40,7 @@ build_forensic_report(
 Provenance oluştururken adli alanları geçirin:
 
 ```python
-from tamga.provenance import Provenance
+from bitig.provenance import Provenance
 
 provenance = Provenance.current(
     spacy_model="en_core_web_trf",
@@ -75,7 +75,7 @@ Adli rapor şablonu, Jinja2 otomatik kaçış (autoescape) etkin olarak oluştur
 > seçilen öznitelik uzayı ve kullanılan kalibrasyon kümesine koşulludur. Kalibrasyon
 > koşulları dışındaki popülasyonlara genelleme yapılması uygun değildir.
 
-Özel bir şablon sağlayarak sorumluluk reddini geçersiz kılabilirsiniz; referans uygulama için yerleşik `src/tamga/report/templates/forensic_lr.html.j2` dosyasına bakın.
+Özel bir şablon sağlayarak sorumluluk reddini geçersiz kılabilirsiniz; referans uygulama için yerleşik `src/bitig/report/templates/forensic_lr.html.j2` dosyasına bakın.
 
 ## Sözel ölçek
 
@@ -96,9 +96,9 @@ Sözel ölçek, pratisyenlerin İngilizce ankor terimini koruyabilmesi için her
 
 ## Referans
 
-::: tamga.report.render.build_forensic_report
+::: bitig.report.render.build_forensic_report
 
-::: tamga.provenance.Provenance
+::: bitig.provenance.Provenance
     options:
       members:
         - current

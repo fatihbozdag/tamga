@@ -1,6 +1,6 @@
 # Results & provenance
 
-Every method returns a `Result` — the shared return type across tamga.
+Every method returns a `Result` — the shared return type across bitig.
 
 ## The Result
 
@@ -36,7 +36,7 @@ Every Result's `.provenance` carries the full reproducibility envelope:
 ```python
 @dataclass
 class Provenance:
-    tamga_version: str
+    bitig_version: str
     python_version: str
     spacy_model: str
     spacy_version: str
@@ -72,7 +72,7 @@ Non-determinism would be a bug — please report.
 
 ## Loading multi-method runs
 
-`tamga run study.yaml` produces a directory structure:
+`bitig run study.yaml` produces a directory structure:
 
 ```
 results/demo/

@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="docs/assets/tamga-banner.svg" alt="tamga — computational stylometry" width="100%">
+  <img src="docs/assets/bitig-banner.svg" alt="bitig — computational stylometry" width="100%">
 </p>
 
 <p align="center">
   <a href="LICENSE"><img alt="BSD-3-Clause" src="https://img.shields.io/badge/license-BSD--3--Clause-0F1A2B?style=flat-square"></a>
   <a href="pyproject.toml"><img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-0F1A2B?style=flat-square"></a>
-  <a href="https://fatihbozdag.github.io/tamga/"><img alt="docs" src="https://img.shields.io/badge/docs-mkdocs%20material-0F1A2B?style=flat-square"></a>
+  <a href="https://fatihbozdag.github.io/bitig/"><img alt="docs" src="https://img.shields.io/badge/docs-mkdocs%20material-0F1A2B?style=flat-square"></a>
   <img alt="status" src="https://img.shields.io/badge/status-multi--language%20%7C%20forensic%20%7C%20phase%205-C9A34A?style=flat-square">
   <img alt="tests" src="https://img.shields.io/badge/tests-417%20passing-0F1A2B?style=flat-square">
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20TR%20%7C%20DE%20%7C%20ES%20%7C%20FR-0F1A2B?style=flat-square">
@@ -13,19 +13,19 @@
 
 ---
 
-`tamga` ("mark, brand, clan-sign" — from Old Turkic) is a Python package and interactive CLI
+`bitig` ("mark, brand, clan-sign" — from Old Turkic) is a Python package and interactive CLI
 for **authorship attribution**, **author-group style comparison**, and **forensic-linguistic
 analysis**. It reimplements the analytical breadth of R's `Stylo`, then adds a modern NLP
 pipeline (spaCy, transformer embeddings), a Bayesian layer (PyMC), and a full forensic-
 evidential toolkit on top.
 
-> Named after the **tamga**, the Turkic clan-mark by which individual and familial identity
+> Named after the **bitig**, the Turkic clan-mark by which individual and familial identity
 > was recognised at a glance — the material-culture counterpart to a stylistic fingerprint.
 
 ## Architecture
 
 <p align="center">
-  <img src="docs/assets/tamga-architecture.svg" alt="tamga architecture: corpus → features → methods → forensic → output" width="100%">
+  <img src="docs/assets/bitig-architecture.svg" alt="bitig architecture: corpus → features → methods → forensic → output" width="100%">
 </p>
 
 Every layer is sklearn-compatible; every `Result` carries full provenance (corpus hash,
@@ -35,31 +35,31 @@ feature hash, seed, spaCy version, timestamp, resolved config), so a study writt
 ## Install
 
 ```bash
-uv pip install tamga
+uv pip install bitig
 python -m spacy download en_core_web_trf
 ```
 
 Optional extras:
 
 ```bash
-uv pip install "tamga[bayesian]"    # PyMC + arviz for hierarchical models
-uv pip install "tamga[embeddings]"  # sentence-transformers + contextual BERT
-uv pip install "tamga[viz]"         # plotly, kaleido, ete3
-uv pip install "tamga[reports]"     # weasyprint for PDF export
-uv pip install "tamga[turkish]"     # spacy-stanza + Stanza for Turkish pipelines
+uv pip install "bitig[bayesian]"    # PyMC + arviz for hierarchical models
+uv pip install "bitig[embeddings]"  # sentence-transformers + contextual BERT
+uv pip install "bitig[viz]"         # plotly, kaleido, ete3
+uv pip install "bitig[reports]"     # weasyprint for PDF export
+uv pip install "bitig[turkish]"     # spacy-stanza + Stanza for Turkish pipelines
 ```
 
 ## Quickstart
 
 ```bash
-tamga init my-study
+bitig init my-study
 cd my-study
 # drop .txt files into corpus/
 # add metadata.tsv mapping filename → author, group, year, ...
-tamga ingest corpus/ --metadata corpus/metadata.tsv
-tamga info
-tamga run study.yaml --name demo
-tamga report results/demo --output results/demo/report.html
+bitig ingest corpus/ --metadata corpus/metadata.tsv
+bitig info
+bitig run study.yaml --name demo
+bitig report results/demo --output results/demo/report.html
 ```
 
 A complete beginner-friendly walkthrough using 9 Federalist Papers (including the disputed
@@ -69,13 +69,13 @@ reproducing the classic Mosteller & Wallace (1964) result is at
 
 ## Desktop GUI
 
-If you'd rather click than write YAML, tamga ships a NiceGUI + pywebview desktop shell that
+If you'd rather click than write YAML, bitig ships a NiceGUI + pywebview desktop shell that
 walks the same workflow — **Ingest → Study → Run → Results** — plus a dedicated
 **Forensic** tab.
 
 ```bash
-uv pip install "tamga[gui]"
-tamga gui
+uv pip install "bitig[gui]"
+bitig gui
 ```
 
 This opens a native window with native file pickers; pass `--no-native` to fall back to a
@@ -107,20 +107,20 @@ into the same space and lands among the Madison cluster — matching the histori
 
 ## Multi-language support
 
-Five first-class languages behind a single `tamga.languages` registry — English, Turkish,
+Five first-class languages behind a single `bitig.languages` registry — English, Turkish,
 German, Spanish, French. Language flows through `Corpus.language` and drives per-language
 defaults for function words, readability formulas, and embedding models:
 
 ```bash
-uv pip install "tamga[turkish]"
+uv pip install "bitig[turkish]"
 python -c "import stanza; stanza.download('tr')"
-tamga init demo-tr --language tr
-tamga ingest corpus/ --language tr --metadata corpus/metadata.tsv
-tamga run study.yaml --name first-run
+bitig init demo-tr --language tr
+bitig ingest corpus/ --language tr --metadata corpus/metadata.tsv
+bitig run study.yaml --name first-run
 ```
 
 Turkish parsing goes through Stanford Stanza (BOUN treebank) wrapped by `spacy-stanza` — it
-returns native spaCy `Doc` objects, so every tamga feature extractor works unchanged. Native
+returns native spaCy `Doc` objects, so every bitig feature extractor works unchanged. Native
 readability formulas are implemented for each language (Ateşman + Bezirci–Yılmaz for Turkish,
 Flesch-Amstad + Wiener Sachtextformel for German, Fernández-Huerta + Szigriszt-Pazos for
 Spanish, Kandel–Moles + LIX for French). Function-word lists are regenerated reproducibly from
@@ -132,43 +132,43 @@ Universal Dependencies treebanks via `scripts/regenerate_function_words.py`. See
 
 Forensic authorship research needs more than attribution — it needs **one-class
 verification**, **topic-invariant features**, and **evidential output framed as a
-likelihood ratio**. `tamga.forensic` ships these as a cohesive layer on top of the analysis
+likelihood ratio**. `bitig.forensic` ships these as a cohesive layer on top of the analysis
 methods:
 
 ```python
-from tamga.forensic import (
+from bitig.forensic import (
     GeneralImpostors, Unmasking,        # verification
     CategorizedCharNgramExtractor,      # Sapkota 2015 topic-invariant features
     distort_corpus,                     # Stamatatos 2013 content masking
     CalibratedScorer,                   # Platt / isotonic calibration
     compute_pan_report,                 # AUC + c@1 + F0.5u + Brier + ECE + (cllr)
 )
-from tamga.report import build_forensic_report  # LR-framed report template
+from bitig.report import build_forensic_report  # LR-framed report template
 ```
 
-Every forensic method is classifier-agnostic — pair it with any tamga feature set and any
+Every forensic method is classifier-agnostic — pair it with any bitig feature set and any
 Delta / Zeta / classify method. Every `Result` can carry six optional chain-of-custody
 metadata fields (`questioned_description`, `known_description`, `hypothesis_pair`,
 `acquisition_notes`, `custody_notes`, `source_hashes`) so a report traces back to its source
-material. See [`src/tamga/forensic/`](src/tamga/forensic/) for the full surface.
+material. See [`src/bitig/forensic/`](src/bitig/forensic/) for the full surface.
 
 ## Documentation
 
-Full MkDocs Material site — **<https://fatihbozdag.github.io/tamga/>**
+Full MkDocs Material site — **<https://fatihbozdag.github.io/bitig/>**
 
-- [Getting started](https://fatihbozdag.github.io/tamga/getting-started/) — install, five-command quickstart
-- [Concepts](https://fatihbozdag.github.io/tamga/concepts/) — Corpus / Features / Languages / Methods / Results & provenance
-- [Languages](https://fatihbozdag.github.io/tamga/concepts/languages/) — EN / TR / DE / ES / FR registry, adding a sixth language
-- [Forensic toolkit](https://fatihbozdag.github.io/tamga/forensic/) — verification, calibration, topic-invariance, PAN evaluation, reporting
-- [Turkish tutorial](https://fatihbozdag.github.io/tamga/tutorials/turkish/) — end-to-end Turkish authorship walkthrough
-- [PAN-CLEF verification tutorial](https://fatihbozdag.github.io/tamga/tutorials/pan-clef/) — end-to-end runnable pipeline
-- [Federalist tutorial](https://fatihbozdag.github.io/tamga/tutorials/federalist/) — reproduce Mosteller & Wallace (1964)
-- [CLI + API reference](https://fatihbozdag.github.io/tamga/reference/)
+- [Getting started](https://fatihbozdag.github.io/bitig/getting-started/) — install, five-command quickstart
+- [Concepts](https://fatihbozdag.github.io/bitig/concepts/) — Corpus / Features / Languages / Methods / Results & provenance
+- [Languages](https://fatihbozdag.github.io/bitig/concepts/languages/) — EN / TR / DE / ES / FR registry, adding a sixth language
+- [Forensic toolkit](https://fatihbozdag.github.io/bitig/forensic/) — verification, calibration, topic-invariance, PAN evaluation, reporting
+- [Turkish tutorial](https://fatihbozdag.github.io/bitig/tutorials/turkish/) — end-to-end Turkish authorship walkthrough
+- [PAN-CLEF verification tutorial](https://fatihbozdag.github.io/bitig/tutorials/pan-clef/) — end-to-end runnable pipeline
+- [Federalist tutorial](https://fatihbozdag.github.io/bitig/tutorials/federalist/) — reproduce Mosteller & Wallace (1964)
+- [CLI + API reference](https://fatihbozdag.github.io/bitig/reference/)
 
 Serve locally:
 
 ```bash
-uv pip install "tamga[docs]"
+uv pip install "bitig[docs]"
 mkdocs serve             # http://127.0.0.1:8000
 ```
 
@@ -177,15 +177,15 @@ deploys to GitHub Pages on every merge to `main`.
 
 ## Status
 
-**Phase 5 landed** — visualisation, Jinja2 reports, declarative runner (`tamga run`), and a
-Rich-based interactive `tamga shell`.
+**Phase 5 landed** — visualisation, Jinja2 reports, declarative runner (`bitig run`), and a
+Rich-based interactive `bitig shell`.
 
 **Forensic phase landed** — six additions (General Impostors, LR + calibration + evaluation
 metrics, Sapkota categories + Stamatatos distortion, Unmasking, chain-of-custody + forensic
 report template, PAN harness).
 
 **Multi-language phase landed** — first-class support for English, Turkish, German, Spanish,
-French behind a `tamga.languages` registry. Turkish parses through Stanford Stanza (BOUN
+French behind a `bitig.languages` registry. Turkish parses through Stanford Stanza (BOUN
 treebank) via `spacy-stanza`, returning native spaCy `Doc` objects so every feature extractor
 works unchanged. Native readability formulas per language (Ateşman + Bezirci–Yılmaz for
 Turkish, Flesch-Amstad + Wiener Sachtextformel for German, Fernández-Huerta + Szigriszt-Pazos
@@ -200,7 +200,7 @@ PAN-CLEF + Turkish tutorials, and CLI/API reference. **417 tests passing.**
 
 **Remaining** — PyPI publish.
 
-See [`docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`](docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md) for the full design.
+See [`docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md`](docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md) for the full design.
 
 ## License
 
@@ -208,7 +208,7 @@ BSD-3-Clause. See [`LICENSE`](LICENSE).
 
 ## Citation
 
-If you use tamga in published work, please cite it — see [`CITATION.cff`](CITATION.cff).
+If you use bitig in published work, please cite it — see [`CITATION.cff`](CITATION.cff).
 
 ## References
 

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features.sentence_length import SentenceLengthExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.sentence_length import SentenceLengthExtractor
 
 pytestmark = pytest.mark.spacy
 

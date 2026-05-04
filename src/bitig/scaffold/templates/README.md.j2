@@ -1,0 +1,21 @@
+# {{ name }}
+
+bitig study project.
+
+## Reproduce
+
+```bash
+uv pip install bitig
+bitig run study.yaml
+```
+
+## Layout
+
+- `study.yaml` — analysis configuration.
+- `corpus/` — raw `.txt` files (one document per file).
+- `corpus/metadata.tsv` — optional: filename → author, group, year, ... (tab-separated).
+- `results/<timestamp>/` — per-run artifacts (generated).
+- `reports/<timestamp>.html` — per-run reports (generated, opt-in).
+- `.bitig/` — cache and lockfile (gitignored).
+
+Created with bitig {{ bitig_version }} on {{ created_on }}.

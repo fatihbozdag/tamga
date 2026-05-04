@@ -2,7 +2,7 @@
 
 Yazar doğrulama (authorship verification) tek sınıflı bir karardır: **belirli bir aday, bu sorgulanan belgeyi üretmiş midir?** Gerçek dava çalışmaları nadiren kapalı bir aday kümesi sunar; bu nedenle doğrulama — yazar tespitinin aksine — adli açıdan standart görevdir.
 
-tamga iki tamamlayıcı doğrulayıcı sunar.
+bitig iki tamamlayıcı doğrulayıcı sunar.
 
 ## General Impostors
 
@@ -19,8 +19,8 @@ Koppel & Winter (2014). Sorgulanan belge Q, adayın bilinen belgeleri K ve diğe
 Kazanan yinemelerin oranı, [0, 1] aralığındaki doğrulama puanıdır.
 
 ```python
-from tamga.features import MFWExtractor
-from tamga.forensic import GeneralImpostors
+from bitig.features import MFWExtractor
+from bitig.forensic import GeneralImpostors
 
 # Q, K ve sahte yazarların ortak bir sözcük dağarcığı paylaşması için
 # birleştirilmiş derlem üzerinde öznitelikler oluşturulur.
@@ -66,8 +66,8 @@ Koppel & Schler (2004). Dağılım varsayımına dayanmayan, uzun metin doğrula
 Aynı yazara ait belgeler stilistik olarak benzerdir: birkaç yüzeysel fark kaldırıldığında sınıflandırıcı hızla çöker (büyük düşüş). Farklı yazara ait belgeler ayrıştırıcı öznitelik vermeyi sürdürür, bu nedenle doğruluk yüksek kalır (küçük düşüş).
 
 ```python
-from tamga.features import MFWExtractor
-from tamga.forensic import Unmasking
+from bitig.features import MFWExtractor
+from bitig.forensic import Unmasking
 
 unmasking = Unmasking(chunk_size=500, n_rounds=10, n_eliminate=3, seed=42)
 result = unmasking.verify(
@@ -90,10 +90,10 @@ result.values["eliminated_per_round"]   # denetlenebilir tur başına öznitelik
 
 ## Referans
 
-::: tamga.forensic.verify.GeneralImpostors
+::: bitig.forensic.verify.GeneralImpostors
     options:
       show_root_full_path: false
 
-::: tamga.forensic.unmasking.Unmasking
+::: bitig.forensic.unmasking.Unmasking
     options:
       show_root_full_path: false

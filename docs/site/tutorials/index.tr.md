@@ -1,6 +1,6 @@
 # Öğreticiler
 
-tamga ile birlikte iki çalıştırılabilir öğretici gelir.
+bitig ile birlikte iki çalıştırılabilir öğretici gelir.
 
 ## [Federalist Papers](federalist.tr.md)
 
@@ -19,4 +19,4 @@ Impostors ile puanlayın, Platt ölçeklendirme ile kalibre edin ve zincir-of-cu
 LR çerçeveli adli HTML raporu dahil tam PAN metrik setini raporlayın —
 AUC, c@1, F0.5u, Brier, ECE, C_llr.
 
-Gösterilen konular: uçtan uca `tamga.forensic` iş akışı.
+Gösterilen konular: uçtan uca `bitig.forensic` iş akışı.

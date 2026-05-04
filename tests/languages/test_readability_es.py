@@ -1,6 +1,6 @@
 """Tests for Spanish readability — Fernández-Huerta (1959) and Szigriszt-Pazos (1992)."""
 
-from tamga.languages.readability_es import (
+from bitig.languages.readability_es import (
     count_syllables_es,
     fernandez_huerta,
     szigriszt_pazos,
@@ -33,8 +33,8 @@ def test_szigriszt_pazos_scoring_sense() -> None:
 
 
 def test_spanish_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(documents=[Document(id="d0", text="El gato duerme.")], language="es")
     fm = ReadabilityExtractor().fit_transform(c)
