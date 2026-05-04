@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.forensic.distortion import distort_corpus, distort_text
+from bitig.corpus import Corpus, Document
+from bitig.forensic.distortion import distort_corpus, distort_text
 
 
 class TestDistortText:

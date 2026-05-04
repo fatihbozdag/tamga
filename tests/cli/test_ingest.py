@@ -1,11 +1,11 @@
-"""Tests for `tamga ingest`."""
+"""Tests for `bitig ingest`."""
 
 from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -71,7 +71,7 @@ def test_ingest_reports_cache_hits_on_rerun(tmp_path: Path) -> None:
 def test_ingest_cli_accepts_language_flag(tmp_path, monkeypatch) -> None:
     from typer.testing import CliRunner
 
-    from tamga.cli import app
+    from bitig.cli import app
 
     corpus_dir = tmp_path / "corpus"
     corpus_dir.mkdir()
@@ -79,7 +79,7 @@ def test_ingest_cli_accepts_language_flag(tmp_path, monkeypatch) -> None:
 
     # Stub out SpacyPipeline to avoid model loads during unit tests.
     recorded: dict[str, object] = {}
-    from tamga.cli import ingest_cmd
+    from bitig.cli import ingest_cmd
 
     class _StubPipe:
         def __init__(self, **kwargs: object) -> None:

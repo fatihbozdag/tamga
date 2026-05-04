@@ -7,9 +7,9 @@ Wikisource'dan alınan, telif hakkı süresi dolmuş Ömer Seyfettin metinleridi
 ## Kurulum
 
 ```bash
-uv pip install 'tamga[turkish]'
+uv pip install 'bitig[turkish]'
 python -c "import stanza; stanza.download('tr')"
-tamga init seyfettin --language tr
+bitig init seyfettin --language tr
 cd seyfettin
 ```
 
@@ -17,7 +17,7 @@ Bu komut, Türkçe için önceden yapılandırılmış `study.yaml` içeren bir 
 Şununla doğrulayın:
 
 ```bash
-tamga info
+bitig info
 ```
 
 `language` satırı `tr` gösterir.
@@ -45,11 +45,11 @@ Delta'nın ayırt edecek bir şeyi olur.
 ## Çalışmayı çalıştırın
 
 ```bash
-tamga ingest corpus/ --language tr --metadata corpus/metadata.tsv
-tamga run study.yaml --name first-run
+bitig ingest corpus/ --language tr --metadata corpus/metadata.tsv
+bitig run study.yaml --name first-run
 ```
 
-`tamga ingest`, Stanza'yı `spacy-stanza` aracılığıyla çalıştırır. İlk çalıştırma her belgeyi
+`bitig ingest`, Stanza'yı `spacy-stanza` aracılığıyla çalıştırır. İlk çalıştırma her belgeyi
 ayrıştırır ve DocBin'leri önbelleğe alır; sonraki çalıştırmalar önbellekten okur ve saniyeler
 içinde tamamlanır.
 
@@ -110,7 +110,7 @@ features:
 ## Sorun giderme
 
 - **`ModuleNotFoundError: No module named 'spacy_stanza'`** — şunu çalıştırın:
-  `uv pip install 'tamga[turkish]'`.
+  `uv pip install 'bitig[turkish]'`.
 - **`FileNotFoundError: ... stanza_resources/tr/default.zip`** — şunu çalıştırın:
   `python -c "import stanza; stanza.download('tr')"`. Model yaklaşık 600 MB'tır.
 - **MPS'de çok yavaş ilk aktarım.** Stanza'nın Türkçe modeli henüz Apple Silicon MPS'i

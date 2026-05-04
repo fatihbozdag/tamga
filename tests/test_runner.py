@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tamga.runner import run_study
+from bitig.runner import run_study
 
 pytestmark = pytest.mark.integration
 

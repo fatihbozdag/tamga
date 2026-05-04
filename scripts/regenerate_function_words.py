@@ -4,7 +4,7 @@
 Usage:
     python scripts/regenerate_function_words.py --lang tr \
         --treebank path/to/UD_Turkish-BOUN \
-        --out src/tamga/resources/languages/tr/function_words.txt
+        --out src/bitig/resources/languages/tr/function_words.txt
 
 Fetches all tokens tagged with closed-class UPOS (DET PRON ADP CCONJ SCONJ AUX PART), counts
 lowercased frequencies, writes the top N. A header comment records source + generation date.

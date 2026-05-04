@@ -1,11 +1,11 @@
 # Değerlendirme (PAN paketi)
 
-Adli yayınlar ve mahkemeler ham doğruluktan fazlasını bekler. tamga, standart PAN doğrulama görevi metrik menüsünü tek bir çağrının arkasında sunar.
+Adli yayınlar ve mahkemeler ham doğruluktan fazlasını bekler. bitig, standart PAN doğrulama görevi metrik menüsünü tek bir çağrının arkasında sunar.
 
 ## Tek çağrı değerlendirme
 
 ```python
-from tamga.forensic import compute_pan_report
+from bitig.forensic import compute_pan_report
 
 report = compute_pan_report(
     probs=calibrated_probs,     # CalibratedScorer'dan
@@ -66,7 +66,7 @@ C_llr < 1 olan bir sistem yalnızca önsel olasılık sistemini geride bırakır
 
 ```python
 import matplotlib.pyplot as plt
-from tamga.forensic import tippett
+from bitig.forensic import tippett
 
 data = tippett(log_lrs, y)
 plt.step(data["thresholds"], data["target_cdf"], label="aynı-yazar")
@@ -86,9 +86,9 @@ plt.legend()
 *Şu durumda kullanmayın:* yalnızca tek bir metriğe ihtiyacınız var; her metrik fonksiyonu doğrudan çağrılabilir.
 *Beklenen sonuç:* her alanı doldurulmuş bir `PANReport` veri sınıfı.
 
-::: tamga.forensic.metrics.compute_pan_report
+::: bitig.forensic.metrics.compute_pan_report
 
-::: tamga.forensic.metrics.PANReport
+::: bitig.forensic.metrics.PANReport
 
 ### AUC
 
@@ -96,7 +96,7 @@ plt.legend()
 *Şu durumda kullanmayın:* operasyonel bir karar almanız gerekiyor — AUC, eşiğin nereye ayarlanacağı konusunda hiçbir şey söylemez.
 *Beklenen sonuç:* `[0.5, 1]` aralığında tek bir sayı. Tahmin edilen olasılıkların kalibre edilmiş olmasına bağlı değildir.
 
-::: tamga.forensic.metrics.auc
+::: bitig.forensic.metrics.auc
 
 ### c@1
 
@@ -104,7 +104,7 @@ plt.legend()
 *Şu durumda kullanmayın:* sisteminiz her zaman bir karar üretiyorsa; `c@1` doğruluğa indirger.
 *Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı. Yalnızca çekimser kalma oranı > 0 olduğunda doğruluğu geçer.
 
-::: tamga.forensic.metrics.c_at_1
+::: bitig.forensic.metrics.c_at_1
 
 ### F0.5u
 
@@ -112,7 +112,7 @@ plt.legend()
 *Şu durumda kullanmayın:* PAN dışı bir kitleye raporluyorsanız; uzman bir metriktir.
 *Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı.
 
-::: tamga.forensic.metrics.f05u
+::: bitig.forensic.metrics.f05u
 
 ### C_llr
 
@@ -120,7 +120,7 @@ plt.legend()
 *Şu durumda kullanmayın:* puanlayıcınız doğruluk-tipi olasılıklar üretiyorsa; `C_llr` log-olabilirlik oranları bekler.
 *Beklenen sonuç:* negatif olmayan tek bir sayı; 0 mükemmeldir; 1 bilgisizdir (yazı-tura ile eşleşir).
 
-::: tamga.forensic.metrics.cllr
+::: bitig.forensic.metrics.cllr
 
 ### ECE
 
@@ -128,7 +128,7 @@ plt.legend()
 *Şu durumda kullanmayın:* geliştirme kümeniz küçükse (<200 deneme); ECE'nin grup tahminleri gürültülü hale gelir.
 *Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı; 0 mükemmel kalibrasyon demektir.
 
-::: tamga.forensic.metrics.ece
+::: bitig.forensic.metrics.ece
 
 ### Brier
 
@@ -136,7 +136,7 @@ plt.legend()
 *Şu durumda kullanmayın:* adli LR'ye özgü bir metriğe ihtiyaç duyuyorsanız — `C_llr` kullanın.
 *Beklenen sonuç:* `[0, 1]` aralığında tek bir sayı; 0 mükemmeldir.
 
-::: tamga.forensic.metrics.brier
+::: bitig.forensic.metrics.brier
 
 ### Tippett
 
@@ -144,4 +144,4 @@ plt.legend()
 *Şu durumda kullanmayın:* tek sayılı bir özete ihtiyacınız varsa (`C_llr` kullanın).
 *Beklenen sonuç:* matplotlib grafiği için hazır iki kümülatif LR dizisi (hedef ve hedef olmayan).
 
-::: tamga.forensic.metrics.tippett
+::: bitig.forensic.metrics.tippett

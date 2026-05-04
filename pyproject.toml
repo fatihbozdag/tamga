@@ -3,7 +3,7 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tamga"
+name = "bitig"
 dynamic = ["version"]
 description = "Next-generation computational stylometry — a Python replacement for R's Stylo."
 readme = "README.md"
@@ -59,7 +59,7 @@ turkish = [
     "stanza>=1.8",
 ]
 multilang = [
-    "tamga[turkish]",
+    "bitig[turkish]",
 ]
 docs = [
     "mkdocs>=1.6",
@@ -80,27 +80,27 @@ dev = [
 ]
 
 [project.scripts]
-tamga = "tamga.cli:app"
+bitig = "bitig.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/fatihbozdag/tamga"
-Documentation = "https://fatihbozdag.github.io/tamga/"
-Source = "https://github.com/fatihbozdag/tamga"
-Issues = "https://github.com/fatihbozdag/tamga/issues"
+Homepage = "https://github.com/fatihbozdag/bitig"
+Documentation = "https://fatihbozdag.github.io/bitig/"
+Source = "https://github.com/fatihbozdag/bitig"
+Issues = "https://github.com/fatihbozdag/bitig/issues"
 
 [tool.hatch.version]
-path = "src/tamga/_version.py"
+path = "src/bitig/_version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tamga"]
+packages = ["src/bitig"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"src/tamga/scaffold/templates" = "tamga/scaffold/templates"
-"src/tamga/resources" = "tamga/resources"
-"src/tamga/report/templates" = "tamga/report/templates"
+"src/bitig/scaffold/templates" = "bitig/scaffold/templates"
+"src/bitig/resources" = "bitig/resources"
+"src/bitig/report/templates" = "bitig/report/templates"
 
 [tool.hatch.build.targets.sdist]
-include = ["src/tamga", "tests", "docs", "README.md", "LICENSE", "CITATION.cff"]
+include = ["src/bitig", "tests", "docs", "README.md", "LICENSE", "CITATION.cff"]
 
 [tool.ruff]
 line-length = 100
@@ -124,10 +124,10 @@ ignore = ["E501"]       # handled by formatter
 "tests/**" = ["N802", "N806"]
 # Language-specific modules intentionally contain non-ASCII characters (Turkish ı, German ß,
 # Spanish/French accents). Suppress "ambiguous character" warnings in these locations.
-"src/tamga/languages/readability_tr.py" = ["RUF001", "RUF002", "RUF003"]
-"src/tamga/languages/readability_de.py" = ["RUF001", "RUF002", "RUF003"]
-"src/tamga/languages/readability_es.py" = ["RUF001", "RUF002", "RUF003"]
-"src/tamga/languages/readability_fr.py" = ["RUF001", "RUF002", "RUF003"]
+"src/bitig/languages/readability_tr.py" = ["RUF001", "RUF002", "RUF003"]
+"src/bitig/languages/readability_de.py" = ["RUF001", "RUF002", "RUF003"]
+"src/bitig/languages/readability_es.py" = ["RUF001", "RUF002", "RUF003"]
+"src/bitig/languages/readability_fr.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/languages/test_readability_tr.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/languages/test_readability_de.py" = ["RUF001", "RUF002", "RUF003"]
 "tests/languages/test_readability_es.py" = ["RUF001", "RUF002", "RUF003"]
@@ -149,7 +149,7 @@ explicit_package_bases = true
 namespace_packages = true
 
 [[tool.mypy.overrides]]
-module = "tamga.*"
+module = "bitig.*"
 disallow_untyped_defs = true
 no_implicit_optional = true
 
@@ -165,7 +165,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/tamga"]
+source = ["src/bitig"]
 branch = true
 
 [tool.coverage.report]

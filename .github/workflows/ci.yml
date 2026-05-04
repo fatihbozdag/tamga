@@ -41,4 +41,4 @@ jobs:
       - run: uv pip install --system -e ".[dev]"
       - name: Download small spaCy model
         run: python -m spacy download en_core_web_sm
-      - run: pytest -n auto --cov=tamga --cov-report=term-missing -m "not slow"
+      - run: pytest -n auto --cov=bitig --cov-report=term-missing -m "not slow"

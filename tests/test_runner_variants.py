@@ -50,7 +50,7 @@ def _study_yaml(
     ["burrows", "cosine", "argamon_linear", "quadratic", "eder", "eder_simple"],
 )
 def test_delta_variant_runs(tmp_path: Path, mini_corpus_dir: Path, variant: str) -> None:
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     cfg = _study_yaml(
         tmp_path,
@@ -84,7 +84,7 @@ def test_reduce_variant_runs(
     variant: str,
     extra: dict[str, Any],
 ) -> None:
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     cfg = _study_yaml(
         tmp_path,
@@ -115,7 +115,7 @@ def test_cluster_variant_runs(
     variant: str,
     extra: dict[str, Any],
 ) -> None:
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     cfg = _study_yaml(
         tmp_path,
@@ -132,7 +132,7 @@ def test_cluster_variant_runs(
 
 
 def test_consensus_emits_bct_plot(tmp_path: Path, mini_corpus_dir: Path) -> None:
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     cfg = _study_yaml(
         tmp_path,
@@ -149,7 +149,7 @@ def test_consensus_emits_bct_plot(tmp_path: Path, mini_corpus_dir: Path) -> None
 
 def test_bayesian_emits_posterior_heatmap(tmp_path: Path, mini_corpus_dir: Path) -> None:
     """Bayesian attribution should also drop a posterior_heatmap.png."""
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     cfg = _study_yaml(
         tmp_path,
@@ -172,7 +172,7 @@ def test_bayesian_emits_posterior_heatmap(tmp_path: Path, mini_corpus_dir: Path)
 
 def test_pca_emits_biplot(tmp_path: Path, mini_corpus_dir: Path) -> None:
     """When method=reduce + variant=pca, runner should drop pca_biplot.png next to scatter.png."""
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     cfg = _study_yaml(
         tmp_path,
@@ -188,7 +188,7 @@ def test_pca_emits_biplot(tmp_path: Path, mini_corpus_dir: Path) -> None:
 
 def test_classify_emits_reliability_diagram(tmp_path: Path) -> None:
     """End-to-end: classify with logreg should also drop a reliability_diagram.png."""
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     fed_dir = Path(__file__).parent / "fixtures" / "federalist"
     method_cfg: dict[str, Any] = {
@@ -221,7 +221,7 @@ def test_classify_emits_reliability_diagram(tmp_path: Path) -> None:
 
 def test_general_imposters_runs_and_plots(tmp_path: Path) -> None:
     """End-to-end: verify fed_49 against Madison; result+plot land on disk."""
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     fed_dir = Path(__file__).parent / "fixtures" / "federalist"
     cfg = _study_yaml(
@@ -248,7 +248,7 @@ def test_general_imposters_runs_and_plots(tmp_path: Path) -> None:
 
 def test_rolling_delta_runs_and_plots(tmp_path: Path) -> None:
     """End-to-end: fed_49 (disputed Madison) is scanned; result+plot land on disk."""
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     fed_dir = Path(__file__).parent / "fixtures" / "federalist"
     cfg = _study_yaml(
@@ -274,7 +274,7 @@ def test_rolling_delta_runs_and_plots(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize("variant", ["classic", "eder"])
 def test_zeta_variant_runs(tmp_path: Path, mini_corpus_dir: Path, variant: str) -> None:
-    from tamga.runner import run_study
+    from bitig.runner import run_study
 
     cfg = _study_yaml(
         tmp_path,

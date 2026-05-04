@@ -1,14 +1,14 @@
-# tamga — Phase 1: Foundation — Implementation Plan
+# bitig — Phase 1: Foundation — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the foundation layer of `tamga`: project skeleton, hashing/seeding plumbing, the `Corpus`/`Document` data model, pydantic `StudyConfig` schema with layered resolution, spaCy preprocessing pipeline with DocBin caching, skeleton CLI with `init`, `ingest`, `info`, and `cache` commands, and CI. End state: `tamga init my-study && tamga ingest corpus/ && tamga info` works end-to-end on a real corpus; all unit + integration tests pass; GitHub Actions CI green.
+**Goal:** Build the foundation layer of `bitig`: project skeleton, hashing/seeding plumbing, the `Corpus`/`Document` data model, pydantic `StudyConfig` schema with layered resolution, spaCy preprocessing pipeline with DocBin caching, skeleton CLI with `init`, `ingest`, `info`, and `cache` commands, and CI. End state: `bitig init my-study && bitig ingest corpus/ && bitig info` works end-to-end on a real corpus; all unit + integration tests pass; GitHub Actions CI green.
 
-**Architecture:** `src/tamga/` layout with concentric layers (plumbing → io/corpus → preprocess → config → cli). Every module has one responsibility. Tests live at `tests/` mirroring the package tree. Test-first throughout: each non-trivial unit gets a failing test, a minimal implementation, a passing test, and a commit before the next unit.
+**Architecture:** `src/bitig/` layout with concentric layers (plumbing → io/corpus → preprocess → config → cli). Every module has one responsibility. Tests live at `tests/` mirroring the package tree. Test-first throughout: each non-trivial unit gets a failing test, a minimal implementation, a passing test, and a commit before the next unit.
 
 **Tech Stack:** Python 3.11+, uv for dependency management, hatchling build backend, pydantic v2 for config, typer + rich + questionary for CLI, pyyaml, spaCy ≥3.7 (with `en_core_web_sm` for tests, `en_core_web_trf` for production), pandas + pyarrow for I/O, pytest + pytest-cov + hypothesis for testing, ruff + mypy + pre-commit for quality.
 
-**Reference spec:** `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`.
+**Reference spec:** `docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md`.
 
 ---
 
@@ -16,8 +16,8 @@
 
 **Files:**
 - Create: `pyproject.toml`
-- Create: `src/tamga/__init__.py`
-- Create: `src/tamga/_version.py`
+- Create: `src/bitig/__init__.py`
+- Create: `src/bitig/_version.py`
 - Create: `tests/__init__.py`
 - Create: `tests/test_smoke.py`
 - Create: `.python-version`
@@ -36,7 +36,7 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tamga"
+name = "bitig"
 dynamic = ["version"]
 description = "Next-generation computational stylometry — a Python replacement for R's Stylo."
 readme = "README.md"
@@ -93,36 +93,36 @@ dev = [
 ]
 
 [project.scripts]
-tamga = "tamga.cli:app"
+bitig = "bitig.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/fatihbozdag/tamga"
-Documentation = "https://github.com/fatihbozdag/tamga"
-Source = "https://github.com/fatihbozdag/tamga"
-Issues = "https://github.com/fatihbozdag/tamga/issues"
+Homepage = "https://github.com/fatihbozdag/bitig"
+Documentation = "https://github.com/fatihbozdag/bitig"
+Source = "https://github.com/fatihbozdag/bitig"
+Issues = "https://github.com/fatihbozdag/bitig/issues"
 
 [tool.hatch.version]
-path = "src/tamga/_version.py"
+path = "src/bitig/_version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tamga"]
+packages = ["src/bitig"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/tamga", "tests", "docs", "README.md", "LICENSE", "CITATION.cff"]
+include = ["src/bitig", "tests", "docs", "README.md", "LICENSE", "CITATION.cff"]
 ```
 
-- [ ] **Step 1.3: Create `src/tamga/_version.py`**
+- [ ] **Step 1.3: Create `src/bitig/_version.py`**
 
 ```python
 __version__ = "0.1.0.dev0"
 ```
 
-- [ ] **Step 1.4: Create `src/tamga/__init__.py`**
+- [ ] **Step 1.4: Create `src/bitig/__init__.py`**
 
 ```python
-"""tamga — next-generation computational stylometry."""
+"""bitig — next-generation computational stylometry."""
 
-from tamga._version import __version__
+from bitig._version import __version__
 
 __all__ = ["__version__"]
 ```
@@ -137,22 +137,22 @@ __all__ = ["__version__"]
 ```python
 """Smoke tests — the absolute minimum that must work."""
 
-import tamga
+import bitig
 
 
 def test_package_imports():
-    assert hasattr(tamga, "__version__")
+    assert hasattr(bitig, "__version__")
 
 
 def test_version_is_string():
-    assert isinstance(tamga.__version__, str)
-    assert len(tamga.__version__) > 0
+    assert isinstance(bitig.__version__, str)
+    assert len(bitig.__version__) > 0
 ```
 
 - [ ] **Step 1.7: Install the package in editable mode with dev deps**
 
 Run: `uv venv && source .venv/bin/activate && uv pip install -e ".[dev]"`
-Expected: installation succeeds; `tamga` importable.
+Expected: installation succeeds; `bitig` importable.
 
 - [ ] **Step 1.8: Run the smoke test**
 
@@ -162,7 +162,7 @@ Expected: 2 passed.
 - [ ] **Step 1.9: Commit**
 
 ```bash
-git add pyproject.toml .python-version src/tamga/__init__.py src/tamga/_version.py tests/__init__.py tests/test_smoke.py
+git add pyproject.toml .python-version src/bitig/__init__.py src/bitig/_version.py tests/__init__.py tests/test_smoke.py
 git commit -m "build: project skeleton with hatchling, src layout, smoke test"
 ```
 
@@ -211,7 +211,7 @@ warn_unused_configs = true
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "tamga.*"
+module = "bitig.*"
 disallow_untyped_defs = true
 no_implicit_optional = true
 
@@ -227,7 +227,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/tamga"]
+source = ["src/bitig"]
 branch = true
 
 [tool.coverage.report]
@@ -284,12 +284,12 @@ git commit -m "chore: ruff + mypy + pre-commit configuration"
 ## Task 3: `plumbing.hashing` — stable content hashes
 
 **Files:**
-- Create: `src/tamga/plumbing/__init__.py`
-- Create: `src/tamga/plumbing/hashing.py`
+- Create: `src/bitig/plumbing/__init__.py`
+- Create: `src/bitig/plumbing/hashing.py`
 - Create: `tests/plumbing/__init__.py`
 - Create: `tests/plumbing/test_hashing.py`
 
-- [ ] **Step 3.1: Create `src/tamga/plumbing/__init__.py` (empty)**
+- [ ] **Step 3.1: Create `src/bitig/plumbing/__init__.py` (empty)**
 
 ```python
 """Low-level cross-cutting utilities: hashing, seeds, logging, paths."""
@@ -307,7 +307,7 @@ git commit -m "chore: ruff + mypy + pre-commit configuration"
 
 import pytest
 
-from tamga.plumbing.hashing import hash_bytes, hash_mapping, hash_text, short_hash
+from bitig.plumbing.hashing import hash_bytes, hash_mapping, hash_text, short_hash
 
 
 def test_hash_text_is_stable_across_calls():
@@ -360,9 +360,9 @@ def test_short_hash_is_prefix_of_full():
 - [ ] **Step 3.4: Run tests to verify they fail**
 
 Run: `pytest tests/plumbing/test_hashing.py -v`
-Expected: all tests FAIL with ModuleNotFoundError on `tamga.plumbing.hashing`.
+Expected: all tests FAIL with ModuleNotFoundError on `bitig.plumbing.hashing`.
 
-- [ ] **Step 3.5: Implement `src/tamga/plumbing/hashing.py`**
+- [ ] **Step 3.5: Implement `src/bitig/plumbing/hashing.py`**
 
 ```python
 """Stable content hashing used throughout the package.
@@ -426,7 +426,7 @@ Expected: all 10 tests PASS.
 - [ ] **Step 3.7: Commit**
 
 ```bash
-git add src/tamga/plumbing/ tests/plumbing/
+git add src/bitig/plumbing/ tests/plumbing/
 git commit -m "feat(plumbing): stable content hashing (hash_text, hash_mapping, short_hash)"
 ```
 
@@ -435,7 +435,7 @@ git commit -m "feat(plumbing): stable content hashing (hash_text, hash_mapping, 
 ## Task 4: `plumbing.seeds` — deterministic per-method RNGs
 
 **Files:**
-- Create: `src/tamga/plumbing/seeds.py`
+- Create: `src/bitig/plumbing/seeds.py`
 - Create: `tests/plumbing/test_seeds.py`
 
 - [ ] **Step 4.1: Write failing tests in `tests/plumbing/test_seeds.py`**
@@ -445,7 +445,7 @@ git commit -m "feat(plumbing): stable content hashing (hash_text, hash_mapping, 
 
 import numpy as np
 
-from tamga.plumbing.seeds import derive_rng, derive_seed
+from bitig.plumbing.seeds import derive_rng, derive_seed
 
 
 def test_derive_seed_is_deterministic():
@@ -487,9 +487,9 @@ def test_derive_rng_produces_different_draws_for_different_methods():
 - [ ] **Step 4.2: Run tests to verify they fail**
 
 Run: `pytest tests/plumbing/test_seeds.py -v`
-Expected: FAIL with ImportError on `tamga.plumbing.seeds`.
+Expected: FAIL with ImportError on `bitig.plumbing.seeds`.
 
-- [ ] **Step 4.3: Implement `src/tamga/plumbing/seeds.py`**
+- [ ] **Step 4.3: Implement `src/bitig/plumbing/seeds.py`**
 
 ```python
 """Per-method RNG derivation.
@@ -528,7 +528,7 @@ Expected: all 7 tests PASS.
 - [ ] **Step 4.5: Commit**
 
 ```bash
-git add src/tamga/plumbing/seeds.py tests/plumbing/test_seeds.py
+git add src/bitig/plumbing/seeds.py tests/plumbing/test_seeds.py
 git commit -m "feat(plumbing): derive_seed and derive_rng for per-method reproducibility"
 ```
 
@@ -537,7 +537,7 @@ git commit -m "feat(plumbing): derive_seed and derive_rng for per-method reprodu
 ## Task 5: `plumbing.logging` — structured logger
 
 **Files:**
-- Create: `src/tamga/plumbing/logging.py`
+- Create: `src/bitig/plumbing/logging.py`
 - Create: `tests/plumbing/test_logging.py`
 
 - [ ] **Step 5.1: Write failing tests**
@@ -547,24 +547,24 @@ git commit -m "feat(plumbing): derive_seed and derive_rng for per-method reprodu
 
 import logging
 
-from tamga.plumbing.logging import get_logger, set_verbosity
+from bitig.plumbing.logging import get_logger, set_verbosity
 
 
 def test_get_logger_returns_logger():
-    log = get_logger("tamga.test")
+    log = get_logger("bitig.test")
     assert isinstance(log, logging.Logger)
-    assert log.name == "tamga.test"
+    assert log.name == "bitig.test"
 
 
 def test_get_logger_is_idempotent():
-    a = get_logger("tamga.test")
-    b = get_logger("tamga.test")
+    a = get_logger("bitig.test")
+    b = get_logger("bitig.test")
     assert a is b
 
 
 def test_set_verbosity_changes_level():
     set_verbosity("DEBUG")
-    log = get_logger("tamga.test")
+    log = get_logger("bitig.test")
     assert log.isEnabledFor(logging.DEBUG)
 
     set_verbosity("WARNING")
@@ -577,12 +577,12 @@ def test_set_verbosity_changes_level():
 Run: `pytest tests/plumbing/test_logging.py -v`
 Expected: FAIL.
 
-- [ ] **Step 5.3: Implement `src/tamga/plumbing/logging.py`**
+- [ ] **Step 5.3: Implement `src/bitig/plumbing/logging.py`**
 
 ```python
 """Logging helpers.
 
-Loggers are namespaced under `tamga.*`. Verbosity is controlled once at the root and inherited.
+Loggers are namespaced under `bitig.*`. Verbosity is controlled once at the root and inherited.
 Integrates with Rich for readable terminal output when the Rich handler is installed by the CLI.
 """
 
@@ -591,19 +591,19 @@ from __future__ import annotations
 import logging
 
 _DEFAULT_FORMAT = "%(asctime)s %(levelname)-7s %(name)s: %(message)s"
-_ROOT = logging.getLogger("tamga")
+_ROOT = logging.getLogger("bitig")
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Return a namespaced logger. Names not starting with `tamga.` are prefixed."""
-    if not name.startswith("tamga"):
-        name = f"tamga.{name}"
+    """Return a namespaced logger. Names not starting with `bitig.` are prefixed."""
+    if not name.startswith("bitig"):
+        name = f"bitig.{name}"
     _configure_once()
     return logging.getLogger(name)
 
 
 def set_verbosity(level: str | int) -> None:
-    """Set the root `tamga` logger verbosity. Accepts 'DEBUG', 'INFO', 'WARNING', 'ERROR' or int."""
+    """Set the root `bitig` logger verbosity. Accepts 'DEBUG', 'INFO', 'WARNING', 'ERROR' or int."""
     _configure_once()
     if isinstance(level, str):
         level = getattr(logging, level.upper())
@@ -628,7 +628,7 @@ Expected: 3 passed.
 - [ ] **Step 5.5: Commit**
 
 ```bash
-git add src/tamga/plumbing/logging.py tests/plumbing/test_logging.py
+git add src/bitig/plumbing/logging.py tests/plumbing/test_logging.py
 git commit -m "feat(plumbing): namespaced logger helpers"
 ```
 
@@ -637,19 +637,19 @@ git commit -m "feat(plumbing): namespaced logger helpers"
 ## Task 6: `corpus.document` — the `Document` type
 
 **Files:**
-- Create: `src/tamga/corpus/__init__.py`
-- Create: `src/tamga/corpus/document.py`
+- Create: `src/bitig/corpus/__init__.py`
+- Create: `src/bitig/corpus/document.py`
 - Create: `tests/corpus/__init__.py`
 - Create: `tests/corpus/test_document.py`
 
 - [ ] **Step 6.1: Create package `__init__.py` files**
 
-`src/tamga/corpus/__init__.py`:
+`src/bitig/corpus/__init__.py`:
 
 ```python
 """Corpus and Document data model."""
 
-from tamga.corpus.document import Document
+from bitig.corpus.document import Document
 
 __all__ = ["Document"]
 ```
@@ -666,7 +666,7 @@ __all__ = ["Document"]
 
 import pytest
 
-from tamga.corpus.document import Document
+from bitig.corpus.document import Document
 
 
 def test_document_basic_construction():
@@ -712,7 +712,7 @@ def test_document_round_trips_to_dict():
 Run: `pytest tests/corpus/test_document.py -v`
 Expected: FAIL.
 
-- [ ] **Step 6.4: Implement `src/tamga/corpus/document.py`**
+- [ ] **Step 6.4: Implement `src/bitig/corpus/document.py`**
 
 ```python
 """The Document class — a single text with metadata."""
@@ -723,7 +723,7 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Any
 
-from tamga.plumbing.hashing import hash_text
+from bitig.plumbing.hashing import hash_text
 
 
 @dataclass(frozen=True, slots=True)
@@ -758,7 +758,7 @@ Expected: 6 passed.
 - [ ] **Step 6.6: Commit**
 
 ```bash
-git add src/tamga/corpus/__init__.py src/tamga/corpus/document.py tests/corpus/__init__.py tests/corpus/test_document.py
+git add src/bitig/corpus/__init__.py src/bitig/corpus/document.py tests/corpus/__init__.py tests/corpus/test_document.py
 git commit -m "feat(corpus): Document immutable dataclass with content-hash"
 ```
 
@@ -767,9 +767,9 @@ git commit -m "feat(corpus): Document immutable dataclass with content-hash"
 ## Task 7: `corpus.corpus` — the `Corpus` collection
 
 **Files:**
-- Create: `src/tamga/corpus/corpus.py`
+- Create: `src/bitig/corpus/corpus.py`
 - Create: `tests/corpus/test_corpus.py`
-- Modify: `src/tamga/corpus/__init__.py` (export `Corpus`)
+- Modify: `src/bitig/corpus/__init__.py` (export `Corpus`)
 
 - [ ] **Step 7.1: Write failing tests in `tests/corpus/test_corpus.py`**
 
@@ -778,7 +778,7 @@ git commit -m "feat(corpus): Document immutable dataclass with content-hash"
 
 import pytest
 
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 
 def _doc(i: int, **meta: object) -> Document:
@@ -853,7 +853,7 @@ def test_corpus_metadata_column_extracts_field_per_document():
 Run: `pytest tests/corpus/test_corpus.py -v`
 Expected: ImportError on `Corpus`.
 
-- [ ] **Step 7.3: Implement `src/tamga/corpus/corpus.py`**
+- [ ] **Step 7.3: Implement `src/bitig/corpus/corpus.py`**
 
 ```python
 """The Corpus collection — an ordered bag of Documents with metadata-aware operations."""
@@ -864,8 +864,8 @@ from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from tamga.corpus.document import Document
-from tamga.plumbing.hashing import hash_mapping, hash_text
+from bitig.corpus.document import Document
+from bitig.plumbing.hashing import hash_mapping, hash_text
 
 
 @dataclass
@@ -936,13 +936,13 @@ class Corpus:
         return cls(documents=list(docs))
 ```
 
-- [ ] **Step 7.4: Update `src/tamga/corpus/__init__.py`**
+- [ ] **Step 7.4: Update `src/bitig/corpus/__init__.py`**
 
 ```python
 """Corpus and Document data model."""
 
-from tamga.corpus.corpus import Corpus
-from tamga.corpus.document import Document
+from bitig.corpus.corpus import Corpus
+from bitig.corpus.document import Document
 
 __all__ = ["Corpus", "Document"]
 ```
@@ -955,7 +955,7 @@ Expected: 9 passed.
 - [ ] **Step 7.6: Commit**
 
 ```bash
-git add src/tamga/corpus/corpus.py src/tamga/corpus/__init__.py tests/corpus/test_corpus.py
+git add src/bitig/corpus/corpus.py src/bitig/corpus/__init__.py tests/corpus/test_corpus.py
 git commit -m "feat(corpus): Corpus with filter, groupby, metadata_column, stable hash"
 ```
 
@@ -964,8 +964,8 @@ git commit -m "feat(corpus): Corpus with filter, groupby, metadata_column, stabl
 ## Task 8: `io.ingest` — read `.txt` corpus + metadata TSV
 
 **Files:**
-- Create: `src/tamga/io/__init__.py`
-- Create: `src/tamga/io/ingest.py`
+- Create: `src/bitig/io/__init__.py`
+- Create: `src/bitig/io/ingest.py`
 - Create: `tests/io/__init__.py`
 - Create: `tests/io/test_ingest.py`
 - Create: `tests/fixtures/mini_corpus/alice_one.txt`
@@ -1010,12 +1010,12 @@ bob_one.txt	Bob	L2	2019
 bob_two.txt	Bob	L2	2021
 ```
 
-- [ ] **Step 8.3: Create `src/tamga/io/__init__.py`**
+- [ ] **Step 8.3: Create `src/bitig/io/__init__.py`**
 
 ```python
 """Filesystem ingestion and serialization."""
 
-from tamga.io.ingest import load_corpus, load_metadata
+from bitig.io.ingest import load_corpus, load_metadata
 
 __all__ = ["load_corpus", "load_metadata"]
 ```
@@ -1034,8 +1034,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus
-from tamga.io import load_corpus, load_metadata
+from bitig.corpus import Corpus
+from bitig.io import load_corpus, load_metadata
 
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "mini_corpus"
 
@@ -1105,7 +1105,7 @@ def test_load_corpus_non_strict_allows_missing_metadata(tmp_path: Path):
 Run: `pytest tests/io/test_ingest.py -v`
 Expected: FAIL.
 
-- [ ] **Step 8.7: Implement `src/tamga/io/ingest.py`**
+- [ ] **Step 8.7: Implement `src/bitig/io/ingest.py`**
 
 ```python
 """Corpus ingestion from a directory of .txt files + optional metadata TSV."""
@@ -1116,8 +1116,8 @@ import csv
 from pathlib import Path
 from typing import Any
 
-from tamga.corpus import Corpus, Document
-from tamga.plumbing.logging import get_logger
+from bitig.corpus import Corpus, Document
+from bitig.plumbing.logging import get_logger
 
 _log = get_logger(__name__)
 
@@ -1193,7 +1193,7 @@ Expected: 9 passed.
 - [ ] **Step 8.9: Commit**
 
 ```bash
-git add src/tamga/io/ tests/io/ tests/fixtures/
+git add src/bitig/io/ tests/io/ tests/fixtures/
 git commit -m "feat(io): load_corpus and load_metadata from directory + TSV"
 ```
 
@@ -1202,7 +1202,7 @@ git commit -m "feat(io): load_corpus and load_metadata from directory + TSV"
 ## Task 9: `provenance` — the run-record dataclass
 
 **Files:**
-- Create: `src/tamga/provenance.py`
+- Create: `src/bitig/provenance.py`
 - Create: `tests/test_provenance.py`
 
 - [ ] **Step 9.1: Write failing tests in `tests/test_provenance.py`**
@@ -1212,12 +1212,12 @@ git commit -m "feat(io): load_corpus and load_metadata from directory + TSV"
 
 from datetime import datetime
 
-from tamga.provenance import Provenance
+from bitig.provenance import Provenance
 
 
 def test_provenance_basic_construction():
     p = Provenance(
-        tamga_version="0.1.0.dev0",
+        bitig_version="0.1.0.dev0",
         python_version="3.11.7",
         spacy_model="en_core_web_sm",
         spacy_version="3.7.2",
@@ -1233,7 +1233,7 @@ def test_provenance_basic_construction():
 
 def test_provenance_round_trips_to_dict():
     p = Provenance(
-        tamga_version="0.1.0.dev0",
+        bitig_version="0.1.0.dev0",
         python_version="3.11.7",
         spacy_model="en_core_web_sm",
         spacy_version="3.7.2",
@@ -1257,7 +1257,7 @@ def test_provenance_current_captures_runtime():
         seed=1,
         resolved_config={},
     )
-    assert p.tamga_version
+    assert p.bitig_version
     assert "." in p.python_version
     assert isinstance(p.timestamp, datetime)
 ```
@@ -1267,7 +1267,7 @@ def test_provenance_current_captures_runtime():
 Run: `pytest tests/test_provenance.py -v`
 Expected: FAIL.
 
-- [ ] **Step 9.3: Implement `src/tamga/provenance.py`**
+- [ ] **Step 9.3: Implement `src/bitig/provenance.py`**
 
 ```python
 """The Provenance record — captured on every Result so re-runs are fully reproducible."""
@@ -1279,12 +1279,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
 
-from tamga._version import __version__
+from bitig._version import __version__
 
 
 @dataclass
 class Provenance:
-    tamga_version: str
+    bitig_version: str
     python_version: str
     spacy_model: str
     spacy_version: str
@@ -1304,7 +1304,7 @@ class Provenance:
         raw_ts = data["timestamp"]
         ts = datetime.fromisoformat(raw_ts) if isinstance(raw_ts, str) else raw_ts
         return cls(
-            tamga_version=data["tamga_version"],
+            bitig_version=data["bitig_version"],
             python_version=data["python_version"],
             spacy_model=data["spacy_model"],
             spacy_version=data["spacy_version"],
@@ -1327,7 +1327,7 @@ class Provenance:
         resolved_config: dict[str, Any],
     ) -> Provenance:
         return cls(
-            tamga_version=__version__,
+            bitig_version=__version__,
             python_version=platform.python_version(),
             spacy_model=spacy_model,
             spacy_version=spacy_version,
@@ -1347,7 +1347,7 @@ Expected: 3 passed.
 - [ ] **Step 9.5: Commit**
 
 ```bash
-git add src/tamga/provenance.py tests/test_provenance.py
+git add src/bitig/provenance.py tests/test_provenance.py
 git commit -m "feat: Provenance record with current() factory and round-trip serialization"
 ```
 
@@ -1356,19 +1356,19 @@ git commit -m "feat: Provenance record with current() factory and round-trip ser
 ## Task 10: `config.schema` — pydantic `StudyConfig`
 
 **Files:**
-- Create: `src/tamga/config/__init__.py`
-- Create: `src/tamga/config/schema.py`
+- Create: `src/bitig/config/__init__.py`
+- Create: `src/bitig/config/schema.py`
 - Create: `tests/config/__init__.py`
 - Create: `tests/config/test_schema.py`
 
 - [ ] **Step 10.1: Create package `__init__.py` files**
 
-`src/tamga/config/__init__.py`:
+`src/bitig/config/__init__.py`:
 
 ```python
 """Configuration schema and resolution."""
 
-from tamga.config.schema import (
+from bitig.config.schema import (
     CacheConfig,
     CorpusConfig,
     FeatureConfig,
@@ -1405,7 +1405,7 @@ __all__ = [
 
 import pytest
 
-from tamga.config.schema import StudyConfig
+from bitig.config.schema import StudyConfig
 
 
 VALID_MINIMAL = {
@@ -1483,7 +1483,7 @@ def test_round_trip_dict_json():
 Run: `pytest tests/config/test_schema.py -v`
 Expected: ImportError.
 
-- [ ] **Step 10.4: Implement `src/tamga/config/schema.py`**
+- [ ] **Step 10.4: Implement `src/bitig/config/schema.py`**
 
 ```python
 """Pydantic schema for `study.yaml`.
@@ -1630,7 +1630,7 @@ class ReportConfig(BaseModel):
 
 class CacheConfig(BaseModel):
     model_config = _STRICT_MODEL
-    dir: str = ".tamga/cache"
+    dir: str = ".bitig/cache"
     reuse: bool = True
 
 
@@ -1669,7 +1669,7 @@ Expected: 8 passed.
 - [ ] **Step 10.6: Commit**
 
 ```bash
-git add src/tamga/config/ tests/config/
+git add src/bitig/config/ tests/config/
 git commit -m "feat(config): StudyConfig pydantic schema with feature/method param passthrough"
 ```
 
@@ -1678,9 +1678,9 @@ git commit -m "feat(config): StudyConfig pydantic schema with feature/method par
 ## Task 11: `config.resolve` — YAML loading + layered resolution
 
 **Files:**
-- Create: `src/tamga/config/resolve.py`
+- Create: `src/bitig/config/resolve.py`
 - Create: `tests/config/test_resolve.py`
-- Modify: `src/tamga/config/__init__.py` (export `load_config`, `resolve_config`)
+- Modify: `src/bitig/config/__init__.py` (export `load_config`, `resolve_config`)
 
 - [ ] **Step 11.1: Write failing tests in `tests/config/test_resolve.py`**
 
@@ -1691,7 +1691,7 @@ from pathlib import Path
 
 import pytest
 
-from tamga.config import StudyConfig, load_config, resolve_config
+from bitig.config import StudyConfig, load_config, resolve_config
 
 
 def _write(p: Path, text: str) -> Path:
@@ -1754,7 +1754,7 @@ def test_resolve_config_with_no_file_uses_defaults(tmp_path: Path):
 Run: `pytest tests/config/test_resolve.py -v`
 Expected: FAIL.
 
-- [ ] **Step 11.3: Implement `src/tamga/config/resolve.py`**
+- [ ] **Step 11.3: Implement `src/bitig/config/resolve.py`**
 
 ```python
 """YAML loading + deep-merge config resolution.
@@ -1769,7 +1769,7 @@ from typing import Any
 
 import yaml
 
-from tamga.config.schema import StudyConfig
+from bitig.config.schema import StudyConfig
 
 
 def load_config(path: Path) -> StudyConfig:
@@ -1813,18 +1813,18 @@ def _deep_merge(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]
 def _validate(data: dict[str, Any]) -> StudyConfig:
     # StudyConfig requires `corpus`; if absent, fill in a placeholder the caller is expected to
     # override via CLI / subsequent validation. This allows `resolve_config` to be reused for
-    # partial inspection commands like `tamga config show`.
+    # partial inspection commands like `bitig config show`.
     data.setdefault("corpus", {"path": ""})
     return StudyConfig.model_validate(data)
 ```
 
-- [ ] **Step 11.4: Update `src/tamga/config/__init__.py`**
+- [ ] **Step 11.4: Update `src/bitig/config/__init__.py`**
 
 ```python
 """Configuration schema and resolution."""
 
-from tamga.config.resolve import load_config, resolve_config
-from tamga.config.schema import (
+from bitig.config.resolve import load_config, resolve_config
+from bitig.config.schema import (
     CacheConfig,
     CorpusConfig,
     FeatureConfig,
@@ -1859,7 +1859,7 @@ Expected: 5 passed.
 - [ ] **Step 11.6: Commit**
 
 ```bash
-git add src/tamga/config/resolve.py src/tamga/config/__init__.py tests/config/test_resolve.py
+git add src/bitig/config/resolve.py src/bitig/config/__init__.py tests/config/test_resolve.py
 git commit -m "feat(config): load_config and resolve_config with deep-merge precedence"
 ```
 
@@ -1868,14 +1868,14 @@ git commit -m "feat(config): load_config and resolve_config with deep-merge prec
 ## Task 12: `preprocess.cache` — DocBin cache key + read/write
 
 **Files:**
-- Create: `src/tamga/preprocess/__init__.py`
-- Create: `src/tamga/preprocess/cache.py`
+- Create: `src/bitig/preprocess/__init__.py`
+- Create: `src/bitig/preprocess/cache.py`
 - Create: `tests/preprocess/__init__.py`
 - Create: `tests/preprocess/test_cache.py`
 
 - [ ] **Step 12.1: Create package `__init__.py` files**
 
-`src/tamga/preprocess/__init__.py`:
+`src/bitig/preprocess/__init__.py`:
 
 ```python
 """spaCy preprocessing pipeline + DocBin cache."""
@@ -1895,7 +1895,7 @@ from pathlib import Path
 
 import pytest
 
-from tamga.preprocess.cache import DocBinCache, cache_key
+from bitig.preprocess.cache import DocBinCache, cache_key
 
 
 def test_cache_key_is_deterministic():
@@ -1952,7 +1952,7 @@ def test_cache_clear_removes_all_entries(tmp_path: Path):
 Run: `pytest tests/preprocess/test_cache.py -v`
 Expected: FAIL.
 
-- [ ] **Step 12.4: Implement `src/tamga/preprocess/cache.py`**
+- [ ] **Step 12.4: Implement `src/bitig/preprocess/cache.py`**
 
 ```python
 """Content-addressable cache for spaCy `DocBin` blobs.
@@ -1965,7 +1965,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tamga.plumbing.hashing import hash_mapping
+from bitig.plumbing.hashing import hash_mapping
 
 
 def cache_key(
@@ -2025,7 +2025,7 @@ Expected: 7 passed.
 - [ ] **Step 12.6: Commit**
 
 ```bash
-git add src/tamga/preprocess/ tests/preprocess/
+git add src/bitig/preprocess/ tests/preprocess/
 git commit -m "feat(preprocess): DocBinCache content-addressable cache + deterministic key"
 ```
 
@@ -2034,7 +2034,7 @@ git commit -m "feat(preprocess): DocBinCache content-addressable cache + determi
 ## Task 13: `preprocess.pipeline` — spaCy wrapper with DocBin caching
 
 **Files:**
-- Create: `src/tamga/preprocess/pipeline.py`
+- Create: `src/bitig/preprocess/pipeline.py`
 - Create: `tests/preprocess/test_pipeline.py`
 
 - [ ] **Step 13.1: Install `en_core_web_sm` once (required for this test file)**
@@ -2051,8 +2051,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.preprocess.pipeline import ParsedCorpus, SpacyPipeline
+from bitig.corpus import Corpus, Document
+from bitig.preprocess.pipeline import ParsedCorpus, SpacyPipeline
 
 
 pytestmark = pytest.mark.spacy
@@ -2106,14 +2106,14 @@ def test_parsed_corpus_iteration_preserves_order(tmp_path: Path):
 Run: `pytest tests/preprocess/test_pipeline.py -v`
 Expected: ImportError.
 
-- [ ] **Step 13.4: Implement `src/tamga/preprocess/pipeline.py`**
+- [ ] **Step 13.4: Implement `src/bitig/preprocess/pipeline.py`**
 
 ```python
 """High-level spaCy parsing wrapper, DocBin-cached.
 
 Usage:
 
-    pipe = SpacyPipeline(model="en_core_web_sm", cache_dir=".tamga/cache/docbin")
+    pipe = SpacyPipeline(model="en_core_web_sm", cache_dir=".bitig/cache/docbin")
     parsed = pipe.parse(corpus)
     for spacy_doc in parsed.spacy_docs():
         ...
@@ -2131,9 +2131,9 @@ import spacy
 from spacy.language import Language
 from spacy.tokens import Doc, DocBin
 
-from tamga.corpus import Corpus, Document
-from tamga.plumbing.logging import get_logger
-from tamga.preprocess.cache import DocBinCache, cache_key
+from bitig.corpus import Corpus, Document
+from bitig.plumbing.logging import get_logger
+from bitig.preprocess.cache import DocBinCache, cache_key
 
 _log = get_logger(__name__)
 
@@ -2164,7 +2164,7 @@ class SpacyPipeline:
         self,
         *,
         model: str = "en_core_web_trf",
-        cache_dir: Path | str = ".tamga/cache/docbin",
+        cache_dir: Path | str = ".bitig/cache/docbin",
         exclude: list[str] | None = None,
     ) -> None:
         self.model = model
@@ -2221,7 +2221,7 @@ Expected: 4 passed.
 - [ ] **Step 13.6: Commit**
 
 ```bash
-git add src/tamga/preprocess/pipeline.py tests/preprocess/test_pipeline.py
+git add src/bitig/preprocess/pipeline.py tests/preprocess/test_pipeline.py
 git commit -m "feat(preprocess): SpacyPipeline with DocBin cache + ParsedCorpus wrapper"
 ```
 
@@ -2230,11 +2230,11 @@ git commit -m "feat(preprocess): SpacyPipeline with DocBin cache + ParsedCorpus 
 ## Task 14: CLI skeleton — Typer app + `--version`
 
 **Files:**
-- Create: `src/tamga/cli/__init__.py`
+- Create: `src/bitig/cli/__init__.py`
 - Create: `tests/cli/__init__.py`
 - Create: `tests/cli/test_skeleton.py`
 
-- [ ] **Step 14.1: Create `src/tamga/cli/__init__.py`**
+- [ ] **Step 14.1: Create `src/bitig/cli/__init__.py`**
 
 ```python
 """Typer CLI entry point."""
@@ -2244,12 +2244,12 @@ from __future__ import annotations
 import typer
 from rich.console import Console
 
-from tamga._version import __version__
+from bitig._version import __version__
 
 console = Console()
 app = typer.Typer(
-    name="tamga",
-    help="tamga — computational stylometry (next-generation Python replacement for R's Stylo).",
+    name="bitig",
+    help="bitig — computational stylometry (next-generation Python replacement for R's Stylo).",
     no_args_is_help=True,
     add_completion=True,
 )
@@ -2257,7 +2257,7 @@ app = typer.Typer(
 
 def _version_callback(value: bool) -> None:
     if value:
-        console.print(f"tamga {__version__}")
+        console.print(f"bitig {__version__}")
         raise typer.Exit()
 
 
@@ -2267,7 +2267,7 @@ def main(
         None, "--version", callback=_version_callback, is_eager=True, help="Show version and exit."
     ),
 ) -> None:
-    """tamga — computational stylometry."""
+    """bitig — computational stylometry."""
 ```
 
 - [ ] **Step 14.2: Create `tests/cli/__init__.py` (empty)**
@@ -2282,8 +2282,8 @@ def main(
 
 from typer.testing import CliRunner
 
-from tamga import __version__
-from tamga.cli import app
+from bitig import __version__
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -2291,7 +2291,7 @@ runner = CliRunner()
 def test_cli_help_lists_subcommands():
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert "tamga" in result.stdout.lower()
+    assert "bitig" in result.stdout.lower()
 
 
 def test_cli_version_flag_prints_version():
@@ -2313,16 +2313,16 @@ Expected: 3 passed.
 
 - [ ] **Step 14.5: Verify the console script works**
 
-Run: `tamga --version`
-Expected: prints `tamga 0.1.0.dev0`.
+Run: `bitig --version`
+Expected: prints `bitig 0.1.0.dev0`.
 
-Run: `tamga --help`
-Expected: prints help text with "tamga — computational stylometry".
+Run: `bitig --help`
+Expected: prints help text with "bitig — computational stylometry".
 
 - [ ] **Step 14.6: Commit**
 
 ```bash
-git add src/tamga/cli/__init__.py tests/cli/__init__.py tests/cli/test_skeleton.py
+git add src/bitig/cli/__init__.py tests/cli/__init__.py tests/cli/test_skeleton.py
 git commit -m "feat(cli): Typer app skeleton with --version and --help"
 ```
 
@@ -2331,11 +2331,11 @@ git commit -m "feat(cli): Typer app skeleton with --version and --help"
 ## Task 15: Scaffold templates
 
 **Files:**
-- Create: `src/tamga/scaffold/__init__.py`
-- Create: `src/tamga/scaffold/templates/study.yaml.j2`
-- Create: `src/tamga/scaffold/templates/README.md.j2`
-- Create: `src/tamga/scaffold/templates/gitignore.tmpl`
-- Create: `src/tamga/scaffold/scaffolder.py`
+- Create: `src/bitig/scaffold/__init__.py`
+- Create: `src/bitig/scaffold/templates/study.yaml.j2`
+- Create: `src/bitig/scaffold/templates/README.md.j2`
+- Create: `src/bitig/scaffold/templates/gitignore.tmpl`
+- Create: `src/bitig/scaffold/scaffolder.py`
 - Create: `tests/scaffold/__init__.py`
 - Create: `tests/scaffold/test_scaffolder.py`
 - Modify: `pyproject.toml` (ensure templates ship with the wheel)
@@ -2346,23 +2346,23 @@ Append under `[tool.hatch.build.targets.wheel]`:
 
 ```toml
 [tool.hatch.build.targets.wheel.force-include]
-"src/tamga/scaffold/templates" = "tamga/scaffold/templates"
+"src/bitig/scaffold/templates" = "bitig/scaffold/templates"
 ```
 
-- [ ] **Step 15.2: Create `src/tamga/scaffold/__init__.py`**
+- [ ] **Step 15.2: Create `src/bitig/scaffold/__init__.py`**
 
 ```python
-"""Project-scaffolding logic for `tamga init`."""
+"""Project-scaffolding logic for `bitig init`."""
 
-from tamga.scaffold.scaffolder import scaffold_project
+from bitig.scaffold.scaffolder import scaffold_project
 
 __all__ = ["scaffold_project"]
 ```
 
-- [ ] **Step 15.3: Create `src/tamga/scaffold/templates/study.yaml.j2`**
+- [ ] **Step 15.3: Create `src/bitig/scaffold/templates/study.yaml.j2`**
 
 ```jinja2
-# tamga study config — {{ name }}
+# bitig study config — {{ name }}
 name: {{ name }}
 seed: 42
 
@@ -2393,25 +2393,25 @@ report:
   format: none                       # 'html' or 'md' to enable reports
 
 cache:
-  dir: .tamga/cache
+  dir: .bitig/cache
 
 output:
   dir: results/
   timestamp: true
 ```
 
-- [ ] **Step 15.4: Create `src/tamga/scaffold/templates/README.md.j2`**
+- [ ] **Step 15.4: Create `src/bitig/scaffold/templates/README.md.j2`**
 
 ```jinja2
 # {{ name }}
 
-tamga study project.
+bitig study project.
 
 ## Reproduce
 
 ```bash
-uv pip install tamga
-tamga run study.yaml
+uv pip install bitig
+bitig run study.yaml
 ```
 
 ## Layout
@@ -2421,15 +2421,15 @@ tamga run study.yaml
 - `corpus/metadata.tsv` — optional: filename → author, group, year, ... (tab-separated).
 - `results/<timestamp>/` — per-run artifacts (generated).
 - `reports/<timestamp>.html` — per-run reports (generated, opt-in).
-- `.tamga/` — cache and lockfile (gitignored).
+- `.bitig/` — cache and lockfile (gitignored).
 
-Created with tamga {{ tamga_version }} on {{ created_on }}.
+Created with bitig {{ bitig_version }} on {{ created_on }}.
 ```
 
-- [ ] **Step 15.5: Create `src/tamga/scaffold/templates/gitignore.tmpl`** (plain file, not Jinja)
+- [ ] **Step 15.5: Create `src/bitig/scaffold/templates/gitignore.tmpl`** (plain file, not Jinja)
 
 ```
-.tamga/
+.bitig/
 results/
 reports/
 *.docbin
@@ -2447,7 +2447,7 @@ from pathlib import Path
 
 import pytest
 
-from tamga.scaffold import scaffold_project
+from bitig.scaffold import scaffold_project
 
 
 def test_scaffold_creates_expected_layout(tmp_path: Path):
@@ -2458,7 +2458,7 @@ def test_scaffold_creates_expected_layout(tmp_path: Path):
     assert (target / "README.md").is_file()
     assert (target / ".gitignore").is_file()
     assert (target / "corpus").is_dir()
-    assert (target / ".tamga" / "cache").is_dir()
+    assert (target / ".bitig" / "cache").is_dir()
 
 
 def test_scaffold_refuses_to_overwrite(tmp_path: Path):
@@ -2490,10 +2490,10 @@ def test_scaffold_study_yaml_contains_project_name(tmp_path: Path):
 Run: `pytest tests/scaffold/test_scaffolder.py -v`
 Expected: FAIL.
 
-- [ ] **Step 15.8: Implement `src/tamga/scaffold/scaffolder.py`**
+- [ ] **Step 15.8: Implement `src/bitig/scaffold/scaffolder.py`**
 
 ```python
-"""Scaffold a new tamga project directory."""
+"""Scaffold a new bitig project directory."""
 
 from __future__ import annotations
 
@@ -2503,13 +2503,13 @@ from pathlib import Path
 
 from jinja2 import Environment
 
-from tamga._version import __version__
+from bitig._version import __version__
 
-_TEMPLATE_PKG = "tamga.scaffold.templates"
+_TEMPLATE_PKG = "bitig.scaffold.templates"
 
 
 def scaffold_project(name: str, target: Path, *, force: bool = False) -> Path:
-    """Create a new tamga project at `target`.
+    """Create a new bitig project at `target`.
 
     Refuses to create on top of an existing non-empty directory unless `force=True`. When `force`
     is True, existing files are left alone and only missing scaffold files are written.
@@ -2522,14 +2522,14 @@ def scaffold_project(name: str, target: Path, *, force: bool = False) -> Path:
         target.mkdir(parents=True)
 
     (target / "corpus").mkdir(exist_ok=True)
-    (target / ".tamga" / "cache").mkdir(parents=True, exist_ok=True)
+    (target / ".bitig" / "cache").mkdir(parents=True, exist_ok=True)
     (target / "results").mkdir(exist_ok=True)
     (target / "reports").mkdir(exist_ok=True)
 
     env = Environment(trim_blocks=False, lstrip_blocks=False, keep_trailing_newline=True)
     ctx = {
         "name": name,
-        "tamga_version": __version__,
+        "bitig_version": __version__,
         "created_on": datetime.now().strftime("%Y-%m-%d"),
     }
 
@@ -2567,29 +2567,29 @@ Expected: 4 passed.
 - [ ] **Step 15.11: Commit**
 
 ```bash
-git add src/tamga/scaffold/ tests/scaffold/ pyproject.toml
+git add src/bitig/scaffold/ tests/scaffold/ pyproject.toml
 git commit -m "feat(scaffold): scaffold_project with Jinja templates for study.yaml/README/.gitignore"
 ```
 
 ---
 
-## Task 16: `tamga init` CLI command
+## Task 16: `bitig init` CLI command
 
 **Files:**
-- Create: `src/tamga/cli/init_cmd.py`
+- Create: `src/bitig/cli/init_cmd.py`
 - Create: `tests/cli/test_init.py`
-- Modify: `src/tamga/cli/__init__.py` (register command)
+- Modify: `src/bitig/cli/__init__.py` (register command)
 
 - [ ] **Step 16.1: Write failing tests in `tests/cli/test_init.py`**
 
 ```python
-"""Tests for `tamga init`."""
+"""Tests for `bitig init`."""
 
 from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -2625,10 +2625,10 @@ def test_init_force_fills_in(tmp_path: Path):
 Run: `pytest tests/cli/test_init.py -v`
 Expected: FAIL (command not found).
 
-- [ ] **Step 16.3: Implement `src/tamga/cli/init_cmd.py`**
+- [ ] **Step 16.3: Implement `src/bitig/cli/init_cmd.py`**
 
 ```python
-"""`tamga init <name>` — scaffold a new project."""
+"""`bitig init <name>` — scaffold a new project."""
 
 from __future__ import annotations
 
@@ -2637,7 +2637,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.scaffold import scaffold_project
+from bitig.scaffold import scaffold_project
 
 console = Console()
 
@@ -2649,7 +2649,7 @@ def init_command(
     ),
     force: bool = typer.Option(False, "--force", help="Fill in missing files even if directory is non-empty."),
 ) -> None:
-    """Scaffold a new tamga project directory."""
+    """Scaffold a new bitig project directory."""
     dest = target if target is not None else Path.cwd() / name
     try:
         created = scaffold_project(name=name, target=dest, force=force)
@@ -2659,10 +2659,10 @@ def init_command(
     console.print(f"[green]created project[/green] {created}")
     console.print(f"  cd {created}")
     console.print("  # edit study.yaml; drop .txt files in corpus/; then run:")
-    console.print("  tamga run study.yaml")
+    console.print("  bitig run study.yaml")
 ```
 
-- [ ] **Step 16.4: Register in `src/tamga/cli/__init__.py`**
+- [ ] **Step 16.4: Register in `src/bitig/cli/__init__.py`**
 
 Replace the file contents with:
 
@@ -2674,13 +2674,13 @@ from __future__ import annotations
 import typer
 from rich.console import Console
 
-from tamga._version import __version__
-from tamga.cli.init_cmd import init_command
+from bitig._version import __version__
+from bitig.cli.init_cmd import init_command
 
 console = Console()
 app = typer.Typer(
-    name="tamga",
-    help="tamga — computational stylometry (next-generation Python replacement for R's Stylo).",
+    name="bitig",
+    help="bitig — computational stylometry (next-generation Python replacement for R's Stylo).",
     no_args_is_help=True,
     add_completion=True,
 )
@@ -2690,7 +2690,7 @@ app.command(name="init")(init_command)
 
 def _version_callback(value: bool) -> None:
     if value:
-        console.print(f"tamga {__version__}")
+        console.print(f"bitig {__version__}")
         raise typer.Exit()
 
 
@@ -2700,7 +2700,7 @@ def main(
         None, "--version", callback=_version_callback, is_eager=True, help="Show version and exit."
     ),
 ) -> None:
-    """tamga — computational stylometry."""
+    """bitig — computational stylometry."""
 ```
 
 - [ ] **Step 16.5: Run — PASS**
@@ -2711,30 +2711,30 @@ Expected: 3 passed.
 - [ ] **Step 16.6: Commit**
 
 ```bash
-git add src/tamga/cli/init_cmd.py src/tamga/cli/__init__.py tests/cli/test_init.py
-git commit -m "feat(cli): tamga init subcommand"
+git add src/bitig/cli/init_cmd.py src/bitig/cli/__init__.py tests/cli/test_init.py
+git commit -m "feat(cli): bitig init subcommand"
 ```
 
 ---
 
-## Task 17: `tamga ingest` CLI command
+## Task 17: `bitig ingest` CLI command
 
 **Files:**
-- Create: `src/tamga/cli/ingest_cmd.py`
+- Create: `src/bitig/cli/ingest_cmd.py`
 - Create: `tests/cli/test_ingest.py`
-- Modify: `src/tamga/cli/__init__.py` (register `ingest`)
+- Modify: `src/bitig/cli/__init__.py` (register `ingest`)
 
 - [ ] **Step 17.1: Write failing tests in `tests/cli/test_ingest.py`**
 
 ```python
-"""Tests for `tamga ingest`."""
+"""Tests for `bitig ingest`."""
 
 from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -2798,10 +2798,10 @@ def test_ingest_reports_cache_hits_on_rerun(tmp_path: Path):
 Run: `pytest tests/cli/test_ingest.py -v -m spacy`
 Expected: FAIL.
 
-- [ ] **Step 17.3: Implement `src/tamga/cli/ingest_cmd.py`**
+- [ ] **Step 17.3: Implement `src/bitig/cli/ingest_cmd.py`**
 
 ```python
-"""`tamga ingest <path>` — parse a corpus and populate the DocBin cache."""
+"""`bitig ingest <path>` — parse a corpus and populate the DocBin cache."""
 
 from __future__ import annotations
 
@@ -2810,8 +2810,8 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.io import load_corpus
-from tamga.preprocess.pipeline import SpacyPipeline
+from bitig.io import load_corpus
+from bitig.preprocess.pipeline import SpacyPipeline
 
 console = Console()
 
@@ -2824,7 +2824,7 @@ def ingest_command(
     ),
     strict: bool = typer.Option(True, "--strict/--no-strict", help="Every file must have metadata."),
     cache_dir: Path = typer.Option(
-        Path(".tamga/cache"), "--cache-dir", help="Directory for the DocBin cache."
+        Path(".bitig/cache"), "--cache-dir", help="Directory for the DocBin cache."
     ),
     spacy_model: str = typer.Option(
         "en_core_web_trf", "--spacy-model", help="spaCy model name."
@@ -2855,12 +2855,12 @@ def ingest_command(
     console.print(f"  cache: {cache_dir / 'docbin'} ({pipe.cache.size_bytes()} bytes)")
 ```
 
-- [ ] **Step 17.4: Register in `src/tamga/cli/__init__.py`**
+- [ ] **Step 17.4: Register in `src/bitig/cli/__init__.py`**
 
 Add alongside `init_command`:
 
 ```python
-from tamga.cli.ingest_cmd import ingest_command
+from bitig.cli.ingest_cmd import ingest_command
 ...
 app.command(name="ingest")(ingest_command)
 ```
@@ -2875,14 +2875,14 @@ from __future__ import annotations
 import typer
 from rich.console import Console
 
-from tamga._version import __version__
-from tamga.cli.ingest_cmd import ingest_command
-from tamga.cli.init_cmd import init_command
+from bitig._version import __version__
+from bitig.cli.ingest_cmd import ingest_command
+from bitig.cli.init_cmd import init_command
 
 console = Console()
 app = typer.Typer(
-    name="tamga",
-    help="tamga — computational stylometry (next-generation Python replacement for R's Stylo).",
+    name="bitig",
+    help="bitig — computational stylometry (next-generation Python replacement for R's Stylo).",
     no_args_is_help=True,
     add_completion=True,
 )
@@ -2893,7 +2893,7 @@ app.command(name="ingest")(ingest_command)
 
 def _version_callback(value: bool) -> None:
     if value:
-        console.print(f"tamga {__version__}")
+        console.print(f"bitig {__version__}")
         raise typer.Exit()
 
 
@@ -2903,7 +2903,7 @@ def main(
         None, "--version", callback=_version_callback, is_eager=True, help="Show version and exit."
     ),
 ) -> None:
-    """tamga — computational stylometry."""
+    """bitig — computational stylometry."""
 ```
 
 - [ ] **Step 17.5: Run — PASS**
@@ -2914,30 +2914,30 @@ Expected: 3 passed.
 - [ ] **Step 17.6: Commit**
 
 ```bash
-git add src/tamga/cli/ingest_cmd.py src/tamga/cli/__init__.py tests/cli/test_ingest.py
-git commit -m "feat(cli): tamga ingest — parse corpus and populate DocBin cache"
+git add src/bitig/cli/ingest_cmd.py src/bitig/cli/__init__.py tests/cli/test_ingest.py
+git commit -m "feat(cli): bitig ingest — parse corpus and populate DocBin cache"
 ```
 
 ---
 
-## Task 18: `tamga info` and `tamga cache` commands
+## Task 18: `bitig info` and `bitig cache` commands
 
 **Files:**
-- Create: `src/tamga/cli/info_cmd.py`
-- Create: `src/tamga/cli/cache_cmd.py`
+- Create: `src/bitig/cli/info_cmd.py`
+- Create: `src/bitig/cli/cache_cmd.py`
 - Create: `tests/cli/test_info.py`
 - Create: `tests/cli/test_cache.py`
-- Modify: `src/tamga/cli/__init__.py`
+- Modify: `src/bitig/cli/__init__.py`
 
 - [ ] **Step 18.1: Write failing tests in `tests/cli/test_info.py`**
 
 ```python
-"""Tests for `tamga info`."""
+"""Tests for `bitig info`."""
 
 from typer.testing import CliRunner
 
-from tamga import __version__
-from tamga.cli import app
+from bitig import __version__
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -2957,14 +2957,14 @@ def test_info_reports_spacy_version():
 - [ ] **Step 18.2: Write failing tests in `tests/cli/test_cache.py`**
 
 ```python
-"""Tests for `tamga cache`."""
+"""Tests for `bitig cache`."""
 
 from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
-from tamga.preprocess.cache import DocBinCache
+from bitig.cli import app
+from bitig.preprocess.cache import DocBinCache
 
 runner = CliRunner()
 
@@ -3004,10 +3004,10 @@ def test_cache_clear_empties_cache(tmp_path: Path):
 Run: `pytest tests/cli/test_info.py tests/cli/test_cache.py -v`
 Expected: FAIL.
 
-- [ ] **Step 18.4: Implement `src/tamga/cli/info_cmd.py`**
+- [ ] **Step 18.4: Implement `src/bitig/cli/info_cmd.py`**
 
 ```python
-"""`tamga info` — show versions and environment."""
+"""`bitig info` — show versions and environment."""
 
 from __future__ import annotations
 
@@ -3018,27 +3018,27 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from tamga._version import __version__
+from bitig._version import __version__
 
 console = Console()
 
 
 def info_command() -> None:
     """Print versions, paths, and runtime information."""
-    table = Table(title="tamga environment", show_header=False)
+    table = Table(title="bitig environment", show_header=False)
     table.add_column("key", style="cyan")
     table.add_column("value")
-    table.add_row("tamga", __version__)
+    table.add_row("bitig", __version__)
     table.add_row("python", platform.python_version())
     table.add_row("platform", platform.platform())
     table.add_row("spacy", spacy.__version__)
     console.print(table)
 ```
 
-- [ ] **Step 18.5: Implement `src/tamga/cli/cache_cmd.py`**
+- [ ] **Step 18.5: Implement `src/bitig/cli/cache_cmd.py`**
 
 ```python
-"""`tamga cache [size|list|clear]` — inspect and manage the DocBin cache."""
+"""`bitig cache [size|list|clear]` — inspect and manage the DocBin cache."""
 
 from __future__ import annotations
 
@@ -3047,7 +3047,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.preprocess.cache import DocBinCache
+from bitig.preprocess.cache import DocBinCache
 
 console = Console()
 
@@ -3056,7 +3056,7 @@ cache_app = typer.Typer(name="cache", help="Inspect and manage the DocBin cache.
 
 @cache_app.command("size")
 def cache_size(
-    cache_dir: Path = typer.Option(Path(".tamga/cache"), "--cache-dir"),
+    cache_dir: Path = typer.Option(Path(".bitig/cache"), "--cache-dir"),
 ) -> None:
     """Show total bytes stored in the DocBin cache."""
     cache = DocBinCache(cache_dir / "docbin")
@@ -3065,7 +3065,7 @@ def cache_size(
 
 @cache_app.command("list")
 def cache_list(
-    cache_dir: Path = typer.Option(Path(".tamga/cache"), "--cache-dir"),
+    cache_dir: Path = typer.Option(Path(".bitig/cache"), "--cache-dir"),
 ) -> None:
     """List cache keys."""
     cache = DocBinCache(cache_dir / "docbin")
@@ -3075,7 +3075,7 @@ def cache_list(
 
 @cache_app.command("clear")
 def cache_clear(
-    cache_dir: Path = typer.Option(Path(".tamga/cache"), "--cache-dir"),
+    cache_dir: Path = typer.Option(Path(".bitig/cache"), "--cache-dir"),
 ) -> None:
     """Delete every entry from the DocBin cache."""
     cache = DocBinCache(cache_dir / "docbin")
@@ -3084,7 +3084,7 @@ def cache_clear(
     console.print(f"cleared {n} entries from {cache_dir / 'docbin'}")
 ```
 
-- [ ] **Step 18.6: Register in `src/tamga/cli/__init__.py`**
+- [ ] **Step 18.6: Register in `src/bitig/cli/__init__.py`**
 
 Full file:
 
@@ -3096,16 +3096,16 @@ from __future__ import annotations
 import typer
 from rich.console import Console
 
-from tamga._version import __version__
-from tamga.cli.cache_cmd import cache_app
-from tamga.cli.info_cmd import info_command
-from tamga.cli.ingest_cmd import ingest_command
-from tamga.cli.init_cmd import init_command
+from bitig._version import __version__
+from bitig.cli.cache_cmd import cache_app
+from bitig.cli.info_cmd import info_command
+from bitig.cli.ingest_cmd import ingest_command
+from bitig.cli.init_cmd import init_command
 
 console = Console()
 app = typer.Typer(
-    name="tamga",
-    help="tamga — computational stylometry (next-generation Python replacement for R's Stylo).",
+    name="bitig",
+    help="bitig — computational stylometry (next-generation Python replacement for R's Stylo).",
     no_args_is_help=True,
     add_completion=True,
 )
@@ -3118,7 +3118,7 @@ app.add_typer(cache_app, name="cache")
 
 def _version_callback(value: bool) -> None:
     if value:
-        console.print(f"tamga {__version__}")
+        console.print(f"bitig {__version__}")
         raise typer.Exit()
 
 
@@ -3128,7 +3128,7 @@ def main(
         None, "--version", callback=_version_callback, is_eager=True, help="Show version and exit."
     ),
 ) -> None:
-    """tamga — computational stylometry."""
+    """bitig — computational stylometry."""
 ```
 
 - [ ] **Step 18.7: Run — PASS**
@@ -3139,8 +3139,8 @@ Expected: 5 passed.
 - [ ] **Step 18.8: Commit**
 
 ```bash
-git add src/tamga/cli/info_cmd.py src/tamga/cli/cache_cmd.py src/tamga/cli/__init__.py tests/cli/test_info.py tests/cli/test_cache.py
-git commit -m "feat(cli): tamga info and tamga cache (size/list/clear)"
+git add src/bitig/cli/info_cmd.py src/bitig/cli/cache_cmd.py src/bitig/cli/__init__.py tests/cli/test_info.py tests/cli/test_cache.py
+git commit -m "feat(cli): bitig info and bitig cache (size/list/clear)"
 ```
 
 ---
@@ -3161,7 +3161,7 @@ from shutil import copy, copytree
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -3189,7 +3189,7 @@ def test_end_to_end_init_ingest_info(tmp_path: Path):
             "ingest",
             str(project / "corpus"),
             "--metadata", str(project / "corpus" / "metadata.tsv"),
-            "--cache-dir", str(project / ".tamga" / "cache"),
+            "--cache-dir", str(project / ".bitig" / "cache"),
             "--spacy-model", "en_core_web_sm",
         ],
     )
@@ -3197,7 +3197,7 @@ def test_end_to_end_init_ingest_info(tmp_path: Path):
 
     # 4. cache reports 4 entries
     r_size = runner.invoke(
-        app, ["cache", "size", "--cache-dir", str(project / ".tamga" / "cache")]
+        app, ["cache", "size", "--cache-dir", str(project / ".bitig" / "cache")]
     )
     assert r_size.exit_code == 0
     assert "4 entries" in r_size.stdout
@@ -3272,7 +3272,7 @@ jobs:
       - run: uv pip install --system -e ".[dev]"
       - name: Download small spaCy model
         run: python -m spacy download en_core_web_sm
-      - run: pytest -n auto --cov=tamga --cov-report=term-missing -m "not slow"
+      - run: pytest -n auto --cov=bitig --cov-report=term-missing -m "not slow"
 ```
 
 - [ ] **Step 20.2: Commit**
@@ -3287,20 +3287,20 @@ git commit -m "ci: GitHub Actions — lint + tests on py3.11-3.13, ubuntu+macos,
 ## Task 21: Public API exports + `__main__`
 
 **Files:**
-- Modify: `src/tamga/__init__.py` (re-export public surface)
-- Create: `src/tamga/__main__.py`
+- Modify: `src/bitig/__init__.py` (re-export public surface)
+- Create: `src/bitig/__main__.py`
 
-- [ ] **Step 21.1: Update `src/tamga/__init__.py`**
+- [ ] **Step 21.1: Update `src/bitig/__init__.py`**
 
 ```python
-"""tamga — next-generation computational stylometry."""
+"""bitig — next-generation computational stylometry."""
 
-from tamga._version import __version__
-from tamga.config import StudyConfig, load_config, resolve_config
-from tamga.corpus import Corpus, Document
-from tamga.io import load_corpus, load_metadata
-from tamga.preprocess.pipeline import ParsedCorpus, SpacyPipeline
-from tamga.provenance import Provenance
+from bitig._version import __version__
+from bitig.config import StudyConfig, load_config, resolve_config
+from bitig.corpus import Corpus, Document
+from bitig.io import load_corpus, load_metadata
+from bitig.preprocess.pipeline import ParsedCorpus, SpacyPipeline
+from bitig.provenance import Provenance
 
 __all__ = [
     "__version__",
@@ -3317,12 +3317,12 @@ __all__ = [
 ]
 ```
 
-- [ ] **Step 21.2: Create `src/tamga/__main__.py`**
+- [ ] **Step 21.2: Create `src/bitig/__main__.py`**
 
 ```python
-"""Allow `python -m tamga ...` to invoke the CLI."""
+"""Allow `python -m bitig ...` to invoke the CLI."""
 
-from tamga.cli import app
+from bitig.cli import app
 
 if __name__ == "__main__":
     app()
@@ -3332,20 +3332,20 @@ if __name__ == "__main__":
 
 Run:
 ```bash
-python -c "from tamga import Corpus, Document, SpacyPipeline, StudyConfig, __version__; print(__version__)"
+python -c "from bitig import Corpus, Document, SpacyPipeline, StudyConfig, __version__; print(__version__)"
 ```
 Expected: prints the version without ImportError.
 
-- [ ] **Step 21.4: Verify `python -m tamga` works**
+- [ ] **Step 21.4: Verify `python -m bitig` works**
 
-Run: `python -m tamga --version`
-Expected: prints `tamga 0.1.0.dev0`.
+Run: `python -m bitig --version`
+Expected: prints `bitig 0.1.0.dev0`.
 
 - [ ] **Step 21.5: Commit**
 
 ```bash
-git add src/tamga/__init__.py src/tamga/__main__.py
-git commit -m "feat: public API re-exports + python -m tamga entry point"
+git add src/bitig/__init__.py src/bitig/__main__.py
+git commit -m "feat: public API re-exports + python -m bitig entry point"
 ```
 
 ---
@@ -3395,19 +3395,19 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ```yaml
 cff-version: 1.2.0
-message: "If you use tamga, please cite it as below."
-title: "tamga: next-generation computational stylometry"
+message: "If you use bitig, please cite it as below."
+title: "bitig: next-generation computational stylometry"
 authors:
   - family-names: "Bozdağ"
     given-names: "Fatih"
     email: "fbozdag1989@gmail.com"
 type: software
 license: BSD-3-Clause
-url: "https://github.com/fatihbozdag/tamga"
-repository-code: "https://github.com/fatihbozdag/tamga"
+url: "https://github.com/fatihbozdag/bitig"
+repository-code: "https://github.com/fatihbozdag/bitig"
 version: "0.1.0.dev0"
 abstract: >
-  tamga is a Python package and interactive CLI for computational stylometry.
+  bitig is a Python package and interactive CLI for computational stylometry.
   It provides feature parity with R's Stylo for authorship attribution,
   author-group comparison, and Digital Humanities analyses, and adds modern
   NLP and ML capabilities via spaCy and scikit-learn.
@@ -3422,15 +3422,15 @@ keywords:
 - [ ] **Step 22.3: Create `README.md`**
 
 ```markdown
-# tamga
+# bitig
 
 **Next-generation computational stylometry — a Python replacement for R's Stylo.**
 
-`tamga` ("mark, brand, clan-sign" — from Old Turkic) is a Python package and interactive CLI for
+`bitig` ("mark, brand, clan-sign" — from Old Turkic) is a Python package and interactive CLI for
 authorship attribution, author-group style comparison, and Digital Humanities stylometric
 analysis. It reimplements the analytical breadth of R's `Stylo` and adds modern NLP and ML on top.
 
-> Named after the **tamga**, the Turkic clan-mark by which individual and familial identity was
+> Named after the **bitig**, the Turkic clan-mark by which individual and familial identity was
 > recognised at a glance — the material-culture counterpart to a stylistic fingerprint.
 
 ## Status
@@ -3439,24 +3439,24 @@ analysis. It reimplements the analytical breadth of R's `Stylo` and adds modern 
 project scaffolding + skeleton CLI. Delta family, Zeta, consensus trees, classifiers,
 visualisations, reports, and the interactive wizard shell land in Phases 2–5.
 
-See `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md` for the full design.
+See `docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md` for the full design.
 
 ## Install
 
 ```bash
-uv pip install tamga
+uv pip install bitig
 python -m spacy download en_core_web_trf
 ```
 
 ## Quickstart
 
 ```bash
-tamga init my-study
+bitig init my-study
 cd my-study
 # drop .txt files into corpus/
 # optionally add a metadata.tsv with filename → author/group/year/...
-tamga ingest corpus/ --metadata corpus/metadata.tsv
-tamga info
+bitig ingest corpus/ --metadata corpus/metadata.tsv
+bitig info
 ```
 
 ## License
@@ -3465,7 +3465,7 @@ BSD-3-Clause. See `LICENSE`.
 
 ## Citation
 
-If you use tamga in published work, please cite it — see `CITATION.cff`.
+If you use bitig in published work, please cite it — see `CITATION.cff`.
 ```
 
 - [ ] **Step 22.4: Commit**
@@ -3491,8 +3491,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus
-from tamga.io import load_corpus
+from bitig.corpus import Corpus
+from bitig.io import load_corpus
 
 
 @pytest.fixture(scope="session")
@@ -3518,8 +3518,8 @@ git commit -m "test: shared conftest with mini_corpus fixture"
 
 - [ ] **Step 24.1: Run all tests with coverage**
 
-Run: `pytest -n auto --cov=tamga --cov-report=term-missing -m "not slow"`
-Expected: all tests pass; total coverage ≥85% on `tamga.plumbing`, `tamga.corpus`, `tamga.io`, `tamga.config`, `tamga.preprocess.cache`, `tamga.scaffold`. Coverage on `tamga.cli` and `tamga.preprocess.pipeline` may be lower due to integration-test boundaries; ≥70% acceptable there.
+Run: `pytest -n auto --cov=bitig --cov-report=term-missing -m "not slow"`
+Expected: all tests pass; total coverage ≥85% on `bitig.plumbing`, `bitig.corpus`, `bitig.io`, `bitig.config`, `bitig.preprocess.cache`, `bitig.scaffold`. Coverage on `bitig.cli` and `bitig.preprocess.pipeline` may be lower due to integration-test boundaries; ≥70% acceptable there.
 
 If any module's coverage is below target, inspect `--cov-report=term-missing` output and add the missing tests in the relevant `tests/<module>/test_*.py` file before continuing.
 
@@ -3546,24 +3546,24 @@ A reviewer must be able to run the following sequence from a clean checkout and 
 
 ```bash
 git clone <repo>
-cd tamga
+cd bitig
 uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 python -m spacy download en_core_web_sm
 pre-commit run --all-files
-pytest -n auto --cov=tamga --cov-report=term-missing -m "not slow"
+pytest -n auto --cov=bitig --cov-report=term-missing -m "not slow"
 
 # end-to-end exercise
-tamga --version
-tamga init /tmp/demo
+bitig --version
+bitig init /tmp/demo
 cp tests/fixtures/mini_corpus/*.txt /tmp/demo/corpus/
 cp tests/fixtures/mini_corpus/metadata.tsv /tmp/demo/corpus/
-tamga ingest /tmp/demo/corpus/ \
+bitig ingest /tmp/demo/corpus/ \
     --metadata /tmp/demo/corpus/metadata.tsv \
-    --cache-dir /tmp/demo/.tamga/cache \
+    --cache-dir /tmp/demo/.bitig/cache \
     --spacy-model en_core_web_sm
-tamga cache size --cache-dir /tmp/demo/.tamga/cache   # → "4 entries"
-tamga info
+bitig cache size --cache-dir /tmp/demo/.bitig/cache   # → "4 entries"
+bitig info
 ```
 
 Every line above must succeed with zero errors.
@@ -3578,7 +3578,7 @@ Every line above must succeed with zero errors.
   reproducibility plumbing (§12.3–12.5), CI (§13.3), BSD-3-Clause + CITATION (§14.4).
   Explicitly **deferred** to later phases: `FeatureMatrix` (§3.3), `Result` (§3.5), extractors
   (§5), methods (§6), sklearn protocol adherence (§7), viz (§10), reports (§11), `study.yaml`
-  runner (§8.5, `tamga run`), interactive shell (§8.4), full `lock.yaml` writer (§12.4), reporting
+  runner (§8.5, `bitig run`), interactive shell (§8.4), full `lock.yaml` writer (§12.4), reporting
   commands.
 - **Placeholder scan.** No "TBD"/"TODO"/"implement later" in any step. All code blocks are
   runnable as shown.
@@ -3597,8 +3597,8 @@ Every line above must succeed with zero errors.
 - **Phase 2:** Feature extractors (MFW, char/word/POS n-grams, deps, function words, punct,
   lexdiv, readability, sentence-length) + Delta family + Federalist Papers parity suite.
 - **Phase 3:** Zeta, reducers, clustering, bootstrap consensus trees, sklearn classifiers.
-- **Phase 4:** `tamga[embeddings]` and `tamga[bayesian]` optional extras.
+- **Phase 4:** `bitig[embeddings]` and `bitig[bayesian]` optional extras.
 - **Phase 5:** Visualisation (matplotlib/seaborn static + plotly interactive), HTML/Markdown
-  reports, interactive wizard shell, `tamga run study.yaml`.
+  reports, interactive wizard shell, `bitig run study.yaml`.
 - **Phase 6:** MkDocs site, Federalist Papers tutorial, EFCAMDAT-style L2-vs-native tutorial,
   PyPI publishing workflow.

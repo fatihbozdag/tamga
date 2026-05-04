@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import linkage
 
-from tamga.viz.mpl import (
+from bitig.viz.mpl import (
     plot_bootstrap_consensus_tree,
     plot_confusion_matrix,
     plot_dendrogram,

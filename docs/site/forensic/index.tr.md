@@ -2,12 +2,12 @@
 
 Adli dilbilim (forensic linguistics) araştırmaları yalnızca yazar tespitinin ötesini gerektirir: **tek sınıflı doğrulama**, **konudan bağımsız öznitelikler** ve **referans popülasyona göre kalibre edilmiş olabilirlik oranı (likelihood ratio) olarak biçimlendirilmiş kanıtsal çıktı**.
 
-`tamga.forensic`, bu bileşenleri analiz yöntemlerinin üzerine tutarlı bir katman olarak sunar. Her araç sınıflandırıcıdan bağımsızdır; herhangi bir tamga öznitelik kümesiyle ve herhangi bir Delta / Zeta / classify yöntemiyle birleştirilebilir.
+`bitig.forensic`, bu bileşenleri analiz yöntemlerinin üzerine tutarlı bir katman olarak sunar. Her araç sınıflandırıcıdan bağımsızdır; herhangi bir bitig öznitelik kümesiyle ve herhangi bir Delta / Zeta / classify yöntemiyle birleştirilebilir.
 
 ## Pakette neler var
 
 ```python
-from tamga.forensic import (
+from bitig.forensic import (
     # Doğrulama
     GeneralImpostors,            # Koppel & Winter 2014
     Unmasking,                   # Koppel & Schler 2004
@@ -26,7 +26,7 @@ from tamga.forensic import (
     PANReport, compute_pan_report,
 )
 
-from tamga.report import build_forensic_report   # LR tabanlı HTML şablonu
+from bitig.report import build_forensic_report   # LR tabanlı HTML şablonu
 ```
 
 ## Adli iş akışı
@@ -59,7 +59,7 @@ $$
 
 — bu, aynı-yazar hipotezi altında kanıtın olasılığının farklı-yazar altındaki olasılığa oranıdır; bunun için **kalibre edilmiş** bir temel puanlayıcı gereklidir. Ham sınıflandırıcı posteriorları nadiren kalibredir ve adli semantiği yanlış temsil eden "suçluluk olasılığı" biçiminde kolayca kötüye kullanılabilir.
 
-tamga'nın `CalibratedScorer` + `log_lr_from_probs` işlem hattı, herhangi bir ham puanı adli raporda savunulabilir bir log-LR değerine dönüştürür. Rapor şablonundaki yerleşik ENFSI / Nordgaard sözel ölçeği (verbal scale), şeffaf bir sözel okuma sunar.
+bitig'nın `CalibratedScorer` + `log_lr_from_probs` işlem hattı, herhangi bir ham puanı adli raporda savunulabilir bir log-LR değerine dönüştürür. Rapor şablonundaki yerleşik ENFSI / Nordgaard sözel ölçeği (verbal scale), şeffaf bir sözel okuma sunar.
 
 ## Delil zinciri
 

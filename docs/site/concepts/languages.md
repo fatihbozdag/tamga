@@ -1,6 +1,6 @@
 # Languages
 
-tamga ships with first-class support for five languages: **English**, **Turkish**, **German**,
+bitig ships with first-class support for five languages: **English**, **Turkish**, **German**,
 **Spanish**, and **French**. Each language has bundled function-word lists, native readability
 formulas, and tested end-to-end pipelines.
 
@@ -16,12 +16,12 @@ formulas, and tested end-to-end pipelines.
 
 ## How the registry works
 
-Every language-dependent site in tamga (preprocess pipeline, function-word loading, readability
+Every language-dependent site in bitig (preprocess pipeline, function-word loading, readability
 index selection, embedding model defaults) reads from the central `LANGUAGES` registry. Unknown
 codes fail fast with a helpful error listing the supported set.
 
 ```python
-from tamga import LANGUAGES, get_language
+from bitig import LANGUAGES, get_language
 
 spec = get_language("tr")
 print(spec.backend)                       # 'spacy_stanza'
@@ -48,35 +48,35 @@ preprocess:
     # backend: spacy
 ```
 
-From the CLI, pass `--language` to `tamga init` or `tamga ingest`:
+From the CLI, pass `--language` to `bitig init` or `bitig ingest`:
 
 ```bash
-tamga init mystudy --language tr
-tamga ingest corpus/ --language tr --metadata corpus/metadata.tsv
+bitig init mystudy --language tr
+bitig ingest corpus/ --language tr --metadata corpus/metadata.tsv
 ```
 
-`tamga info` prints the configured language when a `study.yaml` sits in the current
+`bitig info` prints the configured language when a `study.yaml` sits in the current
 directory, so you can sanity-check the active pipeline at a glance.
 
 ## Turkish prerequisites
 
-Turkish is the one language that does not currently ship as a native spaCy pipeline. tamga
+Turkish is the one language that does not currently ship as a native spaCy pipeline. bitig
 routes it through [Stanza](https://stanfordnlp.github.io/stanza/) via
 [`spacy-stanza`](https://github.com/explosion/spacy-stanza), which still returns native spaCy
 `Doc` objects — everything downstream behaves identically.
 
 ```bash
-uv pip install 'tamga[turkish]'
+uv pip install 'bitig[turkish]'
 python -c "import stanza; stanza.download('tr')"
 ```
 
 The Stanza Turkish model (about 600 MB) is downloaded on first use. After that,
-`tamga ingest --language tr` works identically to the English path.
+`bitig ingest --language tr` works identically to the English path.
 
 ## Function words
 
 Per-language function-word lists live under
-`src/tamga/resources/languages/<code>/function_words.txt`. The non-English lists were derived
+`src/bitig/resources/languages/<code>/function_words.txt`. The non-English lists were derived
 from Universal Dependencies closed-class tokens (ADP / CCONJ / DET / PRON / SCONJ / PART /
 AUX), filtered to the most frequent forms. Regenerate them with:
 
@@ -87,7 +87,7 @@ python scripts/regenerate_function_words.py
 ## Readability formulas
 
 Each non-English language ships at least two native readability indices, implemented in
-`tamga.languages.readability_<code>`:
+`bitig.languages.readability_<code>`:
 
 - **Turkish (tr):** Ateşman (1997), Bezirci-Yılmaz (2010)
 - **German (de):** Flesch-Amstad (1978), Wiener Sachtextformel (Bamberger & Vanecek, 1984)
@@ -99,12 +99,12 @@ automatically.
 
 ## Adding a sixth language
 
-1. Add a `LanguageSpec` entry to `tamga.languages.registry.REGISTRY`.
-2. Create `src/tamga/resources/languages/<code>/function_words.txt` (run
+1. Add a `LanguageSpec` entry to `bitig.languages.registry.REGISTRY`.
+2. Create `src/bitig/resources/languages/<code>/function_words.txt` (run
    `scripts/regenerate_function_words.py` after extending the UD corpus list).
 3. If native readability formulas exist for the language, write them in
-   `tamga.languages.readability_<code>` and register them in
-   `tamga.features.readability._INDEX_REGISTRY`.
+   `bitig.languages.readability_<code>` and register them in
+   `bitig.features.readability._INDEX_REGISTRY`.
 4. Add unit tests under `tests/languages/` and at least one integration test.
 5. Add a tutorial page under `docs/site/tutorials/`.
 

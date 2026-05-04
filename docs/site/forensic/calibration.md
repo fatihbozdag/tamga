@@ -14,7 +14,7 @@ metadata that turns a calibrated score into a court-ready LR statement.
 
 Verification systems produce raw scores. Forensic reporting expects **calibrated
 posteriors** converted to **likelihood ratios** — the evidential semantics courts
-understand. `tamga.forensic` provides both steps.
+understand. `bitig.forensic` provides both steps.
 
 ## The workflow
 
@@ -42,7 +42,7 @@ probability; `log_lr(q, k)` returns the evidential quantity.
 Wraps a 1-D monotone calibrator — either Platt (logistic) or isotonic.
 
 ```python
-from tamga.forensic import CalibratedScorer
+from bitig.forensic import CalibratedScorer
 
 scorer = CalibratedScorer(method="platt").fit(calibration_scores, calibration_labels)
 probs   = scorer.predict_proba(test_scores)
@@ -86,7 +86,7 @@ $$
 $$
 
 ```python
-from tamga.forensic import log_lr_from_probs, log_lr_from_probs_with_priors
+from bitig.forensic import log_lr_from_probs, log_lr_from_probs_with_priors
 
 log_lrs = log_lr_from_probs(probs)                                # flat priors
 log_lrs = log_lr_from_probs_with_priors(probs, prior_target=0.3)  # non-flat
@@ -114,10 +114,10 @@ method's LR value. See [Reporting](reporting.md).
 
 ## Reference
 
-::: tamga.forensic.lr.CalibratedScorer
+::: bitig.forensic.lr.CalibratedScorer
     options:
       show_root_full_path: false
 
-::: tamga.forensic.lr.log_lr_from_probs
+::: bitig.forensic.lr.log_lr_from_probs
 
-::: tamga.forensic.lr.log_lr_from_probs_with_priors
+::: bitig.forensic.lr.log_lr_from_probs_with_priors

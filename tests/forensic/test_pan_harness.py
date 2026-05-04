@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.forensic.metrics import (
+from bitig.forensic.metrics import (
     PANReport,
     auc,
     c_at_1,

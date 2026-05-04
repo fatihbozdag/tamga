@@ -2,7 +2,7 @@
 
 import matplotlib.pyplot as plt
 
-from tamga.viz.style import apply_publication_style, figure_size
+from bitig.viz.style import apply_publication_style, figure_size
 
 
 def test_apply_publication_style_sets_dpi():

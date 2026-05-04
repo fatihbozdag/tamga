@@ -1,13 +1,13 @@
-"""Tests for embedding-based feature extractors — requires tamga[embeddings]."""
+"""Tests for embedding-based feature extractors — requires bitig[embeddings]."""
 
 from __future__ import annotations
 
 import pytest
 
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 try:
-    from tamga.features.embeddings import (
+    from bitig.features.embeddings import (
         ContextualEmbeddingExtractor,
         SentenceEmbeddingExtractor,
     )
@@ -18,7 +18,7 @@ except ImportError:
 
 pytestmark = [
     pytest.mark.slow,  # Model loading is slow.
-    pytest.mark.skipif(not _HAS_EMBEDDINGS, reason="requires tamga[embeddings]"),
+    pytest.mark.skipif(not _HAS_EMBEDDINGS, reason="requires bitig[embeddings]"),
 ]
 
 _MODEL = "sentence-transformers/all-MiniLM-L6-v2"
@@ -29,7 +29,7 @@ def _corpus(*texts: str) -> Corpus:
 
 
 def test_sentence_embedding_extractor_produces_fixed_dim() -> None:
-    from tamga.features.embeddings import SentenceEmbeddingExtractor
+    from bitig.features.embeddings import SentenceEmbeddingExtractor
 
     ex = SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
     fm = ex.fit_transform(_corpus("Hello world.", "The quick brown fox jumped."))
@@ -39,7 +39,7 @@ def test_sentence_embedding_extractor_produces_fixed_dim() -> None:
 
 
 def test_sentence_embedding_similar_texts_have_high_cosine_sim() -> None:
-    from tamga.features.embeddings import SentenceEmbeddingExtractor
+    from bitig.features.embeddings import SentenceEmbeddingExtractor
 
     ex = SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
     fm = ex.fit_transform(
@@ -58,7 +58,7 @@ def test_sentence_embedding_similar_texts_have_high_cosine_sim() -> None:
 
 
 def test_sentence_embedding_handles_empty_text() -> None:
-    from tamga.features.embeddings import SentenceEmbeddingExtractor
+    from bitig.features.embeddings import SentenceEmbeddingExtractor
 
     ex = SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
     fm = ex.fit_transform(_corpus("", "hello"))
@@ -67,11 +67,11 @@ def test_sentence_embedding_handles_empty_text() -> None:
 
 def test_embeddings_raises_clear_error_when_not_installed(monkeypatch: pytest.MonkeyPatch) -> None:
     """If sentence-transformers is absent, import/construction raises an informative error."""
-    from tamga.features import embeddings
+    from bitig.features import embeddings
 
     # Simulate missing dep by breaking the import path temporarily.
     monkeypatch.setattr(embeddings, "_sentence_transformers_available", False)
-    with pytest.raises(ImportError, match=r"tamga\[embeddings\]"):
+    with pytest.raises(ImportError, match=r"bitig\[embeddings\]"):
         embeddings.SentenceEmbeddingExtractor(model=_MODEL, pool="mean")
 
 

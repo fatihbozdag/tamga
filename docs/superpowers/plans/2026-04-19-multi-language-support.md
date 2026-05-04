@@ -4,7 +4,7 @@
 
 **Goal:** Add first-class support for English, Turkish, German, Spanish, French behind a language registry, with Stanza BOUN for Turkish via `spacy-stanza`.
 
-**Architecture:** A new `tamga.languages` module owns a frozen `LanguageSpec` registry. `Corpus` and `StudyConfig.preprocess` gain a `language` field. Language-dependent extractors (`FunctionWordExtractor`, `ReadabilityExtractor`, `ContextualEmbeddingExtractor`, `SentenceEmbeddingExtractor`) resolve defaults from `corpus.language` unless explicitly overridden. `SpacyPipeline` dispatches between `spacy.load()` and `spacy_stanza.load_pipeline()`; DocBin cache keys gain a backend segment that preserves the existing English key format.
+**Architecture:** A new `bitig.languages` module owns a frozen `LanguageSpec` registry. `Corpus` and `StudyConfig.preprocess` gain a `language` field. Language-dependent extractors (`FunctionWordExtractor`, `ReadabilityExtractor`, `ContextualEmbeddingExtractor`, `SentenceEmbeddingExtractor`) resolve defaults from `corpus.language` unless explicitly overridden. `SpacyPipeline` dispatches between `spacy.load()` and `spacy_stanza.load_pipeline()`; DocBin cache keys gain a backend segment that preserves the existing English key format.
 
 **Tech Stack:** Python 3.11+, spaCy ≥3.7, `spacy-stanza` ≥1.0.4 + `stanza` ≥1.6 (new `turkish` extra), `pyphen` ≥0.14 (new core dep for DE/FR syllable counting), pydantic v2, pytest.
 
@@ -14,11 +14,11 @@
 
 ## Phase 1 — Language registry + resource layout
 
-### Task 1.1: Create `tamga.languages.registry`
+### Task 1.1: Create `bitig.languages.registry`
 
 **Files:**
-- Create: `src/tamga/languages/__init__.py`
-- Create: `src/tamga/languages/registry.py`
+- Create: `src/bitig/languages/__init__.py`
+- Create: `src/bitig/languages/registry.py`
 - Create: `tests/languages/__init__.py`
 - Create: `tests/languages/test_registry.py`
 
@@ -34,7 +34,7 @@ import dataclasses
 
 import pytest
 
-from tamga.languages import LANGUAGES, LanguageSpec, get_language
+from bitig.languages import LANGUAGES, LanguageSpec, get_language
 
 
 def test_registry_contains_five_first_class_languages() -> None:
@@ -85,15 +85,15 @@ def test_every_spec_declares_embedding_defaults() -> None:
 pytest tests/languages/test_registry.py -v
 ```
 
-Expected: FAIL with `ModuleNotFoundError: No module named 'tamga.languages'`.
+Expected: FAIL with `ModuleNotFoundError: No module named 'bitig.languages'`.
 
 - [ ] **Step 3: Write the implementation**
 
 ```python
-# src/tamga/languages/registry.py
+# src/bitig/languages/registry.py
 """Language registry: one frozen LanguageSpec per first-class language.
 
-Every language-dependent site in tamga (preprocess pipeline, function-word loading, readability
+Every language-dependent site in bitig (preprocess pipeline, function-word loading, readability
 index selection, embedding model defaults) reads from REGISTRY. Unknown codes raise early and
 clearly.
 """
@@ -173,17 +173,17 @@ def get(code: str) -> LanguageSpec:
         supported = sorted(REGISTRY)
         raise ValueError(
             f"Unknown language code: {code!r}. Supported: {supported}. "
-            f"To add a new language, extend tamga.languages.registry.REGISTRY."
+            f"To add a new language, extend bitig.languages.registry.REGISTRY."
         )
     return REGISTRY[normalized]
 ```
 
 ```python
-# src/tamga/languages/__init__.py
+# src/bitig/languages/__init__.py
 """Language registry — one first-class entry per supported language."""
 
-from tamga.languages.registry import REGISTRY as LANGUAGES, LanguageSpec
-from tamga.languages.registry import get as get_language
+from bitig.languages.registry import REGISTRY as LANGUAGES, LanguageSpec
+from bitig.languages.registry import get as get_language
 
 __all__ = ["LANGUAGES", "LanguageSpec", "get_language"]
 ```
@@ -203,7 +203,7 @@ Expected: all 7 tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/tamga/languages tests/languages
+git add src/bitig/languages tests/languages
 git commit -m "feat(languages): add LanguageSpec registry for EN/TR/DE/ES/FR"
 ```
 
@@ -212,29 +212,29 @@ git commit -m "feat(languages): add LanguageSpec registry for EN/TR/DE/ES/FR"
 ### Task 1.2: Move English function-word list to per-language layout
 
 **Files:**
-- Create: `src/tamga/resources/languages/__init__.py`
-- Create: `src/tamga/resources/languages/en/__init__.py`
-- Create: `src/tamga/resources/languages/en/function_words.txt` (copy of existing English list)
-- Modify: `src/tamga/features/function_words.py` (update `_load_bundled_list`)
-- Delete: `src/tamga/resources/function_words_en.txt` (after migration verified)
+- Create: `src/bitig/resources/languages/__init__.py`
+- Create: `src/bitig/resources/languages/en/__init__.py`
+- Create: `src/bitig/resources/languages/en/function_words.txt` (copy of existing English list)
+- Modify: `src/bitig/features/function_words.py` (update `_load_bundled_list`)
+- Delete: `src/bitig/resources/function_words_en.txt` (after migration verified)
 
 The goal is to move the English list into the per-language layout **without changing observable behavior**. All existing function-word tests must keep passing.
 
 - [ ] **Step 1: Copy the English list to its new home**
 
 ```bash
-mkdir -p src/tamga/resources/languages/en
-cp src/tamga/resources/function_words_en.txt src/tamga/resources/languages/en/function_words.txt
-touch src/tamga/resources/languages/__init__.py
-touch src/tamga/resources/languages/en/__init__.py
+mkdir -p src/bitig/resources/languages/en
+cp src/bitig/resources/function_words_en.txt src/bitig/resources/languages/en/function_words.txt
+touch src/bitig/resources/languages/__init__.py
+touch src/bitig/resources/languages/en/__init__.py
 ```
 
 - [ ] **Step 2: Update `_load_bundled_list` to read from the new path**
 
 ```python
-# src/tamga/features/function_words.py — edit only _load_bundled_list
+# src/bitig/features/function_words.py — edit only _load_bundled_list
 def _load_bundled_list() -> list[str]:
-    path = resources.files("tamga.resources.languages.en") / "function_words.txt"
+    path = resources.files("bitig.resources.languages.en") / "function_words.txt"
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 ```
 
@@ -249,7 +249,7 @@ Expected: all 4 tests pass with identical results.
 - [ ] **Step 4: Remove the old file**
 
 ```bash
-rm src/tamga/resources/function_words_en.txt
+rm src/bitig/resources/function_words_en.txt
 ```
 
 - [ ] **Step 5: Re-run the whole feature test suite**
@@ -260,40 +260,40 @@ pytest tests/features -v
 
 Expected: all tests pass. Ensures no code path still references the old filename.
 
-- [ ] **Step 6: Update `pyproject.toml` wheel-force-include path** — verify the existing `"src/tamga/resources"` entry still covers the new layout (it does — the directory is included recursively).
+- [ ] **Step 6: Update `pyproject.toml` wheel-force-include path** — verify the existing `"src/bitig/resources"` entry still covers the new layout (it does — the directory is included recursively).
 
-No edit needed if the current entry is `"src/tamga/resources" = "tamga/resources"`. Confirm by reading `pyproject.toml` lines 84-87.
+No edit needed if the current entry is `"src/bitig/resources" = "bitig/resources"`. Confirm by reading `pyproject.toml` lines 84-87.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/tamga/resources src/tamga/features/function_words.py
+git add src/bitig/resources src/bitig/features/function_words.py
 git commit -m "refactor(resources): move function_words_en.txt to resources/languages/en/"
 ```
 
 ---
 
-### Task 1.3: Re-export language registry from `tamga.__init__`
+### Task 1.3: Re-export language registry from `bitig.__init__`
 
 **Files:**
-- Modify: `src/tamga/__init__.py`
+- Modify: `src/bitig/__init__.py`
 - Create: `tests/test_public_api.py` (new file — or modify if exists)
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/test_public_api.py — add or append if file exists
-"""Smoke tests for tamga's top-level public API."""
+"""Smoke tests for bitig's top-level public API."""
 
 
 def test_languages_re_exported_from_top_level() -> None:
-    import tamga
+    import bitig
 
-    assert "LANGUAGES" in tamga.__all__
-    assert "LanguageSpec" in tamga.__all__
-    assert "get_language" in tamga.__all__
-    assert set(tamga.LANGUAGES) == {"en", "tr", "de", "es", "fr"}
-    assert tamga.get_language("tr").backend == "spacy_stanza"
+    assert "LANGUAGES" in bitig.__all__
+    assert "LanguageSpec" in bitig.__all__
+    assert "get_language" in bitig.__all__
+    assert set(bitig.LANGUAGES) == {"en", "tr", "de", "es", "fr"}
+    assert bitig.get_language("tr").backend == "spacy_stanza"
 ```
 
 - [ ] **Step 2: Run to verify failure**
@@ -302,14 +302,14 @@ def test_languages_re_exported_from_top_level() -> None:
 pytest tests/test_public_api.py::test_languages_re_exported_from_top_level -v
 ```
 
-Expected: FAIL with `AttributeError: module 'tamga' has no attribute 'LANGUAGES'`.
+Expected: FAIL with `AttributeError: module 'bitig' has no attribute 'LANGUAGES'`.
 
-- [ ] **Step 3: Add re-exports to `src/tamga/__init__.py`**
+- [ ] **Step 3: Add re-exports to `src/bitig/__init__.py`**
 
-Find the existing import block after `from tamga.io import ...` (near line 30) and add:
+Find the existing import block after `from bitig.io import ...` (near line 30) and add:
 
 ```python
-from tamga.languages import LANGUAGES, LanguageSpec, get_language
+from bitig.languages import LANGUAGES, LanguageSpec, get_language
 ```
 
 Then add to `__all__` (keep alphabetical order within the existing list):
@@ -331,7 +331,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/tamga/__init__.py tests/test_public_api.py
+git add src/bitig/__init__.py tests/test_public_api.py
 git commit -m "feat(api): re-export LANGUAGES, LanguageSpec, get_language at top level"
 ```
 
@@ -342,7 +342,7 @@ git commit -m "feat(api): re-export LANGUAGES, LanguageSpec, get_language at top
 ### Task 2.1: Add `language` field to `Corpus`
 
 **Files:**
-- Modify: `src/tamga/corpus/corpus.py`
+- Modify: `src/bitig/corpus/corpus.py`
 - Modify: `tests/test_corpus.py` (append)
 
 The default is `"en"` so every existing call site keeps working without changes. `Corpus.hash()` must include `language` so corpora in different languages hash differently even when their text contents are identical.
@@ -352,21 +352,21 @@ The default is `"en"` so every existing call site keeps working without changes.
 ```python
 # tests/test_corpus.py — append
 def test_corpus_default_language_is_english() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     c = Corpus(documents=[Document(id="d0", text="hello")])
     assert c.language == "en"
 
 
 def test_corpus_accepts_language_argument() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     c = Corpus(documents=[Document(id="d0", text="merhaba")], language="tr")
     assert c.language == "tr"
 
 
 def test_corpus_hash_differs_by_language() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     doc = Document(id="d0", text="merhaba")
     en = Corpus(documents=[doc], language="en")
@@ -384,7 +384,7 @@ Expected: FAIL — `Corpus` has no `language` attribute.
 
 - [ ] **Step 3: Update `Corpus`**
 
-In `src/tamga/corpus/corpus.py`, edit the `@dataclass` body:
+In `src/bitig/corpus/corpus.py`, edit the `@dataclass` body:
 
 ```python
 @dataclass
@@ -460,7 +460,7 @@ Expected: all pass. Note: embeddings tests skipped only if extras aren't install
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/tamga/corpus/corpus.py tests/test_corpus.py
+git add src/bitig/corpus/corpus.py tests/test_corpus.py
 git commit -m "feat(corpus): add language field (default 'en'); include in hash"
 ```
 
@@ -469,8 +469,8 @@ git commit -m "feat(corpus): add language field (default 'en'); include in hash"
 ### Task 2.2: Add `--language` flag to ingestion
 
 **Files:**
-- Modify: `src/tamga/io/ingest.py`
-- Modify: `src/tamga/cli/ingest_cmd.py`
+- Modify: `src/bitig/io/ingest.py`
+- Modify: `src/bitig/cli/ingest_cmd.py`
 - Modify: `tests/cli/test_ingest.py` (append)
 - Modify: `tests/io/test_ingest.py` (append — or create if missing)
 
@@ -481,7 +481,7 @@ git commit -m "feat(corpus): add language field (default 'en'); include in hash"
 
 def test_ingest_cli_accepts_language_flag(tmp_path, monkeypatch) -> None:
     from typer.testing import CliRunner
-    from tamga.cli import app
+    from bitig.cli import app
 
     corpus_dir = tmp_path / "corpus"
     corpus_dir.mkdir()
@@ -489,7 +489,7 @@ def test_ingest_cli_accepts_language_flag(tmp_path, monkeypatch) -> None:
 
     # Stub out SpacyPipeline to avoid model loads during unit tests.
     recorded: dict[str, object] = {}
-    from tamga.cli import ingest_cmd
+    from bitig.cli import ingest_cmd
 
     class _StubPipe:
         def __init__(self, **kwargs: object) -> None:
@@ -513,7 +513,7 @@ def test_ingest_cli_accepts_language_flag(tmp_path, monkeypatch) -> None:
 # tests/io/test_ingest.py — append (create if missing, mirror existing structure)
 
 def test_load_corpus_stamps_language_argument(tmp_path) -> None:
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     (tmp_path / "d.txt").write_text("hola mundo")
     corpus = load_corpus(tmp_path, language="es", strict=False)
@@ -521,7 +521,7 @@ def test_load_corpus_stamps_language_argument(tmp_path) -> None:
 
 
 def test_load_corpus_defaults_to_english(tmp_path) -> None:
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     (tmp_path / "d.txt").write_text("hello")
     corpus = load_corpus(tmp_path, strict=False)
@@ -530,7 +530,7 @@ def test_load_corpus_defaults_to_english(tmp_path) -> None:
 
 def test_load_corpus_rejects_unknown_language_code(tmp_path) -> None:
     import pytest
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     (tmp_path / "d.txt").write_text("x")
     with pytest.raises(ValueError, match="Unknown language code"):
@@ -547,10 +547,10 @@ Expected: FAIL — `load_corpus` doesn't accept `language=`, CLI doesn't accept 
 
 - [ ] **Step 3: Update `load_corpus`**
 
-In `src/tamga/io/ingest.py`, change the signature and pass through to `Corpus`:
+In `src/bitig/io/ingest.py`, change the signature and pass through to `Corpus`:
 
 ```python
-from tamga.languages import get_language
+from bitig.languages import get_language
 
 
 def load_corpus(
@@ -564,7 +564,7 @@ def load_corpus(
 ) -> Corpus:
     """Load every text file under `path` into a Corpus, sorted by filename.
 
-    `language` must be a registered code (see tamga.LANGUAGES). Defaults to 'en'.
+    `language` must be a registered code (see bitig.LANGUAGES). Defaults to 'en'.
     """
     get_language(language)  # validates early; raises ValueError if unknown
     path = Path(path)
@@ -576,7 +576,7 @@ def load_corpus(
 
 - [ ] **Step 4: Update CLI `ingest_command`**
 
-In `src/tamga/cli/ingest_cmd.py`, add a `language` Typer option and pass it into `load_corpus`:
+In `src/bitig/cli/ingest_cmd.py`, add a `language` Typer option and pass it into `load_corpus`:
 
 ```python
 def ingest_command(
@@ -586,7 +586,7 @@ def ingest_command(
         help="TSV file mapping filename to metadata fields.",
     ),
     strict: bool = typer.Option(True, "--strict/--no-strict"),
-    cache_dir: Path = typer.Option(Path(".tamga/cache"), "--cache-dir"),  # noqa: B008
+    cache_dir: Path = typer.Option(Path(".bitig/cache"), "--cache-dir"),  # noqa: B008
     spacy_model: str | None = typer.Option(
         None, "--spacy-model",
         help="spaCy model name. Default: resolved from --language.",
@@ -644,7 +644,7 @@ Expected: all pass. Existing CLI tests don't specify `--language` and should def
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/tamga/io/ingest.py src/tamga/cli/ingest_cmd.py tests/cli/test_ingest.py tests/io/test_ingest.py
+git add src/bitig/io/ingest.py src/bitig/cli/ingest_cmd.py tests/cli/test_ingest.py tests/io/test_ingest.py
 git commit -m "feat(ingest): --language flag stamps Corpus.language (default 'en')"
 ```
 
@@ -653,7 +653,7 @@ git commit -m "feat(ingest): --language flag stamps Corpus.language (default 'en
 ### Task 2.3: Add `PreprocessConfig.language` with pydantic validation
 
 **Files:**
-- Modify: `src/tamga/config/schema.py`
+- Modify: `src/bitig/config/schema.py`
 - Modify: `tests/test_config.py` (append)
 
 Language must validate against the registry at config-load time so typos fail fast.
@@ -664,14 +664,14 @@ Language must validate against the registry at config-load time so typos fail fa
 # tests/test_config.py — append
 
 def test_preprocess_language_defaults_to_english() -> None:
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     cfg = PreprocessConfig()
     assert cfg.language == "en"
 
 
 def test_preprocess_language_accepts_registered_code() -> None:
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     cfg = PreprocessConfig(language="tr")
     assert cfg.language == "tr"
@@ -680,21 +680,21 @@ def test_preprocess_language_accepts_registered_code() -> None:
 def test_preprocess_language_rejects_unknown_code() -> None:
     import pytest
     from pydantic import ValidationError
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     with pytest.raises(ValidationError, match="Unknown language code"):
         PreprocessConfig(language="xx")
 
 
 def test_preprocess_language_case_insensitive() -> None:
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     cfg = PreprocessConfig(language="TR")
     assert cfg.language == "tr"
 
 
 def test_spacy_config_model_now_optional() -> None:
-    from tamga.config.schema import SpacyConfig
+    from bitig.config.schema import SpacyConfig
 
     cfg = SpacyConfig()
     assert cfg.model is None
@@ -711,14 +711,14 @@ Expected: FAIL.
 
 - [ ] **Step 3: Update `SpacyConfig` and `PreprocessConfig`**
 
-In `src/tamga/config/schema.py`:
+In `src/bitig/config/schema.py`:
 
 ```python
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from tamga.languages import LANGUAGES
+from bitig.languages import LANGUAGES
 
 # ... existing code ...
 
@@ -770,7 +770,7 @@ Expected: all pass. Existing `SpacyConfig(model="en_core_web_trf")` usage in oth
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/tamga/config/schema.py tests/test_config.py
+git add src/bitig/config/schema.py tests/test_config.py
 git commit -m "feat(config): PreprocessConfig.language with registry validation; SpacyConfig.model optional"
 ```
 
@@ -793,7 +793,7 @@ turkish = [
     "stanza>=1.6",
 ]
 multilang = [
-    "tamga[turkish]",
+    "bitig[turkish]",
 ]
 ```
 
@@ -838,7 +838,7 @@ git commit -m "chore(deps): add turkish/multilang extras; pyphen to core deps"
 ### Task 3.2: Cache key accepts a backend version string with English back-compat
 
 **Files:**
-- Modify: `src/tamga/preprocess/cache.py`
+- Modify: `src/bitig/preprocess/cache.py`
 - Modify: `tests/preprocess/test_cache.py`
 
 The new signature takes `backend_version: str` instead of `spacy_version: str`. For `backend="spacy"` the string format is `"spacy=<version>"` — formatted to match what the native branch emits and preserve English caches. Cross-backend collisions are impossible because the format differs structurally.
@@ -903,7 +903,7 @@ Expected: all pass.
 
 - [ ] **Step 3: Rename the parameter**
 
-In `src/tamga/preprocess/cache.py`:
+In `src/bitig/preprocess/cache.py`:
 
 ```python
 def cache_key(
@@ -916,7 +916,7 @@ def cache_key(
 
     `backend_version` is a structured string like 'spacy=3.7.2' (native spaCy backend) or
     'spacy_stanza=1.0.4;stanza=1.8.0' (Stanza-via-spacy-stanza backend). The native branch
-    preserves the prior format so English caches built on older tamga versions remain valid.
+    preserves the prior format so English caches built on older bitig versions remain valid.
     """
     return hash_mapping(
         {
@@ -938,7 +938,7 @@ Expected: all pass.
 
 - [ ] **Step 5: Update `SpacyPipeline._key` to use the new name (transitional)**
 
-In `src/tamga/preprocess/pipeline.py`, find `_key` and change:
+In `src/bitig/preprocess/pipeline.py`, find `_key` and change:
 
 ```python
     def _key(self, doc: Document) -> str:
@@ -956,7 +956,7 @@ Expected: all pass.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/tamga/preprocess tests/preprocess
+git add src/bitig/preprocess tests/preprocess
 git commit -m "refactor(cache): rename cache_key arg to backend_version; format 'spacy=X.Y.Z' for native"
 ```
 
@@ -965,7 +965,7 @@ git commit -m "refactor(cache): rename cache_key arg to backend_version; format 
 ### Task 3.3: `SpacyPipeline` gains language/backend dispatch
 
 **Files:**
-- Modify: `src/tamga/preprocess/pipeline.py`
+- Modify: `src/bitig/preprocess/pipeline.py`
 - Modify: `tests/preprocess/test_pipeline.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -973,7 +973,7 @@ git commit -m "refactor(cache): rename cache_key arg to backend_version; format 
 ```python
 # tests/preprocess/test_pipeline.py — append
 
-from tamga.preprocess.pipeline import SpacyPipeline
+from bitig.preprocess.pipeline import SpacyPipeline
 
 
 def test_pipeline_resolves_english_defaults_from_registry(tmp_path) -> None:
@@ -1054,7 +1054,7 @@ Expected: FAIL — `SpacyPipeline` doesn't accept `language=` or `backend=`.
 
 - [ ] **Step 3: Rewrite `SpacyPipeline`**
 
-Replace `SpacyPipeline` class body in `src/tamga/preprocess/pipeline.py`:
+Replace `SpacyPipeline` class body in `src/bitig/preprocess/pipeline.py`:
 
 ```python
 from typing import Literal
@@ -1063,10 +1063,10 @@ import spacy
 from spacy.language import Language
 from spacy.tokens import Doc, DocBin
 
-from tamga.corpus import Corpus, Document
-from tamga.languages import get_language
-from tamga.plumbing.logging import get_logger
-from tamga.preprocess.cache import DocBinCache, cache_key
+from bitig.corpus import Corpus, Document
+from bitig.languages import get_language
+from bitig.plumbing.logging import get_logger
+from bitig.preprocess.cache import DocBinCache, cache_key
 
 _log = get_logger(__name__)
 
@@ -1088,7 +1088,7 @@ class SpacyPipeline:
         language: str = "en",
         model: str | None = None,
         backend: Literal["spacy", "spacy_stanza"] | None = None,
-        cache_dir: Path | str = ".tamga/cache/docbin",
+        cache_dir: Path | str = ".bitig/cache/docbin",
         exclude: list[str] | None = None,
     ) -> None:
         spec = get_language(language)
@@ -1113,8 +1113,8 @@ class SpacyPipeline:
                     import spacy_stanza
                 except ImportError as e:
                     raise ImportError(
-                        "tamga requires spacy-stanza for the 'spacy_stanza' backend. "
-                        "Install with: uv pip install 'tamga[turkish]'"
+                        "bitig requires spacy-stanza for the 'spacy_stanza' backend. "
+                        "Install with: uv pip install 'bitig[turkish]'"
                     ) from e
                 _log.info("loading Stanza pipeline via spacy-stanza: lang=%s", self.model)
                 try:
@@ -1184,7 +1184,7 @@ Expected: all pass.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/tamga/preprocess/pipeline.py tests/preprocess/test_pipeline.py
+git add src/bitig/preprocess/pipeline.py tests/preprocess/test_pipeline.py
 git commit -m "feat(preprocess): SpacyPipeline backend dispatch (spacy | spacy_stanza)"
 ```
 
@@ -1195,7 +1195,7 @@ git commit -m "feat(preprocess): SpacyPipeline backend dispatch (spacy | spacy_s
 ### Task 4.1: `FunctionWordExtractor.language` + per-language resource loading
 
 **Files:**
-- Modify: `src/tamga/features/function_words.py`
+- Modify: `src/bitig/features/function_words.py`
 - Modify: `tests/features/test_function_words.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -1207,8 +1207,8 @@ def test_function_word_uses_corpus_language_when_unspecified() -> None:
     # Create a Turkish corpus; ensure the extractor tries to load the Turkish list.
     # (Turkish list won't exist yet; this test is marked xfail until Task 5.5 ships.)
     import pytest
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
 
     c = Corpus(documents=[Document(id="d0", text="merhaba")], language="tr")
     ex = FunctionWordExtractor(scale="none")
@@ -1217,8 +1217,8 @@ def test_function_word_uses_corpus_language_when_unspecified() -> None:
 
 
 def test_function_word_explicit_language_overrides_corpus() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
 
     c = Corpus(documents=[Document(id="d0", text="the cat")], language="tr")
     ex = FunctionWordExtractor(scale="none", language="en")
@@ -1227,8 +1227,8 @@ def test_function_word_explicit_language_overrides_corpus() -> None:
 
 
 def test_function_word_wordlist_overrides_everything() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
 
     c = Corpus(documents=[Document(id="d0", text="foo bar")], language="tr")
     ex = FunctionWordExtractor(wordlist=["foo"], language="en", scale="none")
@@ -1246,7 +1246,7 @@ Expected: FAIL — `FunctionWordExtractor` doesn't accept `language=`.
 
 - [ ] **Step 3: Update `FunctionWordExtractor`**
 
-Rewrite `src/tamga/features/function_words.py`:
+Rewrite `src/bitig/features/function_words.py`:
 
 ```python
 """Function-word frequency extractor with per-language bundled word lists."""
@@ -1259,9 +1259,9 @@ from typing import Literal
 
 import numpy as np
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
-from tamga.languages import LANGUAGES
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
+from bitig.languages import LANGUAGES
 
 Scale = Literal["none", "zscore", "l1", "l2"]
 
@@ -1274,7 +1274,7 @@ def _load_bundled_list(language: str) -> list[str]:
     Raises FileNotFoundError with a helpful message listing supported languages if no list is
     bundled for `language`.
     """
-    pkg = f"tamga.resources.languages.{language}"
+    pkg = f"bitig.resources.languages.{language}"
     try:
         path = resources.files(pkg) / "function_words.txt"
     except (ModuleNotFoundError, FileNotFoundError) as e:
@@ -1330,7 +1330,7 @@ Expected: all pass (including the new xfail-style test that expects `FileNotFoun
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/tamga/features/function_words.py tests/features/test_function_words.py
+git add src/bitig/features/function_words.py tests/features/test_function_words.py
 git commit -m "feat(features): FunctionWordExtractor.language; resolve from corpus.language"
 ```
 
@@ -1339,7 +1339,7 @@ git commit -m "feat(features): FunctionWordExtractor.language; resolve from corp
 ### Task 4.2: `ReadabilityExtractor.language` + per-language index registry
 
 **Files:**
-- Modify: `src/tamga/features/readability.py`
+- Modify: `src/bitig/features/readability.py`
 - Modify: `tests/features/test_readability.py`
 
 The old `_INDEX_FN` dict becomes `_INDEX_REGISTRY: dict[str, dict[str, Callable]]`, keyed first by language. English indices remain wired via `textstat`. Non-English language entries are empty `{}` in this task — Task 5.1-5.4 fill them in.
@@ -1350,8 +1350,8 @@ Append to `tests/features/test_readability.py`:
 
 ```python
 def test_readability_resolves_english_defaults_from_registry() -> None:
-    from tamga.features.readability import ReadabilityExtractor
-    from tamga.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
 
     c = Corpus(documents=[Document(id="d0", text="A short simple sentence.")], language="en")
     ex = ReadabilityExtractor()  # indices=None
@@ -1361,8 +1361,8 @@ def test_readability_resolves_english_defaults_from_registry() -> None:
 
 def test_readability_rejects_unsupported_index_for_language() -> None:
     import pytest
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(documents=[Document(id="d0", text="x")], language="en")
     ex = ReadabilityExtractor(indices=["atesman"])  # Turkish index on English corpus
@@ -1371,8 +1371,8 @@ def test_readability_rejects_unsupported_index_for_language() -> None:
 
 
 def test_readability_explicit_language_overrides_corpus() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     # Even if corpus is stamped 'tr', a user may override by passing language='en'.
     c = Corpus(documents=[Document(id="d0", text="A simple sentence.")], language="tr")
@@ -1395,7 +1395,7 @@ Expected: FAIL — `ReadabilityExtractor` doesn't accept `language=`.
 """Readability indices, dispatched per-language.
 
 English uses textstat wrappers (unchanged). Non-English languages use native implementations in
-tamga.languages.readability_<code>, registered here. The per-language registry is populated in
+bitig.languages.readability_<code>, registered here. The per-language registry is populated in
 Phase 5; this task wires only English.
 """
 
@@ -1406,9 +1406,9 @@ from collections.abc import Callable
 import numpy as np
 import textstat
 
-from tamga.corpus import Corpus
-from tamga.features.base import BaseFeatureExtractor
-from tamga.languages import get_language
+from bitig.corpus import Corpus
+from bitig.features.base import BaseFeatureExtractor
+from bitig.languages import get_language
 
 # {language_code: {index_name: callable(text) -> float}}
 _INDEX_REGISTRY: dict[str, dict[str, Callable[[str], float]]] = {
@@ -1478,7 +1478,7 @@ Expected: all pass, including new tests. Existing tests that pass `indices=["fle
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/tamga/features/readability.py tests/features/test_readability.py
+git add src/bitig/features/readability.py tests/features/test_readability.py
 git commit -m "feat(features): ReadabilityExtractor per-language index registry; language param"
 ```
 
@@ -1487,10 +1487,10 @@ git commit -m "feat(features): ReadabilityExtractor per-language index registry;
 ### Task 4.3: Embedding extractors resolve default model from language
 
 **Files:**
-- Modify: `src/tamga/features/embeddings.py`
+- Modify: `src/bitig/features/embeddings.py`
 - Modify: `tests/features/test_embeddings.py`
 
-Gated on `tamga[embeddings]` extra. If the extra isn't installed, `ContextualEmbeddingExtractor`/`SentenceEmbeddingExtractor` aren't importable and these tests are skipped. Implement conditionally.
+Gated on `bitig[embeddings]` extra. If the extra isn't installed, `ContextualEmbeddingExtractor`/`SentenceEmbeddingExtractor` aren't importable and these tests are skipped. Implement conditionally.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1500,7 +1500,7 @@ Append to `tests/features/test_embeddings.py`:
 import pytest
 
 try:
-    from tamga.features.embeddings import (
+    from bitig.features.embeddings import (
         ContextualEmbeddingExtractor,
         SentenceEmbeddingExtractor,
     )
@@ -1508,11 +1508,11 @@ try:
 except ImportError:
     _HAS_EMBEDDINGS = False
 
-pytestmark = pytest.mark.skipif(not _HAS_EMBEDDINGS, reason="requires tamga[embeddings]")
+pytestmark = pytest.mark.skipif(not _HAS_EMBEDDINGS, reason="requires bitig[embeddings]")
 
 
 def test_sentence_embedding_resolves_english_default_model() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     ex = SentenceEmbeddingExtractor()  # no model= specified
     # Resolution is lazy — happens at _fit. We inspect the stored model after construction.
@@ -1524,7 +1524,7 @@ def test_sentence_embedding_resolves_english_default_model() -> None:
 
 
 def test_sentence_embedding_resolves_turkish_default_model() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     ex = SentenceEmbeddingExtractor()
     c = Corpus(documents=[Document(id="d0", text="x")], language="tr")
@@ -1533,7 +1533,7 @@ def test_sentence_embedding_resolves_turkish_default_model() -> None:
 
 
 def test_contextual_embedding_resolves_default_from_language() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     ex = ContextualEmbeddingExtractor()
     c = Corpus(documents=[Document(id="d0", text="x")], language="tr")
@@ -1542,7 +1542,7 @@ def test_contextual_embedding_resolves_default_from_language() -> None:
 
 
 def test_explicit_model_overrides_language_default() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     ex = SentenceEmbeddingExtractor(model="custom/model-name")
     c = Corpus(documents=[Document(id="d0", text="x")], language="tr")
@@ -1560,7 +1560,7 @@ Expected: SKIP if embeddings extra not installed, else FAIL on the `_resolve_mod
 
 - [ ] **Step 3: Update `SentenceEmbeddingExtractor` and `ContextualEmbeddingExtractor`**
 
-In `src/tamga/features/embeddings.py`, change both `__init__` signatures to allow `model=None` and `language=None`, and add a `_resolve_model` helper. Also track `language`. The existing `_fit`/`_transform` bodies need to call `_resolve_model(corpus)` before using `self.model`.
+In `src/bitig/features/embeddings.py`, change both `__init__` signatures to allow `model=None` and `language=None`, and add a `_resolve_model` helper. Also track `language`. The existing `_fit`/`_transform` bodies need to call `_resolve_model(corpus)` before using `self.model`.
 
 ```python
 class SentenceEmbeddingExtractor(BaseFeatureExtractor):
@@ -1584,7 +1584,7 @@ class SentenceEmbeddingExtractor(BaseFeatureExtractor):
 
     def _resolve_model(self, corpus: Corpus) -> None:
         if self.model is None:
-            from tamga.languages import get_language
+            from bitig.languages import get_language
             lang = self.language or corpus.language
             self.model = get_language(lang).sentence_embedding_default
 
@@ -1614,7 +1614,7 @@ Expected: pass if extras installed; skip otherwise.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/tamga/features/embeddings.py tests/features/test_embeddings.py
+git add src/bitig/features/embeddings.py tests/features/test_embeddings.py
 git commit -m "feat(features): embedding extractors resolve default model from language"
 ```
 
@@ -1625,9 +1625,9 @@ git commit -m "feat(features): embedding extractors resolve default model from l
 ### Task 5.1: Turkish readability (Ateşman + Bezirci–Yılmaz)
 
 **Files:**
-- Create: `src/tamga/languages/readability_tr.py`
+- Create: `src/bitig/languages/readability_tr.py`
 - Create: `tests/languages/test_readability_tr.py`
-- Modify: `src/tamga/features/readability.py` (wire into registry)
+- Modify: `src/bitig/features/readability.py` (wire into registry)
 
 **Formula references:**
 - **Ateşman (1997)**: `198.825 - 40.175 * (syllables/words) - 2.610 * (words/sentences)` — analogue of Flesch Reading Ease.
@@ -1643,7 +1643,7 @@ Turkish syllables = count of vowels `aeıioöuüAEIİOÖUÜ`. Sentence split = r
 
 import pytest
 
-from tamga.languages.readability_tr import (
+from bitig.languages.readability_tr import (
     atesman,
     bezirci_yilmaz,
     count_syllables_tr,
@@ -1688,8 +1688,8 @@ def test_atesman_handles_empty_and_single_word() -> None:
 
 
 def test_turkish_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(
         documents=[Document(id="d0", text="Ali topu tuttu. Kedi uyudu.")],
@@ -1707,12 +1707,12 @@ def test_turkish_readability_wired_into_extractor() -> None:
 pytest tests/languages/test_readability_tr.py -v
 ```
 
-Expected: FAIL — `tamga.languages.readability_tr` does not exist.
+Expected: FAIL — `bitig.languages.readability_tr` does not exist.
 
 - [ ] **Step 3: Implement Turkish readability**
 
 ```python
-# src/tamga/languages/readability_tr.py
+# src/bitig/languages/readability_tr.py
 """Turkish readability formulas.
 
 Ateşman, E. (1997). Türkçede okunabilirliğin ölçülmesi. Dil Dergisi, 58, 71-74.
@@ -1799,11 +1799,11 @@ def bezirci_yilmaz(text: str) -> float:
 
 - [ ] **Step 4: Wire Turkish indices into the extractor's registry**
 
-In `src/tamga/features/readability.py`, replace the `"tr": {},` line:
+In `src/bitig/features/readability.py`, replace the `"tr": {},` line:
 
 ```python
-from tamga.languages.readability_tr import atesman as _tr_atesman
-from tamga.languages.readability_tr import bezirci_yilmaz as _tr_bezirci_yilmaz
+from bitig.languages.readability_tr import atesman as _tr_atesman
+from bitig.languages.readability_tr import bezirci_yilmaz as _tr_bezirci_yilmaz
 
 _INDEX_REGISTRY: dict[str, dict[str, Callable[[str], float]]] = {
     "en": {
@@ -1830,7 +1830,7 @@ Expected: all pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/tamga/languages/readability_tr.py src/tamga/features/readability.py tests/languages/test_readability_tr.py
+git add src/bitig/languages/readability_tr.py src/bitig/features/readability.py tests/languages/test_readability_tr.py
 git commit -m "feat(languages/tr): Ateşman + Bezirci–Yılmaz readability formulas"
 ```
 
@@ -1839,9 +1839,9 @@ git commit -m "feat(languages/tr): Ateşman + Bezirci–Yılmaz readability form
 ### Task 5.2: German readability (Flesch-Amstad + Wiener Sachtextformel)
 
 **Files:**
-- Create: `src/tamga/languages/readability_de.py`
+- Create: `src/bitig/languages/readability_de.py`
 - Create: `tests/languages/test_readability_de.py`
-- Modify: `src/tamga/features/readability.py` (wire into registry)
+- Modify: `src/bitig/features/readability.py` (wire into registry)
 
 **Formulas:**
 - **Flesch-Amstad (1978)**: `180 - ASL - (58.5 * ASW)` where ASL = average sentence length in words, ASW = average syllables per word.
@@ -1855,7 +1855,7 @@ Syllable counting for German uses `pyphen.Pyphen(lang='de_DE')` — splits a wor
 # tests/languages/test_readability_de.py
 """Tests for German readability — Flesch-Amstad (1978) and Wiener Sachtextformel."""
 
-from tamga.languages.readability_de import (
+from bitig.languages.readability_de import (
     count_syllables_de,
     flesch_amstad,
     wiener_sachtextformel,
@@ -1887,8 +1887,8 @@ def test_wiener_sachtextformel_scoring_sense() -> None:
 
 
 def test_german_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(
         documents=[Document(id="d0", text="Der Hund bellt.")],
@@ -1915,7 +1915,7 @@ Expected: FAIL — module doesn't exist.
 - [ ] **Step 3: Implement German readability**
 
 ```python
-# src/tamga/languages/readability_de.py
+# src/bitig/languages/readability_de.py
 """German readability formulas.
 
 Amstad, T. (1978). Wie verständlich sind unsere Zeitungen? Zurich: Studenten-Schreib-Service.
@@ -2000,11 +2000,11 @@ def wiener_sachtextformel(text: str) -> float:
 
 - [ ] **Step 4: Wire into extractor**
 
-In `src/tamga/features/readability.py`, replace `"de": {},`:
+In `src/bitig/features/readability.py`, replace `"de": {},`:
 
 ```python
-from tamga.languages.readability_de import flesch_amstad as _de_flesch_amstad
-from tamga.languages.readability_de import wiener_sachtextformel as _de_wst
+from bitig.languages.readability_de import flesch_amstad as _de_flesch_amstad
+from bitig.languages.readability_de import wiener_sachtextformel as _de_wst
 
 # ...
     "de": {
@@ -2024,7 +2024,7 @@ Expected: all pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/tamga/languages/readability_de.py src/tamga/features/readability.py tests/languages/test_readability_de.py
+git add src/bitig/languages/readability_de.py src/bitig/features/readability.py tests/languages/test_readability_de.py
 git commit -m "feat(languages/de): Flesch-Amstad + Wiener Sachtextformel readability"
 ```
 
@@ -2033,9 +2033,9 @@ git commit -m "feat(languages/de): Flesch-Amstad + Wiener Sachtextformel readabi
 ### Task 5.3: Spanish readability (Fernández-Huerta + Szigriszt-Pazos)
 
 **Files:**
-- Create: `src/tamga/languages/readability_es.py`
+- Create: `src/bitig/languages/readability_es.py`
 - Create: `tests/languages/test_readability_es.py`
-- Modify: `src/tamga/features/readability.py`
+- Modify: `src/bitig/features/readability.py`
 
 **Formulas:**
 - **Fernández-Huerta (1959)**: `206.84 - 60 * (syllables/words) - 1.02 * (words/sentences)`. Flesch for Spanish.
@@ -2049,7 +2049,7 @@ Syllables for Spanish: count of vowel groups. Vowels = `aeiouáéíóúü`. A vo
 # tests/languages/test_readability_es.py
 """Tests for Spanish readability — Fernández-Huerta (1959) and Szigriszt-Pazos (1992)."""
 
-from tamga.languages.readability_es import (
+from bitig.languages.readability_es import (
     count_syllables_es,
     fernandez_huerta,
     szigriszt_pazos,
@@ -2082,8 +2082,8 @@ def test_szigriszt_pazos_scoring_sense() -> None:
 
 
 def test_spanish_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(documents=[Document(id="d0", text="El gato duerme.")], language="es")
     fm = ReadabilityExtractor().fit_transform(c)
@@ -2106,7 +2106,7 @@ Expected: FAIL.
 - [ ] **Step 3: Implement Spanish readability**
 
 ```python
-# src/tamga/languages/readability_es.py
+# src/bitig/languages/readability_es.py
 """Spanish readability formulas.
 
 Fernández-Huerta, J. (1959). Medidas sencillas de lecturabilidad. Consigna, 214, 29-32.
@@ -2166,9 +2166,9 @@ def szigriszt_pazos(text: str) -> float:
 - [ ] **Step 4: Wire into extractor**
 
 ```python
-# src/tamga/features/readability.py — replace "es": {},
-from tamga.languages.readability_es import fernandez_huerta as _es_fh
-from tamga.languages.readability_es import szigriszt_pazos as _es_sp
+# src/bitig/features/readability.py — replace "es": {},
+from bitig.languages.readability_es import fernandez_huerta as _es_fh
+from bitig.languages.readability_es import szigriszt_pazos as _es_sp
 
     "es": {
         "fernandez_huerta": _es_fh,
@@ -2187,7 +2187,7 @@ Expected: all pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/tamga/languages/readability_es.py src/tamga/features/readability.py tests/languages/test_readability_es.py
+git add src/bitig/languages/readability_es.py src/bitig/features/readability.py tests/languages/test_readability_es.py
 git commit -m "feat(languages/es): Fernández-Huerta + Szigriszt-Pazos readability"
 ```
 
@@ -2196,9 +2196,9 @@ git commit -m "feat(languages/es): Fernández-Huerta + Szigriszt-Pazos readabili
 ### Task 5.4: French readability (Kandel-Moles + LIX)
 
 **Files:**
-- Create: `src/tamga/languages/readability_fr.py`
+- Create: `src/bitig/languages/readability_fr.py`
 - Create: `tests/languages/test_readability_fr.py`
-- Modify: `src/tamga/features/readability.py`
+- Modify: `src/bitig/features/readability.py`
 
 **Formulas:**
 - **Kandel-Moles (1958)**: `207 - 1.015 * (words/sentences) - 73.6 * (syllables/words)`. French Flesch adaptation.
@@ -2211,7 +2211,7 @@ French syllables via pyphen `fr_FR` — same pattern as German.
 ```python
 # tests/languages/test_readability_fr.py
 
-from tamga.languages.readability_fr import count_syllables_fr, kandel_moles, lix
+from bitig.languages.readability_fr import count_syllables_fr, kandel_moles, lix
 
 
 def test_count_syllables_fr_basic() -> None:
@@ -2239,8 +2239,8 @@ def test_lix_scoring_sense() -> None:
 
 
 def test_french_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(documents=[Document(id="d0", text="Le chat dort.")], language="fr")
     fm = ReadabilityExtractor().fit_transform(c)
@@ -2263,7 +2263,7 @@ Expected: FAIL.
 - [ ] **Step 3: Implement French readability**
 
 ```python
-# src/tamga/languages/readability_fr.py
+# src/bitig/languages/readability_fr.py
 """French readability formulas.
 
 Kandel, L., & Moles, A. (1958). Application de l'indice de Flesch à la langue française.
@@ -2324,9 +2324,9 @@ def lix(text: str) -> float:
 - [ ] **Step 4: Wire into extractor**
 
 ```python
-# src/tamga/features/readability.py — replace "fr": {},
-from tamga.languages.readability_fr import kandel_moles as _fr_km
-from tamga.languages.readability_fr import lix as _fr_lix
+# src/bitig/features/readability.py — replace "fr": {},
+from bitig.languages.readability_fr import kandel_moles as _fr_km
+from bitig.languages.readability_fr import lix as _fr_lix
 
     "fr": {
         "kandel_moles": _fr_km,
@@ -2345,7 +2345,7 @@ Expected: all pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/tamga/languages/readability_fr.py src/tamga/features/readability.py tests/languages/test_readability_fr.py
+git add src/bitig/languages/readability_fr.py src/bitig/features/readability.py tests/languages/test_readability_fr.py
 git commit -m "feat(languages/fr): Kandel-Moles + LIX readability"
 ```
 
@@ -2355,14 +2355,14 @@ git commit -m "feat(languages/fr): Kandel-Moles + LIX readability"
 
 **Files:**
 - Create: `scripts/regenerate_function_words.py`
-- Create: `src/tamga/resources/languages/tr/__init__.py`
-- Create: `src/tamga/resources/languages/tr/function_words.txt`
-- Create: `src/tamga/resources/languages/de/__init__.py`
-- Create: `src/tamga/resources/languages/de/function_words.txt`
-- Create: `src/tamga/resources/languages/es/__init__.py`
-- Create: `src/tamga/resources/languages/es/function_words.txt`
-- Create: `src/tamga/resources/languages/fr/__init__.py`
-- Create: `src/tamga/resources/languages/fr/function_words.txt`
+- Create: `src/bitig/resources/languages/tr/__init__.py`
+- Create: `src/bitig/resources/languages/tr/function_words.txt`
+- Create: `src/bitig/resources/languages/de/__init__.py`
+- Create: `src/bitig/resources/languages/de/function_words.txt`
+- Create: `src/bitig/resources/languages/es/__init__.py`
+- Create: `src/bitig/resources/languages/es/function_words.txt`
+- Create: `src/bitig/resources/languages/fr/__init__.py`
+- Create: `src/bitig/resources/languages/fr/function_words.txt`
 - Modify: `tests/features/test_function_words.py` (remove the xfail-style test; add positive tests)
 
 Generator reads CoNLL-U UD files and counts closed-class tokens. Checked-in lists must be committed so ordinary users don't need UD locally.
@@ -2376,7 +2376,7 @@ Generator reads CoNLL-U UD files and counts closed-class tokens. Checked-in list
 Usage:
     python scripts/regenerate_function_words.py --lang tr \\
         --treebank path/to/UD_Turkish-BOUN \\
-        --out src/tamga/resources/languages/tr/function_words.txt
+        --out src/bitig/resources/languages/tr/function_words.txt
 
 Fetches all tokens tagged with closed-class UPOS (DET PRON ADP CCONJ SCONJ AUX PART), counts
 lowercased frequencies, writes the top N. A header comment records source + generation date.
@@ -2484,19 +2484,19 @@ Run the generator for each language:
 ```bash
 python scripts/regenerate_function_words.py --lang tr \
     --treebank /tmp/ud/UD_Turkish-BOUN \
-    --out src/tamga/resources/languages/tr/function_words.txt
+    --out src/bitig/resources/languages/tr/function_words.txt
 
 python scripts/regenerate_function_words.py --lang de \
     --treebank /tmp/ud/UD_German-GSD \
-    --out src/tamga/resources/languages/de/function_words.txt
+    --out src/bitig/resources/languages/de/function_words.txt
 
 python scripts/regenerate_function_words.py --lang es \
     --treebank /tmp/ud/UD_Spanish-AnCora \
-    --out src/tamga/resources/languages/es/function_words.txt
+    --out src/bitig/resources/languages/es/function_words.txt
 
 python scripts/regenerate_function_words.py --lang fr \
     --treebank /tmp/ud/UD_French-GSD \
-    --out src/tamga/resources/languages/fr/function_words.txt
+    --out src/bitig/resources/languages/fr/function_words.txt
 ```
 
 Expected: each command writes a ≥200-token file with a header.
@@ -2505,7 +2505,7 @@ Expected: each command writes a ≥200-token file with a header.
 
 ```bash
 for lang in tr de es fr; do
-    touch src/tamga/resources/languages/${lang}/__init__.py
+    touch src/bitig/resources/languages/${lang}/__init__.py
 done
 ```
 
@@ -2516,8 +2516,8 @@ Replace the xfail-expecting test in `tests/features/test_function_words.py`:
 ```python
 def test_function_word_uses_corpus_language_turkish() -> None:
     """Turkish corpus → Turkish function-word list loaded."""
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
 
     c = Corpus(documents=[Document(id="d0", text="Ben ve sen gittik.")], language="tr")
     ex = FunctionWordExtractor(scale="none")
@@ -2527,7 +2527,7 @@ def test_function_word_uses_corpus_language_turkish() -> None:
 
 
 def test_function_word_list_bundled_for_all_five_languages() -> None:
-    from tamga.features.function_words import _load_bundled_list
+    from bitig.features.function_words import _load_bundled_list
 
     for lang in ["en", "tr", "de", "es", "fr"]:
         words = _load_bundled_list(lang)
@@ -2545,7 +2545,7 @@ Expected: all pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add scripts/regenerate_function_words.py src/tamga/resources/languages/tr src/tamga/resources/languages/de src/tamga/resources/languages/es src/tamga/resources/languages/fr tests/features/test_function_words.py
+git add scripts/regenerate_function_words.py src/bitig/resources/languages/tr src/bitig/resources/languages/de src/bitig/resources/languages/es src/bitig/resources/languages/fr tests/features/test_function_words.py
 git commit -m "feat(resources): generate function-word lists for TR/DE/ES/FR from UD closed-class tokens"
 ```
 
@@ -2553,13 +2553,13 @@ git commit -m "feat(resources): generate function-word lists for TR/DE/ES/FR fro
 
 ## Phase 6 — CLI polish, docs, integration CI
 
-### Task 6.1: `tamga init --language` + `tamga info` displays language
+### Task 6.1: `bitig init --language` + `bitig info` displays language
 
 **Files:**
-- Modify: `src/tamga/cli/init_cmd.py`
-- Modify: `src/tamga/scaffold/__init__.py` (or wherever `scaffold_project` lives)
-- Modify: `src/tamga/scaffold/templates/study.yaml.j2`
-- Modify: `src/tamga/cli/info_cmd.py`
+- Modify: `src/bitig/cli/init_cmd.py`
+- Modify: `src/bitig/scaffold/__init__.py` (or wherever `scaffold_project` lives)
+- Modify: `src/bitig/scaffold/templates/study.yaml.j2`
+- Modify: `src/bitig/cli/info_cmd.py`
 - Modify: `tests/cli/test_init.py` (append)
 - Modify: `tests/cli/test_info.py` (append)
 
@@ -2570,7 +2570,7 @@ git commit -m "feat(resources): generate function-word lists for TR/DE/ES/FR fro
 
 def test_init_writes_language_into_study_yaml(tmp_path) -> None:
     from typer.testing import CliRunner
-    from tamga.cli import app
+    from bitig.cli import app
 
     runner = CliRunner()
     result = runner.invoke(
@@ -2586,7 +2586,7 @@ def test_init_writes_language_into_study_yaml(tmp_path) -> None:
 
 def test_info_displays_corpus_language(tmp_path) -> None:
     from typer.testing import CliRunner
-    from tamga.cli import app
+    from bitig.cli import app
 
     # Set up a minimal project
     corpus = tmp_path / "corpus"
@@ -2598,8 +2598,8 @@ def test_info_displays_corpus_language(tmp_path) -> None:
     )
 
     runner = CliRunner()
-    result = runner.invoke(app, ["info"], catch_exceptions=False, env={"TAMGA_PROJECT_DIR": str(tmp_path)})
-    # The test assumes `tamga info` reads study.yaml from cwd or from TAMGA_PROJECT_DIR if supported.
+    result = runner.invoke(app, ["info"], catch_exceptions=False, env={"BITIG_PROJECT_DIR": str(tmp_path)})
+    # The test assumes `bitig info` reads study.yaml from cwd or from BITIG_PROJECT_DIR if supported.
     # If not supported, cd into tmp_path before invoking — adapt to existing test pattern.
     assert "language" in result.stdout.lower()
     assert "tr" in result.stdout
@@ -2616,7 +2616,7 @@ Expected: FAIL.
 - [ ] **Step 3: Add `--language` to init**
 
 ```python
-# src/tamga/cli/init_cmd.py
+# src/bitig/cli/init_cmd.py
 def init_command(
     name: str = typer.Argument(...),
     target: Path | None = typer.Option(None, "--target", "-t"),  # noqa: B008
@@ -2625,7 +2625,7 @@ def init_command(
         "en", "--language", "-l", help="Project language code (en/tr/de/es/fr)."
     ),
 ) -> None:
-    """Scaffold a new tamga project directory."""
+    """Scaffold a new bitig project directory."""
     dest = target if target is not None else Path.cwd() / name
     try:
         created = scaffold_project(name=name, target=dest, force=force, language=language)
@@ -2634,12 +2634,12 @@ def init_command(
         raise typer.Exit(code=1) from exc
     console.print(f"[green]created project[/green] {created} (language={language})")
     console.print(f"  cd {created}")
-    console.print("  tamga run study.yaml")
+    console.print("  bitig run study.yaml")
 ```
 
 - [ ] **Step 4: Thread language through the scaffold**
 
-In `src/tamga/scaffold/__init__.py` (or the file that defines `scaffold_project`), add a `language` parameter and pass it to the Jinja context rendering `study.yaml.j2`.
+In `src/bitig/scaffold/__init__.py` (or the file that defines `scaffold_project`), add a `language` parameter and pass it to the Jinja context rendering `study.yaml.j2`.
 
 ```python
 def scaffold_project(
@@ -2649,7 +2649,7 @@ def scaffold_project(
     force: bool = False,
     language: str = "en",
 ) -> Path:
-    from tamga.languages import get_language
+    from bitig.languages import get_language
     get_language(language)  # validate early
     # ... existing body ...
     # When rendering study.yaml.j2, add `language=language` to the context dict.
@@ -2657,16 +2657,16 @@ def scaffold_project(
 
 - [ ] **Step 5: Update the Jinja template**
 
-In `src/tamga/scaffold/templates/study.yaml.j2`, add inside the `preprocess:` block:
+In `src/bitig/scaffold/templates/study.yaml.j2`, add inside the `preprocess:` block:
 
 ```yaml
 preprocess:
   language: {{ language | default("en") }}
 ```
 
-- [ ] **Step 6: Update `tamga info` to display language**
+- [ ] **Step 6: Update `bitig info` to display language**
 
-In `src/tamga/cli/info_cmd.py`, add a line that reads `preprocess.language` from the loaded `StudyConfig` (or from the ingested `Corpus.language`) and prints it. Exact code depends on current structure; look at how existing fields are displayed.
+In `src/bitig/cli/info_cmd.py`, add a line that reads `preprocess.language` from the loaded `StudyConfig` (or from the ingested `Corpus.language`) and prints it. Exact code depends on current structure; look at how existing fields are displayed.
 
 Minimal addition, near existing corpus info display:
 
@@ -2686,7 +2686,7 @@ Expected: all pass.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/tamga/cli src/tamga/scaffold tests/cli
+git add src/bitig/cli src/bitig/scaffold tests/cli
 git commit -m "feat(cli): init --language; info displays configured language"
 ```
 
@@ -2699,7 +2699,7 @@ git commit -m "feat(cli): init --language; info displays configured language"
 - Create: `docs/site/concepts/languages.md`
 - Modify: `mkdocs.yml` (add nav entries)
 
-Turkish tutorial uses 3-5 short Ömer Seyfettin stories from Turkish Wikisource (public domain). The tutorial walks through: `tamga init --language tr`, dropping texts into `corpus/`, ingest, basic Delta, PCA plot. No forensic framing.
+Turkish tutorial uses 3-5 short Ömer Seyfettin stories from Turkish Wikisource (public domain). The tutorial walks through: `bitig init --language tr`, dropping texts into `corpus/`, ingest, basic Delta, PCA plot. No forensic framing.
 
 - [ ] **Step 1: Write the concepts page**
 
@@ -2707,7 +2707,7 @@ Turkish tutorial uses 3-5 short Ömer Seyfettin stories from Turkish Wikisource 
 <!-- docs/site/concepts/languages.md -->
 # Languages
 
-tamga ships with first-class support for five languages: **English**, **Turkish**, **German**,
+bitig ships with first-class support for five languages: **English**, **Turkish**, **German**,
 **Spanish**, **French**. Each language has bundled function-word lists, native readability
 formulas, and tested end-to-end pipelines.
 
@@ -2724,7 +2724,7 @@ formulas, and tested end-to-end pipelines.
 ## How the registry works
 
 ```python
-from tamga import LANGUAGES, get_language
+from bitig import LANGUAGES, get_language
 
 spec = get_language("tr")
 print(spec.backend)                   # 'spacy_stanza'
@@ -2748,8 +2748,8 @@ preprocess:
 From the CLI:
 
 ```bash
-tamga init mystudy --language tr
-tamga ingest corpus/ --language tr --metadata corpus/metadata.tsv
+bitig init mystudy --language tr
+bitig ingest corpus/ --language tr --metadata corpus/metadata.tsv
 ```
 
 ## Turkish prerequisites
@@ -2758,21 +2758,21 @@ Turkish uses [Stanza](https://stanfordnlp.github.io/stanza/) through
 [`spacy-stanza`](https://github.com/explosion/spacy-stanza).
 
 ```bash
-uv pip install 'tamga[turkish]'
+uv pip install 'bitig[turkish]'
 python -c "import stanza; stanza.download('tr')"
 ```
 
-After download, `tamga ingest --language tr` works identically to the English path — Stanza
+After download, `bitig ingest --language tr` works identically to the English path — Stanza
 pipelines return native spaCy `Doc` objects.
 
 ## Adding a sixth language
 
-1. Add a `LanguageSpec` entry to `tamga.languages.registry.REGISTRY`.
-2. Create `src/tamga/resources/languages/<code>/function_words.txt` (run
+1. Add a `LanguageSpec` entry to `bitig.languages.registry.REGISTRY`.
+2. Create `src/bitig/resources/languages/<code>/function_words.txt` (run
    `scripts/regenerate_function_words.py`).
 3. If readability formulas don't exist for the language, write them in
-   `tamga.languages.readability_<code>` and register them in
-   `tamga.features.readability._INDEX_REGISTRY`.
+   `bitig.languages.readability_<code>` and register them in
+   `bitig.features.readability._INDEX_REGISTRY`.
 4. Add integration tests and a tutorial page.
 
 See [`docs/superpowers/specs/2026-04-19-multi-language-support-design.md`](#) for the full spec.
@@ -2789,9 +2789,9 @@ A complete runnable example: attribute a small Turkish corpus using MFW + Ateşm
 ## Setup
 
 ```bash
-uv pip install 'tamga[turkish]'
+uv pip install 'bitig[turkish]'
 python -c "import stanza; stanza.download('tr')"
-tamga init seyfettin --language tr
+bitig init seyfettin --language tr
 cd seyfettin
 ```
 
@@ -2815,12 +2815,12 @@ forsa.txt	Omer_Seyfettin	1913
 ## Running the study
 
 ```bash
-tamga ingest corpus/ --language tr --metadata corpus/metadata.tsv
-tamga info
-tamga run study.yaml --name first-run
+bitig ingest corpus/ --language tr --metadata corpus/metadata.tsv
+bitig info
+bitig run study.yaml --name first-run
 ```
 
-`tamga ingest` runs Stanza through `spacy-stanza`. The first run parses every document and
+`bitig ingest` runs Stanza through `spacy-stanza`. The first run parses every document and
 caches the DocBins; subsequent runs hit the cache.
 
 ## What you get
@@ -2932,10 +2932,10 @@ pytestmark = pytest.mark.slow
 
 
 def test_turkish_pipeline_smoke(tmp_path) -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.function_words import FunctionWordExtractor
-    from tamga.features.readability import ReadabilityExtractor
-    from tamga.preprocess.pipeline import SpacyPipeline
+    from bitig.corpus import Corpus, Document
+    from bitig.features.function_words import FunctionWordExtractor
+    from bitig.features.readability import ReadabilityExtractor
+    from bitig.preprocess.pipeline import SpacyPipeline
 
     texts = [
         "Ali topu tuttu. Kedi uyudu. Hava güzeldi.",
@@ -2984,7 +2984,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install tamga + Turkish extras
+      - name: Install bitig + Turkish extras
         run: uv pip install --system -e ".[turkish,embeddings,dev]"
       - name: Download Stanza Turkish model
         run: python -c "import stanza; stanza.download('tr')"

@@ -1,4 +1,4 @@
-# `tamga` — Python Stylometry Package: Design Specification
+# `bitig` — Python Stylometry Package: Design Specification
 
 **Date:** 2026-04-17
 **Status:** Approved (brainstorming), awaiting implementation plan
@@ -10,15 +10,15 @@
 
 ### 1.1 What this package is
 
-`tamga` is a Python package and interactive CLI for computational stylometry.
+`bitig` is a Python package and interactive CLI for computational stylometry.
 It is a next-generation replacement for R's `Stylo`, designed from the ground up for:
 
 - **Authorship attribution and verification.**
 - **Author-group and style comparison** (e.g., L2 vs. native writers, proficiency bands, genre/register).
 - **General-purpose Digital Humanities stylometry** — feature parity with `Stylo` plus modern NLP.
 
-The name derives from the Old Turkic **tamga** — the clan/family mark stamped on livestock, tools, seals,
-and rugs to identify ownership and lineage at a glance. Each family's tamga was visually unique and
+The name derives from the Old Turkic **bitig** — the clan/family mark stamped on livestock, tools, seals,
+and rugs to identify ownership and lineage at a glance. Each family's bitig was visually unique and
 immediately identifiable; the computational analogue is exactly what stylometric methods recover from prose.
 
 ### 1.2 Goals
@@ -38,12 +38,12 @@ immediately identifiable; the computational analogue is exactly what stylometric
    PDF/EPS/TIFF/SVG export; optional Plotly interactive figures and self-contained HTML reports.
 6. **sklearn interoperability as an architectural principle.** Every feature extractor is a sklearn
    `TransformerMixin`; every fit-able method is a `ClassifierMixin`/`ClusterMixin`/`TransformerMixin`.
-   `Pipeline`, `cross_validate`, `GridSearchCV`, `permutation_importance` all work natively on `tamga` objects.
+   `Pipeline`, `cross_validate`, `GridSearchCV`, `permutation_importance` all work natively on `bitig` objects.
 
 ### 1.3 Non-goals
 
 - Not a general NLP toolkit — parsing/tagging/lemmatization is delegated to spaCy.
-- Not a corpus manager or annotation tool — `tamga` consumes corpora, does not curate them.
+- Not a corpus manager or annotation tool — `bitig` consumes corpora, does not curate them.
 - Not a GUI app — the "interactive" surface is a terminal shell (Rich + Questionary), not Electron/Qt.
 - No `rpy2` wrapper around R's `Stylo` — methods are reimplemented from primary literature.
 - No LLM-only "vibes-based" authorship verdicts — if LLM features appear (v0.3+), they are always
@@ -66,23 +66,23 @@ dependencies; outer layers pull in extras as declared in `pyproject.toml`.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  tamga.cli          Typer command tree + interactive shell  │  ← user-facing
-│  tamga.report       HTML / Markdown / PDF reports (opt-in)  │
-│  tamga.viz          matplotlib / seaborn + plotly backends  │
+│  bitig.cli          Typer command tree + interactive shell  │  ← user-facing
+│  bitig.report       HTML / Markdown / PDF reports (opt-in)  │
+│  bitig.viz          matplotlib / seaborn + plotly backends  │
 ├─────────────────────────────────────────────────────────────┤
-│  tamga.methods      delta, zeta, consensus; v0.2: rolling   │
-│  tamga.classify     sklearn wrappers, CV, evaluation        │
-│  tamga.reduce       PCA, MDS, t-SNE, UMAP                   │
-│  tamga.cluster      hierarchical, k-means, HDBSCAN          │
-│  tamga.bayesian     OPTIONAL extra: PyMC models             │
+│  bitig.methods      delta, zeta, consensus; v0.2: rolling   │
+│  bitig.classify     sklearn wrappers, CV, evaluation        │
+│  bitig.reduce       PCA, MDS, t-SNE, UMAP                   │
+│  bitig.cluster      hierarchical, k-means, HDBSCAN          │
+│  bitig.bayesian     OPTIONAL extra: PyMC models             │
 ├─────────────────────────────────────────────────────────────┤
-│  tamga.features     MFW, n-grams, POS, deps, embeddings     │
-│  tamga.preprocess   spaCy pipeline + DocBin cache           │
-│  tamga.corpus       Corpus, Document, metadata              │
+│  bitig.features     MFW, n-grams, POS, deps, embeddings     │
+│  bitig.preprocess   spaCy pipeline + DocBin cache           │
+│  bitig.corpus       Corpus, Document, metadata              │
 ├─────────────────────────────────────────────────────────────┤
-│  tamga.config       study.yaml schema, resolve, hash        │
-│  tamga.io           ingest, serialize: parquet / JSON       │
-│  tamga.plumbing     seeds, caching, logging, hashing        │
+│  bitig.config       study.yaml schema, resolve, hash        │
+│  bitig.io           ingest, serialize: parquet / JSON       │
+│  bitig.plumbing     seeds, caching, logging, hashing        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -168,7 +168,7 @@ Serialisable to `parquet` (tables) + `json` (params, values, provenance) + figur
 
 ```python
 class Provenance(BaseModel):
-    tamga_version: str
+    bitig_version: str
     python_version: str
     spacy_model: str
     spacy_version: str
@@ -197,10 +197,10 @@ Every `result.json` contains a `Provenance` block; no run is ever unreproducible
 
 ### 4.2 DocBin caching
 
-- Parsed spaCy docs are serialized as `DocBin` files at `./.tamga/cache/docbin/`.
+- Parsed spaCy docs are serialized as `DocBin` files at `./.bitig/cache/docbin/`.
 - **Cache key:** `sha256(document_hash || spacy_model || spacy_version || enabled_components)`.
 - Cache is checked before every parse. Cache hit → skip parsing entirely.
-- `tamga cache clear | list | size | export | import` for cache management. `export/import` enable
+- `bitig cache clear | list | size | export | import` for cache management. `export/import` enable
   sharing pre-parsed caches across a team.
 
 ### 4.3 Normalization
@@ -218,7 +218,7 @@ Global defaults are configurable in `study.yaml → preprocess.normalize`; per-f
 
 ## 5. Feature Extractors (v0.1)
 
-All extractors live in `tamga.features` and implement `sklearn.base.BaseEstimator` +
+All extractors live in `bitig.features` and implement `sklearn.base.BaseEstimator` +
 `TransformerMixin`. Shape contract: `fit_transform(corpus: Corpus) -> FeatureMatrix`.
 
 | Extractor | Params | Output columns | Notes |
@@ -233,8 +233,8 @@ All extractors live in `tamga.features` and implement `sklearn.base.BaseEstimato
 | `LexicalDiversityExtractor` | `indices=[...]` | TTR, MATTR, MTLD, HD-D, Yule's K, Yule's I, Herdan's C, Simpson's D | selectable |
 | `ReadabilityExtractor` | `indices=[...]` | Flesch, Flesch-Kincaid, Gunning Fog, Coleman-Liau, ARI, SMOG | selectable |
 | `SentenceLengthExtractor` | — | mean, SD, skew of sentence length in tokens | |
-| `SentenceEmbeddingExtractor` *(extra)* | `model`, `pool={mean|cls|max}` | fixed-d embedding vector | requires `tamga[embeddings]` |
-| `ContextualEmbeddingExtractor` *(extra)* | `model`, `layer`, `pool` | BERT-layer-k mean/CLS | requires `tamga[embeddings]` |
+| `SentenceEmbeddingExtractor` *(extra)* | `model`, `pool={mean|cls|max}` | fixed-d embedding vector | requires `bitig[embeddings]` |
+| `ContextualEmbeddingExtractor` *(extra)* | `model`, `layer`, `pool` | BERT-layer-k mean/CLS | requires `bitig[embeddings]` |
 
 Extractors are **composable**: `FeatureMatrix.concat(other)` column-stacks matrices with aligned
 document IDs, enabling multi-view features in a single classifier.
@@ -246,7 +246,7 @@ document IDs, enabling multi-view features in a single classifier.
 All methods accept `FeatureMatrix` (preferred) or `Corpus` (a sensible default extractor is selected).
 Return type is `Result`. Every method records its `feature_hash` in provenance.
 
-### 6.1 Delta family (`tamga.methods.delta`)
+### 6.1 Delta family (`bitig.methods.delta`)
 
 Implementations follow primary literature:
 
@@ -262,7 +262,7 @@ Implementations follow primary literature:
 Each Delta variant is a sklearn `ClassifierMixin` — a nearest-author-centroid classifier under the
 chosen metric, exposing `fit`, `predict`, `predict_proba`, `decision_function`.
 
-### 6.2 Craig's Zeta (`tamga.methods.zeta`)
+### 6.2 Craig's Zeta (`bitig.methods.zeta`)
 
 - **Classical Zeta** (Burrows 2007 / Craig & Kinney 2009): `proportion_A(word) - proportion_B(word)` where
   proportion = fraction of *texts* in the group that contain the word (binarised counts).
@@ -270,14 +270,14 @@ chosen metric, exposing `fit`, `predict`, `predict_proba`, `decision_function`.
 - Significance: permutation test (configurable replicates, default 1000) producing p-values per term.
 - Returns a `Result` whose `tables` include top-K preferred and top-K dispreferred terms with p-values.
 
-### 6.3 Dimensionality reduction (`tamga.reduce`)
+### 6.3 Dimensionality reduction (`bitig.reduce`)
 
 - PCA (sklearn) — default.
 - MDS (classical + non-metric; sklearn).
 - t-SNE (sklearn).
 - UMAP (`umap-learn`, already sklearn-compatible).
 
-### 6.4 Clustering (`tamga.cluster`)
+### 6.4 Clustering (`bitig.cluster`)
 
 - Hierarchical (Ward / average / complete / single linkage) — `scipy.cluster.hierarchy` +
   thin sklearn wrapper.
@@ -287,7 +287,7 @@ chosen metric, exposing `fit`, `predict`, `predict_proba`, `decision_function`.
 All expose sklearn's `ClusterMixin` API; dendrograms are rendered by the viz layer from the linkage
 matrix.
 
-### 6.5 Bootstrap consensus trees (`tamga.methods.consensus`)
+### 6.5 Bootstrap consensus trees (`bitig.methods.consensus`)
 
 Implementation after Eder 2017:
 
@@ -299,7 +299,7 @@ Implementation after Eder 2017:
 - Export consensus tree as Newick (compatible with ETE3 / Biopython.Phylo / FigTree).
 - Visualise as rectangular or unrooted radial tree with clade support annotations.
 
-### 6.6 Classification (`tamga.classify`)
+### 6.6 Classification (`bitig.classify`)
 
 Thin sklearn wrappers with stylometry-aware CV strategies.
 
@@ -315,12 +315,12 @@ Thin sklearn wrappers with stylometry-aware CV strategies.
   All computed via sklearn's `classification_report` + `confusion_matrix`.
 - **Permutation importance:** `sklearn.inspection.permutation_importance` on the final feature
   matrix, reported per feature.
-- **Out-of-corpus prediction:** `tamga classify predict --model model.pkl <new-corpus>` loads a
+- **Out-of-corpus prediction:** `bitig classify predict --model model.pkl <new-corpus>` loads a
   persisted estimator and labels unseen texts. Persistence via `joblib`.
 
-### 6.7 Bayesian extras (`tamga.bayesian`, optional)
+### 6.7 Bayesian extras (`bitig.bayesian`, optional)
 
-Requires `tamga[bayesian]` (pulls `pymc`, `arviz`). Both of the following ship in v0.1:
+Requires `bitig[bayesian]` (pulls `pymc`, `arviz`). Both of the following ship in v0.1:
 
 - **`BayesianAuthorshipAttributor`** — Wallace–Mosteller-style log-posterior over candidate authors
   from per-token rates with Beta priors, modernized with proper regularisation and posterior sampling.
@@ -331,7 +331,7 @@ Requires `tamga[bayesian]` (pulls `pymc`, `arviz`). Both of the following ship i
   posterior predictive checks.
 
 When the `[bayesian]` extra is not installed, the import gracefully no-ops and CLI commands emit a
-"install `tamga[bayesian]` to enable" hint.
+"install `bitig[bayesian]` to enable" hint.
 
 ---
 
@@ -358,8 +358,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_validate, LeaveOneGroupOut
 
-from tamga.features import MFWExtractor
-from tamga.methods import BurrowsDelta
+from bitig.features import MFWExtractor
+from bitig.methods import BurrowsDelta
 
 pipe = Pipeline([
     ("feat", MFWExtractor(n=1000, min_df=2)),
@@ -377,10 +377,10 @@ scores = cross_validate(
 
 ### 7.3 Bidirectional config ↔ pipeline
 
-- `tamga.to_sklearn_pipeline(study: StudyConfig) -> Pipeline` builds a pipeline from a config.
-- `tamga run study.yaml` executes what is fundamentally a sklearn pipeline under the hood, adding
+- `bitig.to_sklearn_pipeline(study: StudyConfig) -> Pipeline` builds a pipeline from a config.
+- `bitig run study.yaml` executes what is fundamentally a sklearn pipeline under the hood, adding
   corpus loading, caching, provenance, and artifact persistence.
-- `tamga.from_sklearn_pipeline(pipe: Pipeline) -> StudyConfig` is a v0.2 convenience.
+- `bitig.from_sklearn_pipeline(pipe: Pipeline) -> StudyConfig` is a v0.2 convenience.
 
 ### 7.4 Utilities we inherit rather than reinvent
 
@@ -395,21 +395,21 @@ scores = cross_validate(
 ### 8.1 Command tree (Typer)
 
 ```
-tamga init <name>            scaffold a project directory
-tamga ingest <path>          parse corpus, cache DocBins, write corpus.parquet
-tamga features <corpus>      build MFW / n-gram / embedding matrices
-tamga delta <corpus|matrix>  Delta-family methods
-tamga zeta <corpus>          Craig's Zeta (two-group comparison)
-tamga reduce <matrix>        PCA, MDS, t-SNE, UMAP
-tamga cluster <matrix>       hierarchical clustering + dendrogram
-tamga consensus <corpus>     bootstrap consensus tree over MFW bands
-tamga classify <corpus>      sklearn classifiers + CV + permutation importance
-tamga plot <result>          re-render figures from a saved Result
-tamga report <result|study>  generate HTML / Markdown report
-tamga run <study.yaml>       execute a full config-driven study
-tamga shell [<corpus>]       launch the interactive shell
-tamga info                   versions, cache stats, resolved config
-tamga cache [clear|list|size|export|import]
+bitig init <name>            scaffold a project directory
+bitig ingest <path>          parse corpus, cache DocBins, write corpus.parquet
+bitig features <corpus>      build MFW / n-gram / embedding matrices
+bitig delta <corpus|matrix>  Delta-family methods
+bitig zeta <corpus>          Craig's Zeta (two-group comparison)
+bitig reduce <matrix>        PCA, MDS, t-SNE, UMAP
+bitig cluster <matrix>       hierarchical clustering + dendrogram
+bitig consensus <corpus>     bootstrap consensus tree over MFW bands
+bitig classify <corpus>      sklearn classifiers + CV + permutation importance
+bitig plot <result>          re-render figures from a saved Result
+bitig report <result|study>  generate HTML / Markdown report
+bitig run <study.yaml>       execute a full config-driven study
+bitig shell [<corpus>]       launch the interactive shell
+bitig info                   versions, cache stats, resolved config
+bitig cache [clear|list|size|export|import]
 ```
 
 ### 8.2 Global flags
@@ -418,7 +418,7 @@ Every command honours:
 
 ```
 --seed <int>              reproducibility (default: 42, overridable in config)
---cache-dir <path>        default: ./.tamga/cache
+--cache-dir <path>        default: ./.bitig/cache
 --spacy-model <name>      default: en_core_web_trf
 --device cpu|mps|cuda     default: auto-detect (mps preferred on Apple Silicon)
 --output <path>           where to write Result JSON + figures
@@ -434,7 +434,7 @@ Every command honours:
 ### 8.3 Worked example
 
 ```bash
-tamga delta ./my-corpus \
+bitig delta ./my-corpus \
     --method burrows --mfw 1000 --mfw-min 100 \
     --metadata metadata.tsv --group-by author \
     --output results/ --format pdf --dpi 300 --report html
@@ -442,7 +442,7 @@ tamga delta ./my-corpus \
 
 ### 8.4 Interactive shell
 
-`tamga shell` launches a **wizard-first** guided workflow built on Rich + Questionary.
+`bitig shell` launches a **wizard-first** guided workflow built on Rich + Questionary.
 
 - Project-aware: if launched inside a scaffolded project, reads `study.yaml` as defaults.
 - Each step shows the **equivalent CLI command** it is about to run, so users learn the scriptable
@@ -454,9 +454,9 @@ tamga delta ./my-corpus \
 Illustrative first screen:
 
 ```
-╭─ tamga shell ──────────────────────────────────────────╮
+╭─ bitig shell ──────────────────────────────────────────╮
 │ Corpus: ./efcamdat-sample   (1,240 docs, 4 groups)    │
-│ Cache:  ./.tamga/cache      (spaCy trf, 3 days old)   │
+│ Cache:  ./.bitig/cache      (spaCy trf, 3 days old)   │
 ╰────────────────────────────────────────────────────────╯
 
 ? What would you like to do?
@@ -474,7 +474,7 @@ Illustrative first screen:
 
 ### 8.5 Config-driven runs
 
-`tamga run study.yaml` executes the full declarative analysis defined in §9.
+`bitig run study.yaml` executes the full declarative analysis defined in §9.
 
 ---
 
@@ -532,7 +532,7 @@ methods:
       folds: null                   # null = determined by CV kind
     metrics: [accuracy, macro_f1, confusion, per_author]   # per_author ⇒ per-class precision/recall/F1
 
-  - id: bayes_group                 # requires tamga[bayesian]
+  - id: bayes_group                 # requires bitig[bayesian]
     kind: bayesian
     model: hierarchical_group
     features: mfw1000
@@ -553,7 +553,7 @@ report:
   title: "EFCAMDAT: L2 vs. native authorship profile"
 
 cache:
-  dir: .tamga/cache
+  dir: .bitig/cache
   reuse: true
 
 output:
@@ -570,9 +570,9 @@ Precedence (first match wins):
 3. Project `study.yaml` (auto-detected when running inside a scaffolded project).
 4. Package defaults.
 
-(User-level `~/.config/tamga/defaults.yaml` is deferred to v0.2.)
+(User-level `~/.config/bitig/defaults.yaml` is deferred to v0.2.)
 
-`tamga config show --resolved` dumps the effective config *as it would run* for any command, so
+`bitig config show --resolved` dumps the effective config *as it would run* for any command, so
 users can verify layering before executing.
 
 ---
@@ -616,21 +616,21 @@ Static figures never degrade in quality based on extras; interactivity is what `
 
 ### 10.4 Optional extras for viz
 
-- `tamga[viz]` installs `ete3` (consensus tree rendering), `plotly`, `kaleido` (plotly static export).
+- `bitig[viz]` installs `ete3` (consensus tree rendering), `plotly`, `kaleido` (plotly static export).
 - Without `[viz]`: interactive plots fall back to matplotlib (see §10.1 table); consensus trees are
   exported as Newick strings and rendered via `scipy.cluster.hierarchy.dendrogram` as a rectangular
   layout (no unrooted/radial). All user-facing messages make this degradation explicit and suggest
-  `pip install tamga[viz]` to unlock the richer layouts.
+  `pip install bitig[viz]` to unlock the richer layouts.
 
 ---
 
 ## 11. Reporting
 
-### 11.1 `tamga report <result|study.yaml> --format html|md [--pdf]`
+### 11.1 `bitig report <result|study.yaml> --format html|md [--pdf]`
 
 Produces a single report containing, in order:
 
-1. **Header:** study title, date, `tamga` version, corpus hash, seed.
+1. **Header:** study title, date, `bitig` version, corpus hash, seed.
 2. **Corpus summary:** per-group counts, per-document length distribution, metadata fields, sample
    documents.
 3. **Resolved config:** the fully-expanded `study.yaml` as actually executed.
@@ -647,20 +647,20 @@ Produces a single report containing, in order:
   formulas. **CDN-linked Plotly by default; `--offline` inlines plotly.js** for self-contained reports.
 - **Markdown**: same template; static PNG figures; Pandoc-ready for manuscript appendix conversion.
 - **PDF**: optional via `weasyprint` (HTML route) or `pandoc` (MD route); **not a hard dependency**.
-  Requires `tamga[reports]` extra.
+  Requires `bitig[reports]` extra.
 
 ---
 
 ## 12. Project Scaffold & Reproducibility
 
-### 12.1 `tamga init <name>` output
+### 12.1 `bitig init <name>` output
 
 ```
 my-study/
 ├── study.yaml                    canonical analysis config
 ├── corpus/
 │   └── metadata.tsv              optional: filename → author, group, year, ...
-├── .tamga/
+├── .bitig/
 │   ├── cache/
 │   │   ├── docbin/               spaCy parses, keyed by (doc_hash, model, version)
 │   │   └── features/             FeatureMatrix parquet, keyed by extractor config
@@ -683,7 +683,7 @@ my-study/
 ### 12.2 Run-directory naming
 
 - **Default:** timestamped directory `results/YYYY-MM-DDThh-mm-ss/`.
-- **Override:** `tamga run study.yaml --name ablation-no-pos` writes to
+- **Override:** `bitig run study.yaml --name ablation-no-pos` writes to
   `results/ablation-no-pos/`.
 
 ### 12.3 Caching
@@ -696,13 +696,13 @@ my-study/
 
 Pinned on first run, checked on every subsequent run:
 
-- `tamga` version.
+- `bitig` version.
 - Python version.
 - Full `pip freeze` of actually-loaded extras.
 - spaCy model + version.
 - Corpus hash.
 
-On mismatch, `tamga` **warns and proceeds** by default (friendlier for iteration); `--strict-lock`
+On mismatch, `bitig` **warns and proceeds** by default (friendlier for iteration); `--strict-lock`
 hard-blocks without explicit `--force`. The warning lists each drift so users can review before acting.
 
 ### 12.5 Seeds
@@ -713,7 +713,7 @@ methods are added/removed from the config.
 
 ### 12.6 Git-friendliness
 
-- `.tamga/` is auto-added to `.gitignore` at init.
+- `.bitig/` is auto-added to `.gitignore` at init.
 - `study.yaml`, `metadata.tsv`, `README.md`, `results/*/result.json`, and `reports/*.md` are
   intended to be committed.
 
@@ -737,13 +737,13 @@ methods are added/removed from the config.
   match `Stylo`'s output to within `1e-6`. Stylo's outputs are checked into the repo once.
 - **CLI integration tests** via `typer.testing.CliRunner`.
 - **Doctests** for the library API.
-- **Coverage targets:** ≥90% on `tamga.features`, `tamga.methods`, `tamga.reduce`, `tamga.cluster`,
-  `tamga.classify`, `tamga.config`; ≥70% on `tamga.viz` and `tamga.cli`.
+- **Coverage targets:** ≥90% on `bitig.features`, `bitig.methods`, `bitig.reduce`, `bitig.cluster`,
+  `bitig.classify`, `bitig.config`; ≥70% on `bitig.viz` and `bitig.cli`.
 
 ### 13.2 Quality tooling
 
 - **`ruff`** for linting + import sorting (replaces flake8, isort, black).
-- **`mypy --strict`** on the public API surface (everything re-exported from `tamga/__init__.py`);
+- **`mypy --strict`** on the public API surface (everything re-exported from `bitig/__init__.py`);
   relaxed internally.
 - **`pre-commit`** hooks: ruff, mypy, trailing whitespace, large-file check.
 - **Custom layer-violation linter** to enforce the architecture rule from §2.
@@ -780,15 +780,15 @@ jinja2
 
 | Extra | Installs | Enables |
 |---|---|---|
-| `tamga[bayesian]` | `pymc`, `arviz` | Wallace–Mosteller + hierarchical group models |
-| `tamga[embeddings]` | `sentence-transformers`, `torch` | Sentence + contextual embeddings |
-| `tamga[viz]` | `plotly`, `kaleido`, `ete3` | Plotly backend + consensus tree rendering |
-| `tamga[reports]` | `weasyprint` | HTML → PDF report export |
-| `tamga[all]` | union of the above | all optional features |
+| `bitig[bayesian]` | `pymc`, `arviz` | Wallace–Mosteller + hierarchical group models |
+| `bitig[embeddings]` | `sentence-transformers`, `torch` | Sentence + contextual embeddings |
+| `bitig[viz]` | `plotly`, `kaleido`, `ete3` | Plotly backend + consensus tree rendering |
+| `bitig[reports]` | `weasyprint` | HTML → PDF report export |
+| `bitig[all]` | union of the above | all optional features |
 
 ### 14.4 Publication & licensing
 
-- **PyPI name:** `tamga` (availability to be verified pre-release; fallback: `tamga-stylometry`).
+- **PyPI name:** `bitig` (availability to be verified pre-release; fallback: `bitig-stylometry`).
 - **License:** **BSD-3-Clause** (compatible with scientific Python ecosystem; permissive;
   academic-friendly).
 - **Documentation:** MkDocs Material + `mkdocstrings`, hosted on GitHub Pages.
@@ -816,13 +816,13 @@ Everything above. The release bar is:
 
 ### 15.2 v0.2 — advanced stylometry (targeted 3–6 months post-v0.1)
 
-- Rolling stylometry (`tamga rolling`).
+- Rolling stylometry (`bitig rolling`).
 - Author-similarity networks + community detection (Louvain / Leiden).
 - LUAR, Wegmann et al. style-embedding plugins.
 - Bayesian authorship verification (same-author-yes/no with evidence strength).
-- User-level `~/.config/tamga/defaults.yaml`.
-- `tamga compare` — side-by-side multi-method report.
-- `tamga.from_sklearn_pipeline(pipe) -> StudyConfig`.
+- User-level `~/.config/bitig/defaults.yaml`.
+- `bitig compare` — side-by-side multi-method report.
+- `bitig.from_sklearn_pipeline(pipe) -> StudyConfig`.
 
 ### 15.3 v0.3 — research-lab grade
 
@@ -840,6 +840,6 @@ Everything above. The release bar is:
   testing.
 - Whether to vendor a small Federalist Papers fixture inside the package (+~1 MB) or fetch it on
   first test run. Leaning toward vendoring for offline CI.
-- Details of the `tamga shell` IPython-escape plumbing (`IPython.embed()` vs.
+- Details of the `bitig shell` IPython-escape plumbing (`IPython.embed()` vs.
   `IPython.start_ipython()` with scope injection).
-- Exact public-API surface re-exported from `tamga/__init__.py` (mypy-strict boundary).
+- Exact public-API surface re-exported from `bitig/__init__.py` (mypy-strict boundary).

@@ -6,7 +6,7 @@ hide:
 
 # Turkish terminology glossary
 
-This file pins the Turkish rendering of recurring technical terms used across the tamga
+This file pins the Turkish rendering of recurring technical terms used across the bitig
 documentation. It is not rendered in the public navigation. Translators MUST consult this
 table before drafting or updating a Turkish page; consistency is enforced by grep before
 each commit.
@@ -41,7 +41,7 @@ each commit.
 Apply these exact renderings in every gloss block across `concepts/` and `forensic/`
 pages. Do not paraphrase the marker phrases.
 
-Brand / proper nouns (never translate): **tamga**, **Burrows**, **Eder**, **Argamon**,
+Brand / proper nouns (never translate): **bitig**, **Burrows**, **Eder**, **Argamon**,
 **Cosine**, **Quadratic Delta**, **Zeta**, **General Impostors**, **Unmasking**,
 **Stamatatos**, **Sapkota**, **PANReport**, **Mosteller & Wallace**, **Federalist Papers**,
 **PAN-CLEF**, **CalibratedScorer**, **study.yaml**.

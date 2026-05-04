@@ -1,6 +1,6 @@
 """Render the two showcase figures for the quickstart example.
 
-Run after `tamga run examples/quickstart/study.yaml --name demo`. Produces:
+Run after `bitig run examples/quickstart/study.yaml --name demo`. Produces:
   - results/demo/pca/pca.png        (the "who writes like whom" map)
   - results/demo/zeta/zeta.png      (the "tell-tale words" plot)
 """
@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from tamga.viz import apply_publication_style, plot_scatter_2d, plot_zeta
+from bitig.viz import apply_publication_style, plot_scatter_2d, plot_zeta
 
 HERE = Path(__file__).resolve().parent
 RUN_DIR = HERE / "results" / "demo"

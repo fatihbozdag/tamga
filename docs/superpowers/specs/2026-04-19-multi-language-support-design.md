@@ -1,13 +1,13 @@
 # Multi-language support — design
 
 **Status:** design approved, awaiting implementation plan
-**Author:** tamga maintainers
+**Author:** bitig maintainers
 **Date:** 2026-04-19
 **Scope:** five first-class languages — English, Turkish, German, Spanish, French — behind a single language-aware interface. Expansion pattern documented for additional languages.
 
 ## Problem
 
-tamga today is English-only. Five sites hard-code that assumption:
+bitig today is English-only. Five sites hard-code that assumption:
 
 1. `SpacyConfig.model` defaults to `en_core_web_trf`.
 2. `FunctionWordExtractor` loads a single bundled `function_words_en.txt`.
@@ -22,7 +22,7 @@ The goal is multi-language support that treats Turkish as a first-class citizen,
 ## Non-goals
 
 - **Code-mixed corpora.** Within a single study, every document is in the same language. Mixed-language corpora would require per-document language tracking plus cross-lingual Delta — a separate design.
-- **Automatic language detection** as a default. An optional `tamga.corpus.detect_language()` convenience helper may ship, but ingestion requires the language to be declared explicitly.
+- **Automatic language detection** as a default. An optional `bitig.corpus.detect_language()` convenience helper may ship, but ingestion requires the language to be declared explicitly.
 - **Claiming support for every spaCy language.** Only the five named above are first-class (bundled resources, tested, tutorialised). Additional languages can be added by following the documented pattern.
 - **Alternative NLP backends beyond spaCy-compatible ones.** Stanza is consumed through `spacy-stanza`, which returns native spaCy `Doc` objects — no separate `Doc` abstraction is introduced.
 
@@ -38,17 +38,17 @@ The goal is multi-language support that treats Turkish as a first-class citizen,
 
 **Rationale:**
 
-- **Turkish via Stanza, not turkish-nlp-suite.** The community `tr_core_news_trf` pipeline is pinned to `spacy>=3.4.2,<3.5.0` and incompatible with tamga's `spacy>=3.7`. Stanford Stanza's Turkish BOUN pipeline is actively maintained, canonical in Turkish NLP research, and is exposed through a native spaCy interface by the `spacy-stanza` package.
+- **Turkish via Stanza, not turkish-nlp-suite.** The community `tr_core_news_trf` pipeline is pinned to `spacy>=3.4.2,<3.5.0` and incompatible with bitig's `spacy>=3.7`. Stanford Stanza's Turkish BOUN pipeline is actively maintained, canonical in Turkish NLP research, and is exposed through a native spaCy interface by the `spacy-stanza` package.
 - **Contextual embeddings are all ~110 M BERT-family models.** Stylometric signal lives in token-level representations; scaling to 1.4 B-parameter models (BERT5urk, CamemBERT-large, XLM-large) gives diminishing returns on feature quality while multiplying VRAM cost. Heavyweight alternatives are documented as overrides, not defaults.
 - **Function-word lists are generated, not curated.** Each list is derived programmatically from the language's UD treebank(s), counting closed-class tokens (UPOS ∈ {DET, PRON, ADP, CCONJ, SCONJ, AUX, PART}) by frequency. This avoids the "whose canon do we use" problem, stays license-clean (UD is CC-BY-SA), and gives methodologically uniform lists across all five languages. A regeneration script ships alongside.
-- **Non-English readability formulas are implemented natively.** `textstat`'s per-language support is partial (Turkish is absent; DE/FR syllable counters are approximate). Implementing the source-paper formulas directly in `tamga.languages.readability_*` gives unit-testable closed-form calculations with known reference values from the originating papers.
+- **Non-English readability formulas are implemented natively.** `textstat`'s per-language support is partial (Turkish is absent; DE/FR syllable counters are approximate). Implementing the source-paper formulas directly in `bitig.languages.readability_*` gives unit-testable closed-form calculations with known reference values from the originating papers.
 
 ## Architecture
 
-A new module `tamga.languages` owns a registry of `LanguageSpec` dataclasses. Every language-dependent site reads from this registry. `Corpus` gains a `language` attribute stamped at ingestion. `StudyConfig.preprocess` gains a `language:` field that cascades as the resolution root for every downstream default.
+A new module `bitig.languages` owns a registry of `LanguageSpec` dataclasses. Every language-dependent site reads from this registry. `Corpus` gains a `language` attribute stamped at ingestion. `StudyConfig.preprocess` gains a `language:` field that cascades as the resolution root for every downstream default.
 
 ```
-src/tamga/languages/
+src/bitig/languages/
 ├── __init__.py            # re-exports get(), REGISTRY, LanguageSpec
 ├── registry.py            # dataclass, REGISTRY dict, get()
 ├── readability_tr.py      # Ateşman, Bezirci–Yılmaz (native)
@@ -56,8 +56,8 @@ src/tamga/languages/
 ├── readability_es.py      # Fernández-Huerta, Szigriszt-Pazos (native)
 └── readability_fr.py      # Kandel–Moles, LIX (native)
 
-src/tamga/resources/languages/
-├── en/function_words.txt  # moved from src/tamga/resources/function_words_en.txt
+src/bitig/resources/languages/
+├── en/function_words.txt  # moved from src/bitig/resources/function_words_en.txt
 ├── tr/function_words.txt  # generated from UD BOUN
 ├── de/function_words.txt  # generated from UD GSD + HDT
 ├── es/function_words.txt  # generated from UD AnCora + GSD
@@ -66,14 +66,14 @@ src/tamga/resources/languages/
 scripts/
 └── regenerate_function_words.py  # reproducible generator
 
-src/tamga/preprocess/pipeline.py   # gains backend="spacy" | "spacy_stanza"
+src/bitig/preprocess/pipeline.py   # gains backend="spacy" | "spacy_stanza"
 ```
 
-Two backends behind a single interface — `spacy.load()` for native pipelines, `spacy_stanza.load_pipeline()` for Stanza-wrapped ones. Both return a `spacy.Language` object and produce native `Doc` objects, so every downstream feature extractor remains untouched. The DocBin cache key incorporates a backend identifier; English caches built on a prior tamga version remain valid because the native-spaCy branch of the key preserves the existing format.
+Two backends behind a single interface — `spacy.load()` for native pipelines, `spacy_stanza.load_pipeline()` for Stanza-wrapped ones. Both return a `spacy.Language` object and produce native `Doc` objects, so every downstream feature extractor remains untouched. The DocBin cache key incorporates a backend identifier; English caches built on a prior bitig version remain valid because the native-spaCy branch of the key preserves the existing format.
 
 ## Components
 
-### `tamga.languages.LanguageSpec` + `REGISTRY`
+### `bitig.languages.LanguageSpec` + `REGISTRY`
 
 ```python
 @dataclass(frozen=True)
@@ -116,7 +116,7 @@ Unknown language codes raise at pydantic validation. `NormalizeConfig.expand_con
 
 ### `Corpus` gains `language: str = "en"`
 
-Stamped at ingestion time. `Corpus.from_directory(..., language="tr")` and `tamga ingest corpus/ --language tr`. Default `"en"` keeps existing call sites working without changes. An optional helper `tamga.corpus.detect_language(corpus) -> str` (using `langdetect` or `fasttext`) is available for users who want automatic detection — never run implicitly.
+Stamped at ingestion time. `Corpus.from_directory(..., language="tr")` and `bitig ingest corpus/ --language tr`. Default `"en"` keeps existing call sites working without changes. An optional helper `bitig.corpus.detect_language(corpus) -> str` (using `langdetect` or `fasttext`) is available for users who want automatic detection — never run implicitly.
 
 ### Feature extractor changes — all additive and back-compatible
 
@@ -135,10 +135,10 @@ class SpacyPipeline:
         language: str = "en",
         model: str | None = None,
         backend: Literal["spacy", "spacy_stanza"] | None = None,
-        cache_dir: Path | str = ".tamga/cache/docbin",
+        cache_dir: Path | str = ".bitig/cache/docbin",
         exclude: list[str] | None = None,
     ) -> None:
-        spec = tamga.languages.get(language)
+        spec = bitig.languages.get(language)
         self.language = language
         self.model = model or spec.default_model
         self.backend = backend or spec.backend
@@ -186,16 +186,16 @@ Reproducible, license-clean, methodologically uniform across all languages.
 
 ### CLI surface
 
-- `tamga init <dir> --language tr` — scaffolds `study.yaml` with `preprocess.language: tr`.
-- `tamga ingest corpus/ --language tr --metadata …` — stamps `Corpus.language`.
-- `tamga info` — prints configured language alongside existing corpus stats.
+- `bitig init <dir> --language tr` — scaffolds `study.yaml` with `preprocess.language: tr`.
+- `bitig ingest corpus/ --language tr --metadata …` — stamps `Corpus.language`.
+- `bitig info` — prints configured language alongside existing corpus stats.
 
 ### Public Python API
 
-`tamga/__init__.py` re-exports:
+`bitig/__init__.py` re-exports:
 
 ```python
-from tamga.languages import REGISTRY as LANGUAGES, LanguageSpec, get as get_language
+from bitig.languages import REGISTRY as LANGUAGES, LanguageSpec, get as get_language
 ```
 
 ## Data flow
@@ -229,7 +229,7 @@ extractor's explicit `language=` → `SpacyConfig.backend`/`model` → `Preproce
 | Condition | Behavior |
 |---|---|
 | Unknown language code | `ValueError` at registry lookup / pydantic validation, with supported-languages list |
-| `language="tr"` but `spacy-stanza` not installed | `ImportError("tamga requires spacy-stanza for Turkish. Install with: uv pip install 'tamga[turkish]'")` |
+| `language="tr"` but `spacy-stanza` not installed | `ImportError("bitig requires spacy-stanza for Turkish. Install with: uv pip install 'bitig[turkish]'")` |
 | Stanza model not downloaded | `RuntimeError("Stanza model for 'tr' not found. Run: python -c \"import stanza; stanza.download('tr')\"")` |
 | No bundled function-word list for a language | `FileNotFoundError` listing supported languages, with `wordlist=[...]` override hint |
 | Extractor's `language` ≠ `corpus.language` | Warning log; does not block (intentional override use-case) |
@@ -283,7 +283,7 @@ Marked `@pytest.mark.slow`; skipped by default in local runs and PR CI. A new wo
 
 | Existing usage | New behavior |
 |---|---|
-| `tamga ingest corpus/` (no `--language`) | `Corpus.language = "en"`; unchanged from before |
+| `bitig ingest corpus/` (no `--language`) | `Corpus.language = "en"`; unchanged from before |
 | Existing `study.yaml` (no `preprocess.language`) | Defaults to `"en"`; unchanged |
 | `MFWExtractor(n=200)` no language param | Works unchanged (language-agnostic) |
 | `FunctionWordExtractor()` (no language) | Uses `corpus.language` → `"en"` → loads English list; same result as before |
@@ -296,12 +296,12 @@ Only user-visible change for existing English workflows: `FunctionWordExtractor`
 
 The design divides into six implementation steps, producible in order without breaking existing tests at any step:
 
-1. **Language registry + resource layout.** Create `tamga.languages` with the registry. Move `function_words_en.txt` to `resources/languages/en/function_words.txt` and update `FunctionWordExtractor._load_bundled_list()` to read from the new path (keeping its current English-only behavior). Unit-test the registry. At this point nothing else changes in feature behavior; the existing English test suite stays green.
-2. **Corpus.language + config schema.** Add `Corpus.language: str = "en"` stamped at ingestion (`tamga ingest --language`, `Corpus.from_directory(..., language=...)`). Add `PreprocessConfig.language: str = "en"` with pydantic validation against the registry. No extractor behavior changes yet.
+1. **Language registry + resource layout.** Create `bitig.languages` with the registry. Move `function_words_en.txt` to `resources/languages/en/function_words.txt` and update `FunctionWordExtractor._load_bundled_list()` to read from the new path (keeping its current English-only behavior). Unit-test the registry. At this point nothing else changes in feature behavior; the existing English test suite stays green.
+2. **Corpus.language + config schema.** Add `Corpus.language: str = "en"` stamped at ingestion (`bitig ingest --language`, `Corpus.from_directory(..., language=...)`). Add `PreprocessConfig.language: str = "en"` with pydantic validation against the registry. No extractor behavior changes yet.
 3. **spacy-stanza backend in SpacyPipeline.** New optional extra `turkish`. `SpacyPipeline` gains `language`, `backend`, and `backend_version`; dispatch between `spacy.load()` and `spacy_stanza.load_pipeline()`. Backend-aware cache-key format with an English byte-exact regression test to confirm prior caches remain valid.
 4. **Extractors pick up language.** `FunctionWordExtractor`, `ReadabilityExtractor`, `ContextualEmbeddingExtractor`, `SentenceEmbeddingExtractor` gain `language: str | None = None`, resolve from `corpus.language` when unset, accept explicit overrides.
 5. **Non-English resources.** Native readability formulas (TR, DE, ES, FR) with paper-referenced unit tests; generated function-word lists committed with provenance headers; `scripts/regenerate_function_words.py`. At this point all five languages are fully usable end-to-end.
-6. **Tutorial, docs, CLI flags polish, integration workflow.** `tamga init/ingest --language` wiring (if not already in step 2), `tamga info` displays configured language, Turkish tutorial page, `concepts/languages.md`, `tests-multilang.yml` CI workflow for gated model-download integration tests.
+6. **Tutorial, docs, CLI flags polish, integration workflow.** `bitig init/ingest --language` wiring (if not already in step 2), `bitig info` displays configured language, Turkish tutorial page, `concepts/languages.md`, `tests-multilang.yml` CI workflow for gated model-download integration tests.
 
 Each step is independently mergeable and produces a releasable state.
 

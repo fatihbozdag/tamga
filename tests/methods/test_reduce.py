@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.features import FeatureMatrix
-from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
+from bitig.features import FeatureMatrix
+from bitig.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
 
 
 def _fm(n: int = 10, d: int = 5) -> FeatureMatrix:

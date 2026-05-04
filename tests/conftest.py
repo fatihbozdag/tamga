@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus
-from tamga.io import load_corpus
+from bitig.corpus import Corpus
+from bitig.io import load_corpus
 
 
 @pytest.fixture(scope="session")

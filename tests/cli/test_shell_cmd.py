@@ -2,7 +2,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "mini_corpus"

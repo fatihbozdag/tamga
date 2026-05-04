@@ -4,7 +4,7 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 pytestmark = pytest.mark.integration

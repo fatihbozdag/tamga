@@ -1,7 +1,7 @@
 """Tests for Char/Word n-gram extractors."""
 
-from tamga.corpus import Corpus, Document
-from tamga.features.ngrams import CharNgramExtractor, WordNgramExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.ngrams import CharNgramExtractor, WordNgramExtractor
 
 
 def _corpus(*texts: str) -> Corpus:

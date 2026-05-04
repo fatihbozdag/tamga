@@ -2,7 +2,7 @@
 
 ## Problem
 
-Users landing on the tamga docs cannot tell (a) what the overall system is for, (b) which
+Users landing on the bitig docs cannot tell (a) what the overall system is for, (b) which
 method to pick for which task, or (c) what each forensic metric means in practice. The
 current `concepts/methods.md`, `concepts/features.md`, and `forensic/evaluation.md` pages
 are catalogs — they list *what exists* without guiding the reader to *when to use it* or
@@ -22,7 +22,7 @@ gloss that sits above the existing technical content.
 - **New page:** `concepts/choosing.md` — task-oriented decision table, linked from
   `concepts/index.md` as the "start here if you don't know which method to use" entry.
 - **Rewritten in place (8 pages):**
-  - `concepts/index.md` — add a "What tamga is for" frame up top.
+  - `concepts/index.md` — add a "What bitig is for" frame up top.
   - `concepts/methods.md` — every method entry gets a gloss block.
   - `concepts/features.md` — every extractor entry gets a gloss block.
   - `forensic/evaluation.md` — every metric gets a "use for" line.
@@ -43,7 +43,7 @@ gloss that sits above the existing technical content.
 - `tutorials/*.md` — already task-oriented; the new choosing page links to them rather
   than duplicating.
 - `reference/*.md` — reference is reference; CLI and schema pages don't teach pedagogy.
-- API docstring prose in `src/tamga/`.
+- API docstring prose in `src/bitig/`.
 
 ## Approach
 
@@ -107,9 +107,9 @@ and English.
 Add a new top section before "The pipeline":
 
 ```markdown
-## What tamga is for
+## What bitig is for
 
-tamga answers three questions about who wrote a text:
+bitig answers three questions about who wrote a text:
 
 - **Attribution** — which of a set of candidate authors most likely wrote this document?
 - **Verification** — was this document written by *this specific* person?
@@ -188,7 +188,7 @@ Apply to every extractor, including the forensic extractors.
 ### `forensic/evaluation.md` metrics rewrite
 
 The metrics table gains a "Use for" column. Each metric additionally gets a gloss
-paragraph before the existing `::: tamga.forensic.metrics.<fn>` autodoc block.
+paragraph before the existing `::: bitig.forensic.metrics.<fn>` autodoc block.
 
 New table:
 

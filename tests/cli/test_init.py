@@ -1,10 +1,10 @@
-"""Tests for `tamga init`."""
+"""Tests for `bitig init`."""
 
 from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 

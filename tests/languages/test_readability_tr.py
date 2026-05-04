@@ -1,6 +1,6 @@
 """Tests for Turkish readability — Ateşman (1997) and Bezirci–Yılmaz (2010)."""
 
-from tamga.languages.readability_tr import (
+from bitig.languages.readability_tr import (
     atesman,
     bezirci_yilmaz,
     count_syllables_tr,
@@ -43,8 +43,8 @@ def test_atesman_handles_empty_and_single_word() -> None:
 
 
 def test_turkish_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(
         documents=[Document(id="d0", text="Ali topu tuttu. Kedi uyudu.")],

@@ -2,12 +2,12 @@
 
 from datetime import datetime
 
-from tamga.provenance import Provenance
+from bitig.provenance import Provenance
 
 
 def test_provenance_basic_construction():
     p = Provenance(
-        tamga_version="0.1.0.dev0",
+        bitig_version="0.1.0.dev0",
         python_version="3.11.7",
         spacy_model="en_core_web_sm",
         spacy_version="3.7.2",
@@ -23,7 +23,7 @@ def test_provenance_basic_construction():
 
 def test_provenance_round_trips_to_dict():
     p = Provenance(
-        tamga_version="0.1.0.dev0",
+        bitig_version="0.1.0.dev0",
         python_version="3.11.7",
         spacy_model="en_core_web_sm",
         spacy_version="3.7.2",
@@ -47,7 +47,7 @@ def test_provenance_current_captures_runtime():
         seed=1,
         resolved_config={},
     )
-    assert p.tamga_version
+    assert p.bitig_version
     assert "." in p.python_version
     assert isinstance(p.timestamp, datetime)
 
@@ -96,7 +96,7 @@ def test_provenance_round_trips_forensic_fields() -> None:
 def test_provenance_from_dict_accepts_records_without_forensic_fields() -> None:
     """Backward compatibility — loading a pre-forensic result.json must still work."""
     legacy_payload = {
-        "tamga_version": "0.1.0.dev0",
+        "bitig_version": "0.1.0.dev0",
         "python_version": "3.11.7",
         "spacy_model": "en_core_web_sm",
         "spacy_version": "3.7.2",

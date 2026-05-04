@@ -2,7 +2,7 @@
 
 import pytest
 
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 
 def _doc(i: int, **meta: object) -> Document:
@@ -73,21 +73,21 @@ def test_corpus_metadata_column_extracts_field_per_document():
 
 
 def test_corpus_default_language_is_english() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     c = Corpus(documents=[Document(id="d0", text="hello")])
     assert c.language == "en"
 
 
 def test_corpus_accepts_language_argument() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     c = Corpus(documents=[Document(id="d0", text="merhaba")], language="tr")
     assert c.language == "tr"
 
 
 def test_corpus_hash_differs_by_language() -> None:
-    from tamga.corpus import Corpus, Document
+    from bitig.corpus import Corpus, Document
 
     doc = Document(id="d0", text="merhaba")
     en = Corpus(documents=[doc], language="en")

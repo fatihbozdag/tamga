@@ -3,8 +3,8 @@
 import numpy as np
 from sklearn.base import is_classifier
 
-from tamga.features import FeatureMatrix
-from tamga.methods.delta.argamon import ArgamonLinearDelta, QuadraticDelta
+from bitig.features import FeatureMatrix
+from bitig.methods.delta.argamon import ArgamonLinearDelta, QuadraticDelta
 
 
 def _fm(X: np.ndarray) -> FeatureMatrix:  # noqa: N803

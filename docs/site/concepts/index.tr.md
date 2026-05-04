@@ -1,8 +1,8 @@
 # Kavramlar
 
-## tamga ne işe yarar
+## bitig ne işe yarar
 
-tamga, bir metni kimin yazdığına dair üç soruyu yanıtlar:
+bitig, bir metni kimin yazdığına dair üç soruyu yanıtlar:
 
 - **Yazar tespiti** — bir aday yazar kümesinden hangisinin bu belgeyi yazma olasılığı
   en yüksektir?
@@ -18,7 +18,7 @@ başlayın](choosing.md).**
 
 ## Dört katman
 
-tamga dört katman etrafında düzenlenmiştir; her katmanın birincil bir dönüş türü vardır. Bu dört türü anlamak, tamga'nın yapabildiği her şeyi oluşturmanıza olanak tanır:
+bitig dört katman etrafında düzenlenmiştir; her katmanın birincil bir dönüş türü vardır. Bu dört türü anlamak, bitig'nın yapabildiği her şeyi oluşturmanıza olanak tanır:
 
 | Katman | Tür | Amaç |
 |---|---|---|
@@ -51,7 +51,7 @@ Her ok, verinin diske düzgünce serileştirildiği bir sınırı temsil eder:
 
 Her `Result`, şunları içeren bir `Provenance` kaydı taşır:
 
-- tamga sürümü, Python sürümü, spaCy modeli + sürümü
+- bitig sürümü, Python sürümü, spaCy modeli + sürümü
 - derlem özeti (içerik tabanlı özetleme)
 - öznitelik özeti (yapılandırma + derlem özeti)
 - çalıştırmada kullanılan seed değeri

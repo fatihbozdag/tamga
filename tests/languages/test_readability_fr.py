@@ -1,6 +1,6 @@
 """Tests for French readability — Kandel-Moles (1958) and LIX (Björnsson 1968)."""
 
-from tamga.languages.readability_fr import count_syllables_fr, kandel_moles, lix
+from bitig.languages.readability_fr import count_syllables_fr, kandel_moles, lix
 
 
 def test_count_syllables_fr_basic() -> None:
@@ -28,8 +28,8 @@ def test_lix_scoring_sense() -> None:
 
 
 def test_french_readability_wired_into_extractor() -> None:
-    from tamga.corpus import Corpus, Document
-    from tamga.features.readability import ReadabilityExtractor
+    from bitig.corpus import Corpus, Document
+    from bitig.features.readability import ReadabilityExtractor
 
     c = Corpus(documents=[Document(id="d0", text="Le chat dort.")], language="fr")
     fm = ReadabilityExtractor().fit_transform(c)

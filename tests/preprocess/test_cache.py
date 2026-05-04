@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from tamga.preprocess.cache import DocBinCache, cache_key
+from bitig.preprocess.cache import DocBinCache, cache_key
 
 
 def test_cache_key_is_deterministic() -> None:

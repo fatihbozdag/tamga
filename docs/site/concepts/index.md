@@ -1,8 +1,8 @@
 # Concepts
 
-## What tamga is for
+## What bitig is for
 
-tamga answers three questions about who wrote a text:
+bitig answers three questions about who wrote a text:
 
 - **Attribution** — which of a set of candidate authors most likely wrote this document?
 - **Verification** — was this document written by *this specific* person?
@@ -17,8 +17,8 @@ guide](choosing.md).**
 
 ## The four layers
 
-tamga is organised around four layers, each with one primary return type. Understanding
-these four types lets you compose anything tamga can do:
+bitig is organised around four layers, each with one primary return type. Understanding
+these four types lets you compose anything bitig can do:
 
 | Layer | Type | Purpose |
 |---|---|---|
@@ -53,7 +53,7 @@ Each arrow is a boundary where data serialises cleanly to disk:
 
 Every `Result` carries a `Provenance` record with:
 
-- tamga version, Python version, spaCy model + version
+- bitig version, Python version, spaCy model + version
 - corpus hash (content-addressed)
 - feature hash (config + corpus hash)
 - seed used for the run

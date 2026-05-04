@@ -1,4 +1,4 @@
-"""Unit tests for `tamga.methods.rolling_delta.RollingDelta`."""
+"""Unit tests for `bitig.methods.rolling_delta.RollingDelta`."""
 
 from __future__ import annotations
 
@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from tamga.corpus import Corpus
-from tamga.corpus.document import Document
-from tamga.methods.rolling_delta import RollingDelta
+from bitig.corpus import Corpus
+from bitig.corpus.document import Document
+from bitig.methods.rolling_delta import RollingDelta
 
 
 def _alice_text(n_paragraphs: int = 200) -> str:

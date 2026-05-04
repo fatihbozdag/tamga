@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install tamga + Turkish extras
+      - name: Install bitig + Turkish extras
         run: uv pip install --system -e ".[turkish,embeddings,dev]"
       - name: Download Stanza Turkish model
         run: python -c "import stanza; stanza.download('tr')"

@@ -19,12 +19,12 @@ analysis conditions.
 chain-of-custody fields, calibrated scores, verbal scale, and Tippett plot into a
 Jinja2 template.
 *Don't use when:* you're producing a research paper figure — use the standard
-`tamga report` CLI or the plotting helpers in `concepts/methods.md`.
+`bitig report` CLI or the plotting helpers in `concepts/methods.md`.
 *Expect:* a path to the rendered HTML file; optional PDF export requires
-`tamga[reports]`.
+`bitig[reports]`.
 
 ```python
-from tamga.report import build_forensic_report
+from bitig.report import build_forensic_report
 
 build_forensic_report(
     "results/case_001",
@@ -54,7 +54,7 @@ Template sections:
 Pass the forensic fields when building your Provenance:
 
 ```python
-from tamga.provenance import Provenance
+from bitig.provenance import Provenance
 
 provenance = Provenance.current(
     spacy_model="en_core_web_trf",
@@ -94,7 +94,7 @@ reporting guideline:
 > populations outside the calibration conditions is not warranted.
 
 You may override the disclaimer by providing a custom template; see the bundled
-`src/tamga/report/templates/forensic_lr.html.j2` for the reference implementation.
+`src/bitig/report/templates/forensic_lr.html.j2` for the reference implementation.
 
 ### Verbal scale
 
@@ -115,9 +115,9 @@ its `C_llr` directly.
 
 ## Reference
 
-::: tamga.report.render.build_forensic_report
+::: bitig.report.render.build_forensic_report
 
-::: tamga.provenance.Provenance
+::: bitig.provenance.Provenance
     options:
       members:
         - current

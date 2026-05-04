@@ -1,0 +1,37 @@
+# bitig study config — {{ name }}
+name: {{ name }}
+seed: 42
+
+corpus:
+  path: corpus/
+  # metadata: corpus/metadata.tsv    # uncomment when you provide a metadata TSV
+
+preprocess:
+  language: {{ language | default("en") }}
+  spacy:
+    model: {{ spacy_model | default("en_core_web_trf") }}
+    device: auto                     # auto | cpu | mps | cuda
+
+features:
+  - {id: mfw1000, type: mfw, n: 1000, min_df: 2, scale: zscore}
+
+methods:
+  - id: burrows
+    kind: delta
+    method: burrows
+    features: mfw1000
+    group_by: author
+
+viz:
+  format: [pdf, png]
+  dpi: 300
+
+report:
+  format: none                       # 'html' or 'md' to enable reports
+
+cache:
+  dir: .bitig/cache
+
+output:
+  dir: results/
+  timestamp: true

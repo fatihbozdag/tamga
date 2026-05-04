@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.preprocess.pipeline import ParsedCorpus, SpacyPipeline
+from bitig.corpus import Corpus, Document
+from bitig.preprocess.pipeline import ParsedCorpus, SpacyPipeline
 
 
 def _tiny(text: str) -> Document:
@@ -130,7 +130,7 @@ def test_pipeline_exclude_warns_on_spacy_stanza_backend(
 
     # Our logger has propagate=False so caplog can't see it; patch the module logger directly.
     mock_log = MagicMock()
-    monkeypatch.setattr("tamga.preprocess.pipeline._log", mock_log)
+    monkeypatch.setattr("bitig.preprocess.pipeline._log", mock_log)
 
     pipe = SpacyPipeline(language="tr", cache_dir=tmp_path, exclude=["ner"])
     _ = pipe.nlp  # triggers lazy load

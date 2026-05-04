@@ -36,7 +36,7 @@ Produce for each trial:
 
 ```python
 import numpy as np
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 rng = np.random.default_rng(42)
 VOCAB = [
@@ -119,7 +119,7 @@ Build the feature matrix over the pooled corpus once, so Q, K, and impostors liv
 the same vocabulary.
 
 ```python
-from tamga import MFWExtractor
+from bitig import MFWExtractor
 
 fm = MFWExtractor(n=500, scale="zscore", lowercase=True).fit_transform(corpus)
 
@@ -136,8 +136,8 @@ For each trial we assemble:
 - Impostor pool = everyone except the candidate author
 
 ```python
-from tamga.features import FeatureMatrix
-from tamga.forensic import GeneralImpostors
+from bitig.features import FeatureMatrix
+from bitig.forensic import GeneralImpostors
 
 def slice_fm(rows: list[int]) -> FeatureMatrix:
     return FeatureMatrix(
@@ -184,7 +184,7 @@ Raw GI scores are discrimination-shaped but not probabilities. Calibrate on a he
 split so the output is a defensible posterior.
 
 ```python
-from tamga.forensic import CalibratedScorer, log_lr_from_probs
+from bitig.forensic import CalibratedScorer, log_lr_from_probs
 
 # 60/40 split — calibrate on the first 60%, evaluate on the rest.
 n = len(scores)
@@ -204,7 +204,7 @@ print(f"log-LR range:               [{test_log_lrs.min():.2f}, {test_log_lrs.max
 ## 6. PAN evaluation
 
 ```python
-from tamga.forensic import compute_pan_report
+from bitig.forensic import compute_pan_report
 
 report = compute_pan_report(
     probs=test_probs,
@@ -236,7 +236,7 @@ Expected output on the synthetic setup (approximate):
 
 ```python
 import matplotlib.pyplot as plt
-from tamga.forensic import tippett
+from bitig.forensic import tippett
 
 data = tippett(test_log_lrs, test_labels)
 
@@ -258,16 +258,16 @@ log-LRs while the non-target CDF drops quickly.
 
 ## 8. Forensic HTML report
 
-Save the test-set results as a tamga `Result`, stamp chain-of-custody metadata on its
+Save the test-set results as a bitig `Result`, stamp chain-of-custody metadata on its
 `Provenance`, and render the LR-framed forensic report.
 
 ```python
 import json
 import spacy
 from pathlib import Path
-from tamga.provenance import Provenance
-from tamga.result import Result
-from tamga.report import build_forensic_report
+from bitig.provenance import Provenance
+from bitig.result import Result
+from bitig.report import build_forensic_report
 
 run_dir = Path("pan_demo")
 (run_dir / "gi").mkdir(parents=True, exist_ok=True)

@@ -1,10 +1,10 @@
-# tamga — Phase 5: Visualisation, Reports, `tamga run`, Interactive Shell — Implementation Plan
+# bitig — Phase 5: Visualisation, Reports, `bitig run`, Interactive Shell — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans.
 
-**Goal:** Ship the user-facing polish layer — publication-grade static figures (matplotlib/seaborn), optional interactive figures (plotly when `[viz]` installed), HTML/Markdown reports rendered from saved `Result` artefacts, a config-driven `tamga run study.yaml` orchestrator that runs a full multi-method study end-to-end, and a Rich/Questionary interactive wizard shell (`tamga shell`) that exposes the same workflow through a guided menu. End state: `tamga run study.yaml --report html` produces a self-contained HTML report with every figure and provenance section for a publication-ready analysis.
+**Goal:** Ship the user-facing polish layer — publication-grade static figures (matplotlib/seaborn), optional interactive figures (plotly when `[viz]` installed), HTML/Markdown reports rendered from saved `Result` artefacts, a config-driven `bitig run study.yaml` orchestrator that runs a full multi-method study end-to-end, and a Rich/Questionary interactive wizard shell (`bitig shell`) that exposes the same workflow through a guided menu. End state: `bitig run study.yaml --report html` produces a self-contained HTML report with every figure and provenance section for a publication-ready analysis.
 
-**Architecture:** Backend-agnostic plotting API (`tamga.viz.plot_*` functions) that dispatches to matplotlib or plotly based on the `backend=` argument; static matplotlib always available, plotly gated on the `[viz]` extra with graceful fallback. Reports assemble a `Result` directory into a Jinja2-templated HTML/Markdown document with embedded figures. `tamga run` is a single orchestrator that reads `study.yaml`, builds the Corpus → spaCy parse → per-method feature + method execution → saves all Results to a timestamped directory → optionally generates a report. The shell is a thin Rich/Questionary menu wrapping the same orchestrator.
+**Architecture:** Backend-agnostic plotting API (`bitig.viz.plot_*` functions) that dispatches to matplotlib or plotly based on the `backend=` argument; static matplotlib always available, plotly gated on the `[viz]` extra with graceful fallback. Reports assemble a `Result` directory into a Jinja2-templated HTML/Markdown document with embedded figures. `bitig run` is a single orchestrator that reads `study.yaml`, builds the Corpus → spaCy parse → per-method feature + method execution → saves all Results to a timestamped directory → optionally generates a report. The shell is a thin Rich/Questionary menu wrapping the same orchestrator.
 
 **Tech Stack:** matplotlib (core), seaborn (core), plotly (optional `[viz]`), Jinja2 (core, already declared), scipy.cluster.hierarchy (dendrogram plumbing, already used), rich + questionary (core, already declared), IPython (lazy-import for shell's REPL-escape option — no new dep).
 
@@ -17,7 +17,7 @@
 ## File Layout
 
 ```
-src/tamga/
+src/bitig/
 ├── viz/
 │   ├── __init__.py          # public plot_* functions
 │   ├── style.py             # publication defaults (DPI, font, palette, figure sizes)
@@ -31,10 +31,10 @@ src/tamga/
 │   │   └── report.md.j2
 ├── runner.py                # run_study(config, cache_dir, output_dir, report_format)
 └── cli/
-    ├── plot_cmd.py          # tamga plot <result>
-    ├── report_cmd.py        # tamga report <result-dir|study.yaml>
-    ├── run_cmd.py           # tamga run <study.yaml>
-    └── shell_cmd.py         # tamga shell
+    ├── plot_cmd.py          # bitig plot <result>
+    ├── report_cmd.py        # bitig report <result-dir|study.yaml>
+    ├── run_cmd.py           # bitig run <study.yaml>
+    └── shell_cmd.py         # bitig shell
 
 tests/
 ├── viz/
@@ -56,8 +56,8 @@ tests/
 ## Task 1: `viz.style` — publication defaults
 
 **Files:**
-- Create: `src/tamga/viz/__init__.py`
-- Create: `src/tamga/viz/style.py`
+- Create: `src/bitig/viz/__init__.py`
+- Create: `src/bitig/viz/style.py`
 - Create: `tests/viz/__init__.py`
 - Create: `tests/viz/test_style.py`
 
@@ -68,7 +68,7 @@ tests/
 
 import matplotlib.pyplot as plt
 
-from tamga.viz.style import apply_publication_style, figure_size
+from bitig.viz.style import apply_publication_style, figure_size
 
 
 def test_apply_publication_style_sets_dpi():
@@ -96,7 +96,7 @@ def test_apply_publication_style_uses_colorblind_palette():
     assert len(palette) >= 6
 ```
 
-### Step 1.2 — Implement `src/tamga/viz/style.py`
+### Step 1.2 — Implement `src/bitig/viz/style.py`
 
 ```python
 """Publication-grade styling defaults.
@@ -142,12 +142,12 @@ def figure_size(width: ColumnWidth = "single") -> tuple[float, float]:
     return _WIDTHS[width]
 ```
 
-### Step 1.3 — `src/tamga/viz/__init__.py`
+### Step 1.3 — `src/bitig/viz/__init__.py`
 
 ```python
-"""tamga visualisation — matplotlib/seaborn static + plotly interactive."""
+"""bitig visualisation — matplotlib/seaborn static + plotly interactive."""
 
-from tamga.viz.style import apply_publication_style, figure_size
+from bitig.viz.style import apply_publication_style, figure_size
 
 __all__ = ["apply_publication_style", "figure_size"]
 ```
@@ -157,7 +157,7 @@ __all__ = ["apply_publication_style", "figure_size"]
 ### Step 1.5 — Run → PASS. Commit:
 
 ```bash
-git add src/tamga/viz/__init__.py src/tamga/viz/style.py tests/viz/__init__.py tests/viz/test_style.py
+git add src/bitig/viz/__init__.py src/bitig/viz/style.py tests/viz/__init__.py tests/viz/test_style.py
 git commit -m "feat(viz): publication-grade matplotlib defaults + figure_size helper"
 ```
 
@@ -166,9 +166,9 @@ git commit -m "feat(viz): publication-grade matplotlib defaults + figure_size he
 ## Task 2: `viz.mpl` — matplotlib plot renderers
 
 **Files:**
-- Create: `src/tamga/viz/mpl.py`
+- Create: `src/bitig/viz/mpl.py`
 - Create: `tests/viz/test_mpl.py`
-- Modify: `src/tamga/viz/__init__.py` (re-export plot_* functions)
+- Modify: `src/bitig/viz/__init__.py` (re-export plot_* functions)
 
 ### Step 2.1 — Tests `tests/viz/test_mpl.py`
 
@@ -182,7 +182,7 @@ import pandas as pd
 import pytest
 from scipy.cluster.hierarchy import linkage
 
-from tamga.viz.mpl import (
+from bitig.viz.mpl import (
     plot_confusion_matrix,
     plot_dendrogram,
     plot_distance_heatmap,
@@ -239,10 +239,10 @@ def test_plot_zeta(tmp_path: Path):
     fig.savefig(tmp_path / "zeta.png")
 ```
 
-### Step 2.2 — Implement `src/tamga/viz/mpl.py`
+### Step 2.2 — Implement `src/bitig/viz/mpl.py`
 
 ```python
-"""Matplotlib renderers for every major tamga plot type."""
+"""Matplotlib renderers for every major bitig plot type."""
 
 from __future__ import annotations
 
@@ -253,7 +253,7 @@ import seaborn as sns
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.metrics import confusion_matrix
 
-from tamga.viz.style import figure_size
+from bitig.viz.style import figure_size
 
 
 def plot_dendrogram(
@@ -371,12 +371,12 @@ def plot_zeta(
     return fig
 ```
 
-### Step 2.3 — Update `src/tamga/viz/__init__.py`
+### Step 2.3 — Update `src/bitig/viz/__init__.py`
 
 ```python
-"""tamga visualisation — matplotlib/seaborn static + plotly interactive."""
+"""bitig visualisation — matplotlib/seaborn static + plotly interactive."""
 
-from tamga.viz.mpl import (
+from bitig.viz.mpl import (
     plot_confusion_matrix,
     plot_dendrogram,
     plot_distance_heatmap,
@@ -384,7 +384,7 @@ from tamga.viz.mpl import (
     plot_scatter_2d,
     plot_zeta,
 )
-from tamga.viz.style import apply_publication_style, figure_size
+from bitig.viz.style import apply_publication_style, figure_size
 
 __all__ = [
     "apply_publication_style",
@@ -401,7 +401,7 @@ __all__ = [
 ### Step 2.4 — Run → PASS (6/6). Commit:
 
 ```bash
-git add src/tamga/viz/mpl.py tests/viz/test_mpl.py src/tamga/viz/__init__.py
+git add src/bitig/viz/mpl.py tests/viz/test_mpl.py src/bitig/viz/__init__.py
 git commit -m "feat(viz): matplotlib renderers (dendrogram, scatter, heatmap, CM, importance, zeta)"
 ```
 
@@ -410,25 +410,25 @@ git commit -m "feat(viz): matplotlib renderers (dendrogram, scatter, heatmap, CM
 ## Task 3: Report generator (HTML + Markdown via Jinja2)
 
 **Files:**
-- Create: `src/tamga/report/__init__.py`
-- Create: `src/tamga/report/render.py`
-- Create: `src/tamga/report/templates/report.html.j2`
-- Create: `src/tamga/report/templates/report.md.j2`
+- Create: `src/bitig/report/__init__.py`
+- Create: `src/bitig/report/render.py`
+- Create: `src/bitig/report/templates/report.html.j2`
+- Create: `src/bitig/report/templates/report.md.j2`
 - Create: `tests/report/__init__.py`
 - Create: `tests/report/test_render.py`
 - Modify: `pyproject.toml` (wheel force-include `report/templates`)
 
-### Step 3.1 — `src/tamga/report/__init__.py`
+### Step 3.1 — `src/bitig/report/__init__.py`
 
 ```python
-"""tamga HTML / Markdown report generation from saved Result artefacts."""
+"""bitig HTML / Markdown report generation from saved Result artefacts."""
 
-from tamga.report.render import build_report
+from bitig.report.render import build_report
 
 __all__ = ["build_report"]
 ```
 
-### Step 3.2 — `src/tamga/report/templates/report.html.j2`
+### Step 3.2 — `src/bitig/report/templates/report.html.j2`
 
 ```jinja2
 <!DOCTYPE html>
@@ -450,7 +450,7 @@ code.inline { background: #f6f8fa; padding: 0.1em 0.3em; border-radius: 3px; }
 </head>
 <body>
 <h1>{{ title }}</h1>
-<p><strong>Generated:</strong> {{ generated_at }} &middot; <strong>tamga:</strong> {{ tamga_version }}</p>
+<p><strong>Generated:</strong> {{ generated_at }} &middot; <strong>bitig:</strong> {{ bitig_version }}</p>
 
 {% if corpus_summary %}
 <h2>Corpus</h2>
@@ -501,12 +501,12 @@ code.inline { background: #f6f8fa; padding: 0.1em 0.3em; border-radius: 3px; }
 </html>
 ```
 
-### Step 3.3 — `src/tamga/report/templates/report.md.j2`
+### Step 3.3 — `src/bitig/report/templates/report.md.j2`
 
 ```jinja2
 # {{ title }}
 
-**Generated:** {{ generated_at }} · **tamga:** {{ tamga_version }}
+**Generated:** {{ generated_at }} · **bitig:** {{ bitig_version }}
 
 {% if corpus_summary %}
 ## Corpus
@@ -563,7 +563,7 @@ code.inline { background: #f6f8fa; padding: 0.1em 0.3em; border-radius: 3px; }
 ```
 ```
 
-### Step 3.4 — `src/tamga/report/render.py`
+### Step 3.4 — `src/bitig/report/render.py`
 
 ```python
 """Build an HTML or Markdown report from a directory containing saved Result artefacts."""
@@ -578,11 +578,11 @@ from typing import Any, Literal
 
 from jinja2 import Environment
 
-from tamga._version import __version__
+from bitig._version import __version__
 
 Format = Literal["html", "md"]
 
-_TEMPLATE_PKG = "tamga.report.templates"
+_TEMPLATE_PKG = "bitig.report.templates"
 
 
 def build_report(
@@ -590,13 +590,13 @@ def build_report(
     *,
     output: str | Path,
     format: Format = "html",
-    title: str = "tamga study",
+    title: str = "bitig study",
     corpus_summary: dict[str, Any] | None = None,
 ) -> Path:
     """Assemble `result.json` + figures in `result_dir` into a single HTML/MD file at `output`.
 
     `result_dir` may be either a single Result directory (one method) or a parent directory
-    containing per-method subdirectories (produced by `tamga run`).
+    containing per-method subdirectories (produced by `bitig run`).
     """
     result_dir = Path(result_dir)
     output = Path(output)
@@ -614,7 +614,7 @@ def build_report(
     rendered = template.render(
         title=title,
         generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        tamga_version=__version__,
+        bitig_version=__version__,
         corpus_summary=corpus_summary,
         resolved_config=json.dumps(provenance.get("resolved_config", {}), indent=2),
         results=results,
@@ -662,7 +662,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from tamga.report import build_report
+from bitig.report import build_report
 
 
 def _make_result_dir(tmp_path: Path) -> Path:
@@ -675,7 +675,7 @@ def _make_result_dir(tmp_path: Path) -> Path:
                 "params": {"method": "burrows", "mfw": 500},
                 "values": {},
                 "provenance": {
-                    "tamga_version": "0.1.0.dev0",
+                    "bitig_version": "0.1.0.dev0",
                     "python_version": "3.11",
                     "spacy_model": "en",
                     "spacy_version": "3.7",
@@ -723,7 +723,7 @@ def test_build_report_multi_method(tmp_path: Path) -> None:
                     "params": {},
                     "values": {},
                     "provenance": {
-                        "tamga_version": "0.1.0.dev0",
+                        "bitig_version": "0.1.0.dev0",
                         "python_version": "3.11",
                         "spacy_model": "en",
                         "spacy_version": "3.7",
@@ -747,25 +747,25 @@ def test_build_report_multi_method(tmp_path: Path) -> None:
 Append to the existing `[tool.hatch.build.targets.wheel.force-include]`:
 
 ```toml
-"src/tamga/report/templates" = "tamga/report/templates"
+"src/bitig/report/templates" = "bitig/report/templates"
 ```
 
 ### Step 3.7 — Commit
 
 ```bash
-git add src/tamga/report/ tests/report/ pyproject.toml
+git add src/bitig/report/ tests/report/ pyproject.toml
 git commit -m "feat(report): Jinja2-based HTML/Markdown report rendering"
 ```
 
 ---
 
-## Task 4: `tamga.runner` — config-driven orchestrator
+## Task 4: `bitig.runner` — config-driven orchestrator
 
 **Files:**
-- Create: `src/tamga/runner.py`
+- Create: `src/bitig/runner.py`
 - Create: `tests/test_runner.py`
 
-### Step 4.1 — Implement `src/tamga/runner.py`
+### Step 4.1 — Implement `src/bitig/runner.py`
 
 ```python
 """Config-driven orchestrator — executes all methods declared in a `study.yaml`."""
@@ -779,8 +779,8 @@ from typing import Any
 
 import numpy as np
 
-from tamga.config import StudyConfig, load_config
-from tamga.features import (
+from bitig.config import StudyConfig, load_config
+from bitig.features import (
     CharNgramExtractor,
     FeatureMatrix,
     FunctionWordExtractor,
@@ -790,16 +790,16 @@ from tamga.features import (
     ReadabilityExtractor,
     WordNgramExtractor,
 )
-from tamga.io import load_corpus
-from tamga.methods.classify import build_classifier, cross_validate_tamga
-from tamga.methods.cluster import HierarchicalCluster
-from tamga.methods.consensus import BootstrapConsensus
-from tamga.methods.delta import BurrowsDelta
-from tamga.methods.reduce import PCAReducer
-from tamga.methods.zeta import ZetaClassic
-from tamga.plumbing.logging import get_logger
-from tamga.provenance import Provenance
-from tamga.result import Result
+from bitig.io import load_corpus
+from bitig.methods.classify import build_classifier, cross_validate_bitig
+from bitig.methods.cluster import HierarchicalCluster
+from bitig.methods.consensus import BootstrapConsensus
+from bitig.methods.delta import BurrowsDelta
+from bitig.methods.reduce import PCAReducer
+from bitig.methods.zeta import ZetaClassic
+from bitig.plumbing.logging import get_logger
+from bitig.provenance import Provenance
+from bitig.result import Result
 
 _log = get_logger(__name__)
 
@@ -928,7 +928,7 @@ def _dispatch_method(
         y = np.array(corpus.metadata_column(method_cfg.group_by))
         cv_kind = method_cfg.cv.kind if method_cfg.cv else "stratified"
         clf = build_classifier(method_cfg.params.get("estimator", "logreg"))
-        report = cross_validate_tamga(
+        report = cross_validate_bitig(
             clf, fm, y, cv_kind=cv_kind, groups_from=y if cv_kind == "loao" else None
         )
         return Result(
@@ -950,7 +950,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tamga.runner import run_study
+from bitig.runner import run_study
 
 pytestmark = pytest.mark.integration
 
@@ -987,23 +987,23 @@ def test_runner_executes_study(tmp_path: Path) -> None:
 ### Step 4.3 — Commit
 
 ```bash
-git add src/tamga/runner.py tests/test_runner.py
+git add src/bitig/runner.py tests/test_runner.py
 git commit -m "feat: run_study orchestrator — execute a full study.yaml end-to-end"
 ```
 
 ---
 
-## Task 5: CLI — `tamga plot`, `tamga report`, `tamga run`
+## Task 5: CLI — `bitig plot`, `bitig report`, `bitig run`
 
 **Files:**
-- Create: `src/tamga/cli/plot_cmd.py`, `report_cmd.py`, `run_cmd.py`
+- Create: `src/bitig/cli/plot_cmd.py`, `report_cmd.py`, `run_cmd.py`
 - Create: `tests/cli/test_plot_cmd.py`, `test_report_cmd.py`, `test_run_cmd.py`
-- Modify: `src/tamga/cli/__init__.py`
+- Modify: `src/bitig/cli/__init__.py`
 
-### Step 5.1 — `src/tamga/cli/run_cmd.py`
+### Step 5.1 — `src/bitig/cli/run_cmd.py`
 
 ```python
-"""`tamga run <study.yaml>` — execute a full declarative study."""
+"""`bitig run <study.yaml>` — execute a full declarative study."""
 
 from __future__ import annotations
 
@@ -1012,7 +1012,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.runner import run_study
+from bitig.runner import run_study
 
 console = Console()
 
@@ -1027,10 +1027,10 @@ def run_command(
     console.print(f"[green]run complete[/green] {run_dir}")
 ```
 
-### Step 5.2 — `src/tamga/cli/report_cmd.py`
+### Step 5.2 — `src/bitig/cli/report_cmd.py`
 
 ```python
-"""`tamga report <result-dir>` — generate an HTML/MD report from a run directory."""
+"""`bitig report <result-dir>` — generate an HTML/MD report from a run directory."""
 
 from __future__ import annotations
 
@@ -1039,7 +1039,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.report import build_report
+from bitig.report import build_report
 
 console = Console()
 
@@ -1048,9 +1048,9 @@ def report_command(
     result_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),  # noqa: B008
     output: Path = typer.Option(Path("report.html"), "--output", "-o"),  # noqa: B008
     format: str = typer.Option("html", "--format", help="html | md"),
-    title: str = typer.Option("tamga study", "--title"),
+    title: str = typer.Option("bitig study", "--title"),
 ) -> None:
-    """Generate an HTML or Markdown report from a tamga run directory."""
+    """Generate an HTML or Markdown report from a bitig run directory."""
     if format not in ("html", "md"):
         console.print(f"[red]error:[/red] format must be 'html' or 'md', got {format!r}")
         raise typer.Exit(code=1)
@@ -1058,10 +1058,10 @@ def report_command(
     console.print(f"[green]wrote[/green] {out}")
 ```
 
-### Step 5.3 — `src/tamga/cli/plot_cmd.py`
+### Step 5.3 — `src/bitig/cli/plot_cmd.py`
 
 ```python
-"""`tamga plot <result-dir>` — render figures from a saved Result directory."""
+"""`bitig plot <result-dir>` — render figures from a saved Result directory."""
 
 from __future__ import annotations
 
@@ -1071,7 +1071,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.viz.style import apply_publication_style
+from bitig.viz.style import apply_publication_style
 
 console = Console()
 
@@ -1090,7 +1090,7 @@ def plot_command(
     data = json.loads(rj.read_text(encoding="utf-8"))
     method = data.get("method_name", "?")
     console.print(f"(plot rendering for {method} — stub; full plot renderer wiring is in Phase 6)")
-    console.print(f"[yellow]note:[/yellow] to render actual figures, use the tamga.viz.plot_* functions directly from Python for now")
+    console.print(f"[yellow]note:[/yellow] to render actual figures, use the bitig.viz.plot_* functions directly from Python for now")
 ```
 
 ### Step 5.4 — Tests (three files)
@@ -1104,7 +1104,7 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 pytestmark = pytest.mark.integration
@@ -1136,7 +1136,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -1151,7 +1151,7 @@ def test_report_html_runs(tmp_path: Path) -> None:
                 "params": {},
                 "values": {},
                 "provenance": {
-                    "tamga_version": "0.1",
+                    "bitig_version": "0.1",
                     "python_version": "3.11",
                     "spacy_model": "en",
                     "spacy_version": "3.7",
@@ -1179,7 +1179,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -1197,14 +1197,14 @@ def test_plot_command_accepts_valid_result_dir(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.stdout
 ```
 
-### Step 5.5 — Register in `src/tamga/cli/__init__.py`
+### Step 5.5 — Register in `src/bitig/cli/__init__.py`
 
 Append:
 
 ```python
-from tamga.cli.plot_cmd import plot_command
-from tamga.cli.report_cmd import report_command
-from tamga.cli.run_cmd import run_command
+from bitig.cli.plot_cmd import plot_command
+from bitig.cli.report_cmd import report_command
+from bitig.cli.run_cmd import run_command
 
 app.command(name="run")(run_command)
 app.command(name="report")(report_command)
@@ -1214,25 +1214,25 @@ app.command(name="plot")(plot_command)
 ### Step 5.6 — Commit
 
 ```bash
-git add src/tamga/cli/plot_cmd.py src/tamga/cli/report_cmd.py src/tamga/cli/run_cmd.py tests/cli/test_plot_cmd.py tests/cli/test_report_cmd.py tests/cli/test_run_cmd.py src/tamga/cli/__init__.py
-git commit -m "feat(cli): tamga run / report / plot subcommands"
+git add src/bitig/cli/plot_cmd.py src/bitig/cli/report_cmd.py src/bitig/cli/run_cmd.py tests/cli/test_plot_cmd.py tests/cli/test_report_cmd.py tests/cli/test_run_cmd.py src/bitig/cli/__init__.py
+git commit -m "feat(cli): bitig run / report / plot subcommands"
 ```
 
 ---
 
-## Task 6: Interactive shell (`tamga shell`)
+## Task 6: Interactive shell (`bitig shell`)
 
 **Files:**
-- Create: `src/tamga/cli/shell_cmd.py`
+- Create: `src/bitig/cli/shell_cmd.py`
 - Create: `tests/cli/test_shell_cmd.py`
-- Modify: `src/tamga/cli/__init__.py`
+- Modify: `src/bitig/cli/__init__.py`
 
 Minimal Rich-based wizard. No questionary dependency — Rich prompts are simpler and avoid an extra runtime import path. Users who want a full interactive prompt can always pipe commands.
 
-### Step 6.1 — `src/tamga/cli/shell_cmd.py`
+### Step 6.1 — `src/bitig/cli/shell_cmd.py`
 
 ```python
-"""`tamga shell [<corpus>]` — guided wizard over the analytical methods."""
+"""`bitig shell [<corpus>]` — guided wizard over the analytical methods."""
 
 from __future__ import annotations
 
@@ -1242,7 +1242,7 @@ import typer
 from rich.console import Console
 from rich.prompt import IntPrompt, Prompt
 
-from tamga.io import load_corpus
+from bitig.io import load_corpus
 
 console = Console()
 
@@ -1252,7 +1252,7 @@ def shell_command(
     metadata: Path | None = typer.Option(None, "--metadata", "-m"),  # noqa: B008
 ) -> None:
     """Launch the interactive wizard."""
-    console.rule("[bold cyan]tamga shell[/bold cyan]")
+    console.rule("[bold cyan]bitig shell[/bold cyan]")
 
     if corpus_path is None:
         corpus_path_str = Prompt.ask("Corpus path")
@@ -1264,11 +1264,11 @@ def shell_command(
 
     menu = [
         "Inspect corpus",
-        "Run Delta attribution (tamga delta)",
-        "Run Zeta comparison (tamga zeta)",
-        "Cluster & visualise (tamga cluster)",
-        "Classify (tamga classify)",
-        "Reduce & plot (tamga reduce)",
+        "Run Delta attribution (bitig delta)",
+        "Run Zeta comparison (bitig zeta)",
+        "Cluster & visualise (bitig cluster)",
+        "Classify (bitig classify)",
+        "Reduce & plot (bitig reduce)",
         "Quit",
     ]
     for i, item in enumerate(menu, start=1):
@@ -1284,7 +1284,7 @@ def shell_command(
     else:
         method = menu[choice - 1]
         console.print(
-            f"Would run: [dim]tamga {method.split('(')[1].rstrip(')').split()[1]}[/dim]"
+            f"Would run: [dim]bitig {method.split('(')[1].rstrip(')').split()[1]}[/dim]"
             f" — run the CLI directly for the full flow."
         )
 ```
@@ -1296,7 +1296,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FIXTURES = Path(__file__).parent.parent / "fixtures" / "mini_corpus"
@@ -1316,29 +1316,29 @@ def test_shell_inspects_corpus(tmp_path: Path) -> None:
 
 ### Step 6.3 — Register and commit
 
-Add in `src/tamga/cli/__init__.py`:
+Add in `src/bitig/cli/__init__.py`:
 
 ```python
-from tamga.cli.shell_cmd import shell_command
+from bitig.cli.shell_cmd import shell_command
 
 app.command(name="shell")(shell_command)
 ```
 
 ```bash
-git add src/tamga/cli/shell_cmd.py tests/cli/test_shell_cmd.py src/tamga/cli/__init__.py
-git commit -m "feat(cli): tamga shell — minimal Rich-based wizard"
+git add src/bitig/cli/shell_cmd.py tests/cli/test_shell_cmd.py src/bitig/cli/__init__.py
+git commit -m "feat(cli): bitig shell — minimal Rich-based wizard"
 ```
 
 ---
 
 ## Task 7: Public API + Phase 5 tag
 
-Modify `src/tamga/__init__.py` to export `tamga.viz`, `tamga.report.build_report`, `tamga.runner.run_study`. Update README. Run full suite, commit, tag `phase-5-viz-reports`.
+Modify `src/bitig/__init__.py` to export `bitig.viz`, `bitig.report.build_report`, `bitig.runner.run_study`. Update README. Run full suite, commit, tag `phase-5-viz-reports`.
 
 ```python
-from tamga.report import build_report
-from tamga.runner import run_study
-from tamga.viz import (
+from bitig.report import build_report
+from bitig.runner import run_study
+from bitig.viz import (
     apply_publication_style,
     figure_size,
     plot_confusion_matrix,
@@ -1357,11 +1357,11 @@ README update:
 ```markdown
 ## Status
 
-**Phase 5 — Viz, reports, interactive shell, `tamga run`.** Ships publication-grade matplotlib
+**Phase 5 — Viz, reports, interactive shell, `bitig run`.** Ships publication-grade matplotlib
 renderers (dendrogram, scatter, heatmap, confusion matrix, feature importance, Zeta preference
 plot), HTML/Markdown report generation from saved Result directories, a config-driven
-`tamga run study.yaml` orchestrator that runs a full multi-method study end-to-end, and a
-minimal Rich-based `tamga shell` wizard.
+`bitig run study.yaml` orchestrator that runs a full multi-method study end-to-end, and a
+minimal Rich-based `bitig shell` wizard.
 
 Phase 6 (MkDocs site + Federalist/EFCAMDAT tutorials + PyPI publish) remains.
 ```
@@ -1369,9 +1369,9 @@ Phase 6 (MkDocs site + Federalist/EFCAMDAT tutorials + PyPI publish) remains.
 Commit + tag:
 
 ```bash
-git add src/tamga/__init__.py README.md
+git add src/bitig/__init__.py README.md
 git commit -m "feat: public API re-exports for Phase 5 (viz + reports + runner + shell)"
-git tag -a phase-5-viz-reports -m "Phase 5 complete: viz renderers, HTML/MD reports, tamga run orchestrator, interactive shell"
+git tag -a phase-5-viz-reports -m "Phase 5 complete: viz renderers, HTML/MD reports, bitig run orchestrator, interactive shell"
 ```
 
 ---
@@ -1380,8 +1380,8 @@ git tag -a phase-5-viz-reports -m "Phase 5 complete: viz renderers, HTML/MD repo
 
 ```bash
 pytest -n auto -q                                             # full suite
-tamga run tests/fixtures/federalist/study.yaml --name demo    # (fixture study.yaml to be added ad-hoc)
-tamga report ./results/demo --output /tmp/report.html
+bitig run tests/fixtures/federalist/study.yaml --name demo    # (fixture study.yaml to be added ad-hoc)
+bitig report ./results/demo --output /tmp/report.html
 ```
 
 ---
@@ -1391,6 +1391,6 @@ tamga report ./results/demo --output /tmp/report.html
 - **Spec §8.4 (shell):** minimal wizard — deferred IPython-embed to Phase 6.
 - **Spec §10 (viz):** matplotlib covered; Plotly deferred to Phase 6 (optional, needs `[viz]` extra).
 - **Spec §11 (reports):** HTML + MD via Jinja2; PDF deferred (would need weasyprint, `[reports]` extra).
-- **Spec §8.5 (`tamga run`):** runner ships with Delta/Zeta/reduce/cluster/consensus/classify; embeddings/Bayesian not wired in runner yet.
+- **Spec §8.5 (`bitig run`):** runner ships with Delta/Zeta/reduce/cluster/consensus/classify; embeddings/Bayesian not wired in runner yet.
 - **Placeholder scan:** no TBD/TODO.
 - **Type consistency:** FeatureMatrix / Result / Corpus signatures preserved.

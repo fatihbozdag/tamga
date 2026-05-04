@@ -1,6 +1,6 @@
 # study.yaml schema
 
-The declarative study config consumed by `tamga run`. A minimal example:
+The declarative study config consumed by `bitig run`. A minimal example:
 
 ```yaml
 name: my-study
@@ -94,7 +94,7 @@ output:
 
 ```yaml
 cache:
-  dir: .tamga/cache     # spaCy DocBin cache location
+  dir: .bitig/cache     # spaCy DocBin cache location
 ```
 
 ## preprocess

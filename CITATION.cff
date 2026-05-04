@@ -1,17 +1,17 @@
 cff-version: 1.2.0
-message: "If you use tamga, please cite it as below."
-title: "tamga: next-generation computational stylometry"
+message: "If you use bitig, please cite it as below."
+title: "bitig: next-generation computational stylometry"
 authors:
   - family-names: "Bozdağ"
     given-names: "Fatih"
     email: "fbozdag1989@gmail.com"
 type: software
 license: BSD-3-Clause
-url: "https://github.com/fatihbozdag/tamga"
-repository-code: "https://github.com/fatihbozdag/tamga"
+url: "https://github.com/fatihbozdag/bitig"
+repository-code: "https://github.com/fatihbozdag/bitig"
 version: "0.1.0.dev0"
 abstract: >
-  tamga is a Python package and interactive CLI for computational stylometry.
+  bitig is a Python package and interactive CLI for computational stylometry.
   It provides feature parity with R's Stylo for authorship attribution,
   author-group comparison, and Digital Humanities analyses, and adds modern
   NLP and ML capabilities via spaCy and scikit-learn.

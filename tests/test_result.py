@@ -7,13 +7,13 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from tamga.provenance import Provenance
-from tamga.result import Result
+from bitig.provenance import Provenance
+from bitig.result import Result
 
 
 def _prov() -> Provenance:
     return Provenance(
-        tamga_version="0.1.0.dev0",
+        bitig_version="0.1.0.dev0",
         python_version="3.11.7",
         spacy_model="en_core_web_sm",
         spacy_version="3.7.2",

@@ -5,9 +5,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features import MFWExtractor
-from tamga.forensic.unmasking import Unmasking
+from bitig.corpus import Corpus, Document
+from bitig.features import MFWExtractor
+from bitig.forensic.unmasking import Unmasking
 
 
 def _make_vocab(size: int) -> list[str]:

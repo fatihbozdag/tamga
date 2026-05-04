@@ -5,9 +5,9 @@ from __future__ import annotations
 import numpy as np
 from sklearn.base import is_classifier
 
-from tamga.corpus import Corpus, Document
-from tamga.features import MFWExtractor
-from tamga.methods.classify import build_classifier, cross_validate_tamga
+from bitig.corpus import Corpus, Document
+from bitig.features import MFWExtractor
+from bitig.methods.classify import build_classifier, cross_validate_bitig
 
 
 def _corpus() -> Corpus:
@@ -37,7 +37,7 @@ def test_build_classifier_rejects_unknown() -> None:
         build_classifier("nonsense")
 
 
-def test_cross_validate_tamga_loao() -> None:
+def test_cross_validate_bitig_loao() -> None:
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
     mfw = MFWExtractor(n=5, scale="zscore", lowercase=True)
@@ -45,7 +45,7 @@ def test_cross_validate_tamga_loao() -> None:
     # Use four interleaved groups (0..3), each spanning both classes, so every
     # LOAO fold still has both classes in the training set (required by LogisticRegression).
     groups = np.array([i % 4 for i in range(20)])
-    report = cross_validate_tamga(
+    report = cross_validate_bitig(
         build_classifier("logreg", random_state=42),
         X_fm,
         y,
@@ -56,12 +56,12 @@ def test_cross_validate_tamga_loao() -> None:
     assert "per_class" in report
 
 
-def test_cross_validate_tamga_stratified() -> None:
+def test_cross_validate_bitig_stratified() -> None:
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
     mfw = MFWExtractor(n=5, scale="zscore", lowercase=True)
     X_fm = mfw.fit_transform(corpus)
-    report = cross_validate_tamga(
+    report = cross_validate_bitig(
         build_classifier("rf", random_state=42),
         X_fm,
         y,
@@ -82,7 +82,7 @@ def test_cross_validate_seed_controls_stratified_folds() -> None:
     mfw = MFWExtractor(n=5, scale="zscore", lowercase=True)
     X_fm = mfw.fit_transform(corpus)
 
-    report_a = cross_validate_tamga(
+    report_a = cross_validate_bitig(
         build_classifier("rf", random_state=0),
         X_fm,
         y,
@@ -90,7 +90,7 @@ def test_cross_validate_seed_controls_stratified_folds() -> None:
         folds=5,
         seed=1,
     )
-    report_b = cross_validate_tamga(
+    report_b = cross_validate_bitig(
         build_classifier("rf", random_state=0),
         X_fm,
         y,
@@ -99,7 +99,7 @@ def test_cross_validate_seed_controls_stratified_folds() -> None:
         seed=999,
     )
     # Same seed must reproduce exactly.
-    report_a2 = cross_validate_tamga(
+    report_a2 = cross_validate_bitig(
         build_classifier("rf", random_state=0),
         X_fm,
         y,

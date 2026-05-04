@@ -4,7 +4,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -19,7 +19,7 @@ def test_report_html_runs(tmp_path: Path) -> None:
                 "params": {},
                 "values": {},
                 "provenance": {
-                    "tamga_version": "0.1",
+                    "bitig_version": "0.1",
                     "python_version": "3.11",
                     "spacy_model": "en",
                     "spacy_version": "3.7",

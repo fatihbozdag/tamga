@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from tamga.corpus import Corpus, Document
-from tamga.features.lexical_diversity import LexicalDiversityExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.lexical_diversity import LexicalDiversityExtractor
 
 
 def _corpus(*texts: str) -> Corpus:

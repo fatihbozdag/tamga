@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from tamga.config.schema import StudyConfig
+from bitig.config.schema import StudyConfig
 
 VALID_MINIMAL = {
     "name": "demo",
@@ -80,14 +80,14 @@ def test_round_trip_dict_json():
 
 
 def test_preprocess_language_defaults_to_english() -> None:
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     cfg = PreprocessConfig()
     assert cfg.language == "en"
 
 
 def test_preprocess_language_accepts_registered_code() -> None:
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     cfg = PreprocessConfig(language="tr")
     assert cfg.language == "tr"
@@ -97,21 +97,21 @@ def test_preprocess_language_rejects_unknown_code() -> None:
     import pytest
     from pydantic import ValidationError
 
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     with pytest.raises(ValidationError, match="Unknown language code"):
         PreprocessConfig(language="xx")
 
 
 def test_preprocess_language_case_insensitive() -> None:
-    from tamga.config.schema import PreprocessConfig
+    from bitig.config.schema import PreprocessConfig
 
     cfg = PreprocessConfig(language="TR")
     assert cfg.language == "tr"
 
 
 def test_spacy_config_model_now_optional() -> None:
-    from tamga.config.schema import SpacyConfig
+    from bitig.config.schema import SpacyConfig
 
     cfg = SpacyConfig()
     assert cfg.model is None

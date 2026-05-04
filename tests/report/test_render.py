@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from tamga.report import build_forensic_report, build_report
+from bitig.report import build_forensic_report, build_report
 
 
 def _make_result_dir(tmp_path: Path) -> Path:
@@ -17,7 +17,7 @@ def _make_result_dir(tmp_path: Path) -> Path:
                 "params": {"method": "burrows", "mfw": 500},
                 "values": {},
                 "provenance": {
-                    "tamga_version": "0.1.0.dev0",
+                    "bitig_version": "0.1.0.dev0",
                     "python_version": "3.11",
                     "spacy_model": "en",
                     "spacy_version": "3.7",
@@ -65,7 +65,7 @@ def test_build_report_multi_method(tmp_path: Path) -> None:
                     "params": {},
                     "values": {},
                     "provenance": {
-                        "tamga_version": "0.1.0.dev0",
+                        "bitig_version": "0.1.0.dev0",
                         "python_version": "3.11",
                         "spacy_model": "en",
                         "spacy_version": "3.7",
@@ -88,7 +88,7 @@ def _make_forensic_result_dir(tmp_path: Path, *, with_custody: bool = True) -> P
     d = tmp_path / "gi"
     d.mkdir()
     provenance: dict = {
-        "tamga_version": "0.1.0.dev0",
+        "bitig_version": "0.1.0.dev0",
         "python_version": "3.11",
         "spacy_model": "en",
         "spacy_version": "3.7",
@@ -182,7 +182,7 @@ def test_forensic_report_escapes_html_in_user_fields(tmp_path: Path) -> None:
                 "params": {},
                 "values": {},
                 "provenance": {
-                    "tamga_version": "0.1.0.dev0",
+                    "bitig_version": "0.1.0.dev0",
                     "python_version": "3.11",
                     "spacy_model": "en",
                     "spacy_version": "3.7",

@@ -3,22 +3,22 @@ hide:
   - navigation
 ---
 
-# tamga
+# bitig
 
 <p align="center">
-  <img src="assets/tamga-banner.svg" alt="tamga — computational stylometry" style="max-width: 100%;">
+  <img src="assets/bitig-banner.svg" alt="bitig — computational stylometry" style="max-width: 100%;">
 </p>
 
 **Computational stylometry for authorship attribution, author-group comparison, and forensic-linguistic analysis.** A Python replacement for R's `Stylo`, with a modern NLP pipeline (spaCy, transformer embeddings), a Bayesian layer (PyMC), and a full forensic-evidential toolkit on top.
 
-> Named after the **tamga** — the Turkic clan-mark by which individual and familial
+> Named after the **bitig** — the Turkic clan-mark by which individual and familial
 > identity was recognised at a glance — the material-culture counterpart to a stylistic
 > fingerprint.
 
 ## Architecture
 
 <p align="center">
-  <img src="assets/tamga-architecture.svg" alt="corpus → features → methods → forensic → output" style="max-width: 100%;">
+  <img src="assets/bitig-architecture.svg" alt="corpus → features → methods → forensic → output" style="max-width: 100%;">
 </p>
 
 Every layer is `sklearn`-compatible; every `Result` carries full provenance (corpus hash,
@@ -33,7 +33,7 @@ feature hash, seed, spaCy version, timestamp, resolved config) so a study writte
 
     ---
 
-    Install tamga, build your first corpus, and run a Burrows Delta study from the CLI.
+    Install bitig, build your first corpus, and run a Burrows Delta study from the CLI.
 
     [:octicons-arrow-right-24: Install & quickstart](getting-started.md)
 
@@ -75,15 +75,15 @@ feature hash, seed, spaCy version, timestamp, resolved config) so a study writte
 
 ## Status
 
-**Phase 5 landed** — visualisation, Jinja2 reports, declarative runner (`tamga run`), and a
-Rich-based interactive `tamga shell`.
+**Phase 5 landed** — visualisation, Jinja2 reports, declarative runner (`bitig run`), and a
+Rich-based interactive `bitig shell`.
 
 **Forensic phase landed** — six additions (General Impostors, LR + calibration + evaluation
 metrics, Sapkota categories + Stamatatos distortion, Unmasking, chain-of-custody + forensic
 report template, PAN harness).
 
 **Multi-language phase landed** — first-class support for English, Turkish, German, Spanish,
-French behind a `tamga.languages` registry. Turkish parses through Stanford Stanza (BOUN
+French behind a `bitig.languages` registry. Turkish parses through Stanford Stanza (BOUN
 treebank) via `spacy-stanza`, returning native spaCy `Doc` objects so every feature extractor
 works unchanged. Native readability formulas per language (Ateşman + Bezirci–Yılmaz for Turkish,
 Flesch-Amstad + Wiener Sachtextformel for German, Fernández-Huerta + Szigriszt-Pazos for
@@ -100,7 +100,7 @@ PAN-CLEF + Turkish tutorials, and CLI/API reference. **417 tests passing.**
 
 ## License & citation
 
-BSD-3-Clause. See [`LICENSE`](https://github.com/fatihbozdag/tamga/blob/main/LICENSE).
+BSD-3-Clause. See [`LICENSE`](https://github.com/fatihbozdag/bitig/blob/main/LICENSE).
 
-If you use tamga in published work, please cite it via
-[`CITATION.cff`](https://github.com/fatihbozdag/tamga/blob/main/CITATION.cff).
+If you use bitig in published work, please cite it via
+[`CITATION.cff`](https://github.com/fatihbozdag/bitig/blob/main/CITATION.cff).

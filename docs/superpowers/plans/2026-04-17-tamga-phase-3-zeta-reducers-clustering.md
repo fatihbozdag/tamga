@@ -1,14 +1,14 @@
-# tamga — Phase 3: Zeta, Reducers, Clustering, Consensus, Classify — Implementation Plan
+# bitig — Phase 3: Zeta, Reducers, Clustering, Consensus, Classify — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Complete the analytical breadth of R's `Stylo`: Craig's Zeta contrastive vocabulary, four dimensionality reducers (PCA/MDS/t-SNE/UMAP), three clustering methods (hierarchical/k-means/HDBSCAN), bootstrap consensus trees over MFW bands, and sklearn-wrapped classifiers (linear/RBF SVM, logistic regression, random forest, histogram gradient boosting) with stylometry-aware CV primitives including leave-one-author-out. End state: every analytical method from spec §6 is callable via library API and CLI; `tamga run study.yaml` can drive a full multi-method study (wired in Phase 5 report-generator).
+**Goal:** Complete the analytical breadth of R's `Stylo`: Craig's Zeta contrastive vocabulary, four dimensionality reducers (PCA/MDS/t-SNE/UMAP), three clustering methods (hierarchical/k-means/HDBSCAN), bootstrap consensus trees over MFW bands, and sklearn-wrapped classifiers (linear/RBF SVM, logistic regression, random forest, histogram gradient boosting) with stylometry-aware CV primitives including leave-one-author-out. End state: every analytical method from spec §6 is callable via library API and CLI; `bitig run study.yaml` can drive a full multi-method study (wired in Phase 5 report-generator).
 
-**Architecture:** Each analytical family lives under `tamga/methods/`. Dimensionality reduction + clustering are thin sklearn wrappers that return `Result` objects with resolved-config provenance. Classifiers are sklearn estimators with tamga's CV helpers on top. Consensus trees are the single piece of genuinely new algorithmic work — they iterate bootstrap-subsampled MFW bands, aggregate Ward linkages, and produce a Newick-serialised consensus.
+**Architecture:** Each analytical family lives under `bitig/methods/`. Dimensionality reduction + clustering are thin sklearn wrappers that return `Result` objects with resolved-config provenance. Classifiers are sklearn estimators with bitig's CV helpers on top. Consensus trees are the single piece of genuinely new algorithmic work — they iterate bootstrap-subsampled MFW bands, aggregate Ward linkages, and produce a Newick-serialised consensus.
 
-**Tech Stack:** Phase 1+2 stack + sklearn's unsupervised modules (`sklearn.decomposition.PCA`, `sklearn.manifold.MDS/TSNE`, `sklearn.cluster.AgglomerativeClustering/KMeans`), `umap-learn` (already in deps), `hdbscan` (already in deps), `scipy.cluster.hierarchy` (linkage matrices, dendrogram plumbing), and optional `ete3` via `tamga[viz]` for richer tree rendering.
+**Tech Stack:** Phase 1+2 stack + sklearn's unsupervised modules (`sklearn.decomposition.PCA`, `sklearn.manifold.MDS/TSNE`, `sklearn.cluster.AgglomerativeClustering/KMeans`), `umap-learn` (already in deps), `hdbscan` (already in deps), `scipy.cluster.hierarchy` (linkage matrices, dendrogram plumbing), and optional `ete3` via `bitig[viz]` for richer tree rendering.
 
-**Reference spec:** `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md` §6.2–6.6.
+**Reference spec:** `docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md` §6.2–6.6.
 
 **Phase 2 baseline:** tag `phase-2-features-delta`, 165 tests, 87.4% coverage.
 
@@ -17,7 +17,7 @@
 ## File Layout (new in Phase 3)
 
 ```
-src/tamga/
+src/bitig/
 ├── methods/
 │   ├── zeta.py              # ZetaClassic + ZetaEder
 │   ├── reduce.py            # PCAReducer, MDSReducer, TSNEReducer, UMAPReducer
@@ -55,7 +55,7 @@ tests/
 ## Task 1: `Result` dataclass
 
 **Files:**
-- Create: `src/tamga/result.py`
+- Create: `src/bitig/result.py`
 - Create: `tests/test_result.py`
 
 TDD.
@@ -72,13 +72,13 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from tamga.provenance import Provenance
-from tamga.result import Result
+from bitig.provenance import Provenance
+from bitig.result import Result
 
 
 def _prov() -> Provenance:
     return Provenance(
-        tamga_version="0.1.0.dev0",
+        bitig_version="0.1.0.dev0",
         python_version="3.11.7",
         spacy_model="en_core_web_sm",
         spacy_version="3.7.2",
@@ -138,9 +138,9 @@ def test_result_save_writes_tables_and_json(tmp_path) -> None:
     pd.testing.assert_frame_equal(restored, df)
 ```
 
-### Step 1.2 — Run → FAIL (ImportError on tamga.result).
+### Step 1.2 — Run → FAIL (ImportError on bitig.result).
 
-### Step 1.3 — Implement `src/tamga/result.py`
+### Step 1.3 — Implement `src/bitig/result.py`
 
 ```python
 """The Result record — uniform return type from every analytical method."""
@@ -155,7 +155,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from tamga.provenance import Provenance
+from bitig.provenance import Provenance
 
 
 @dataclass
@@ -235,7 +235,7 @@ def _decode(obj: Any) -> Any:
 ### Step 1.5 — Commit
 
 ```bash
-git add src/tamga/result.py tests/test_result.py
+git add src/bitig/result.py tests/test_result.py
 git commit -m "feat: Result record with JSON round-trip and parquet table persistence"
 ```
 
@@ -244,7 +244,7 @@ git commit -m "feat: Result record with JSON round-trip and parquet table persis
 ## Task 2: Craig's Zeta
 
 **Files:**
-- Create: `src/tamga/methods/zeta.py`
+- Create: `src/bitig/methods/zeta.py`
 - Create: `tests/methods/test_zeta.py`
 
 TDD. Zeta is a two-group contrastive-vocabulary method. For each word type, compute:
@@ -261,8 +261,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.methods.zeta import ZetaClassic, ZetaEder
+from bitig.corpus import Corpus, Document
+from bitig.methods.zeta import ZetaClassic, ZetaEder
 
 
 def _corpus(*texts: str, groups: list[str]) -> Corpus:
@@ -336,7 +336,7 @@ def test_zeta_supports_custom_group_pair() -> None:
 
 ### Step 2.2 — Run → FAIL.
 
-### Step 2.3 — Implement `src/tamga/methods/zeta.py`
+### Step 2.3 — Implement `src/bitig/methods/zeta.py`
 
 ```python
 """Craig's Zeta — contrastive-vocabulary extraction between two author/group populations.
@@ -356,9 +356,9 @@ from collections import Counter
 
 import pandas as pd
 
-from tamga.corpus import Corpus
-from tamga.provenance import Provenance
-from tamga.result import Result
+from bitig.corpus import Corpus
+from bitig.provenance import Provenance
+from bitig.result import Result
 
 _WORD_RE = re.compile(r"[^\W\d_]+", flags=re.UNICODE)
 
@@ -477,7 +477,7 @@ class ZetaEder(_ZetaBase):
 ### Step 2.5 — Commit
 
 ```bash
-git add src/tamga/methods/zeta.py tests/methods/test_zeta.py
+git add src/bitig/methods/zeta.py tests/methods/test_zeta.py
 git commit -m "feat(methods): Craig's Zeta (classic + Eder smoothed variant)"
 ```
 
@@ -486,7 +486,7 @@ git commit -m "feat(methods): Craig's Zeta (classic + Eder smoothed variant)"
 ## Task 3: Dimensionality reducers (PCA / MDS / t-SNE / UMAP)
 
 **Files:**
-- Create: `src/tamga/methods/reduce.py`
+- Create: `src/bitig/methods/reduce.py`
 - Create: `tests/methods/test_reduce.py`
 
 All four are thin sklearn-style wrappers returning a `Result` with the 2-D / n-d coordinates.
@@ -501,8 +501,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.features import FeatureMatrix
-from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
+from bitig.features import FeatureMatrix
+from bitig.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
 
 
 def _fm(n: int = 10, d: int = 5) -> FeatureMatrix:
@@ -546,7 +546,7 @@ def test_reduce_result_contains_document_ids() -> None:
 
 ### Step 3.2 — Run → FAIL.
 
-### Step 3.3 — Implement `src/tamga/methods/reduce.py`
+### Step 3.3 — Implement `src/bitig/methods/reduce.py`
 
 ```python
 """Dimensionality reducers — PCA, MDS, t-SNE, UMAP — with a shared Result interface."""
@@ -557,8 +557,8 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.manifold import MDS, TSNE
 
-from tamga.features import FeatureMatrix
-from tamga.result import Result
+from bitig.features import FeatureMatrix
+from bitig.result import Result
 
 
 class _ReducerBase:
@@ -617,7 +617,7 @@ class UMAPReducer(_ReducerBase):
 ### Step 3.5 — Commit
 
 ```bash
-git add src/tamga/methods/reduce.py tests/methods/test_reduce.py
+git add src/bitig/methods/reduce.py tests/methods/test_reduce.py
 git commit -m "feat(methods): PCA / MDS / t-SNE / UMAP reducers returning Result"
 ```
 
@@ -626,7 +626,7 @@ git commit -m "feat(methods): PCA / MDS / t-SNE / UMAP reducers returning Result
 ## Task 4: Clustering (hierarchical + k-means + HDBSCAN)
 
 **Files:**
-- Create: `src/tamga/methods/cluster.py`
+- Create: `src/bitig/methods/cluster.py`
 - Create: `tests/methods/test_cluster.py`
 
 ### Step 4.1 — Failing tests
@@ -639,8 +639,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.features import FeatureMatrix
-from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
+from bitig.features import FeatureMatrix
+from bitig.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
 
 
 def _fm() -> FeatureMatrix:
@@ -693,7 +693,7 @@ def test_hierarchical_all_linkages(linkage: str) -> None:
 
 ### Step 4.2 — Run → FAIL.
 
-### Step 4.3 — Implement `src/tamga/methods/cluster.py`
+### Step 4.3 — Implement `src/bitig/methods/cluster.py`
 
 ```python
 """Clustering methods — hierarchical (Ward/average/complete/single), k-means, HDBSCAN."""
@@ -704,8 +704,8 @@ import numpy as np
 from scipy.cluster.hierarchy import fcluster, linkage
 from sklearn.cluster import KMeans
 
-from tamga.features import FeatureMatrix
-from tamga.result import Result
+from bitig.features import FeatureMatrix
+from bitig.result import Result
 
 
 class HierarchicalCluster:
@@ -807,7 +807,7 @@ class HDBSCANCluster:
 ### Step 4.5 — Commit
 
 ```bash
-git add src/tamga/methods/cluster.py tests/methods/test_cluster.py
+git add src/bitig/methods/cluster.py tests/methods/test_cluster.py
 git commit -m "feat(methods): hierarchical (Ward/avg/complete/single) + k-means + HDBSCAN clustering"
 ```
 
@@ -816,7 +816,7 @@ git commit -m "feat(methods): hierarchical (Ward/avg/complete/single) + k-means 
 ## Task 5: Bootstrap consensus tree
 
 **Files:**
-- Create: `src/tamga/methods/consensus.py`
+- Create: `src/bitig/methods/consensus.py`
 - Create: `tests/methods/test_consensus.py`
 
 TDD. This is the most algorithmically novel piece of Phase 3.
@@ -839,13 +839,13 @@ from __future__ import annotations
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.methods.consensus import BootstrapConsensus
+from bitig.corpus import Corpus, Document
+from bitig.methods.consensus import BootstrapConsensus
 
 
 def _federalist_mini() -> Corpus:
     # Use the bundled Federalist fixture for a realistic test.
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     return load_corpus("tests/fixtures/federalist", metadata="tests/fixtures/federalist/metadata.tsv")
 
@@ -882,7 +882,7 @@ def test_consensus_clade_support_is_bounded_0_1() -> None:
 
 ### Step 5.2 — Run → FAIL.
 
-### Step 5.3 — Implement `src/tamga/methods/consensus.py`
+### Step 5.3 — Implement `src/bitig/methods/consensus.py`
 
 ```python
 """Bootstrap consensus trees (Eder 2017).
@@ -898,11 +898,11 @@ from collections import Counter, defaultdict
 import numpy as np
 from scipy.cluster.hierarchy import linkage, to_tree
 
-from tamga.corpus import Corpus
-from tamga.features import MFWExtractor
-from tamga.methods.delta import BurrowsDelta
-from tamga.plumbing.seeds import derive_rng
-from tamga.result import Result
+from bitig.corpus import Corpus
+from bitig.features import MFWExtractor
+from bitig.methods.delta import BurrowsDelta
+from bitig.plumbing.seeds import derive_rng
+from bitig.result import Result
 
 
 class BootstrapConsensus:
@@ -1042,7 +1042,7 @@ def _build_newick(leaves: list[str], clades_with_support: dict[frozenset[str], f
 ### Step 5.5 — Commit
 
 ```bash
-git add src/tamga/methods/consensus.py tests/methods/test_consensus.py
+git add src/bitig/methods/consensus.py tests/methods/test_consensus.py
 git commit -m "feat(methods): bootstrap consensus tree over MFW bands with Newick output"
 ```
 
@@ -1051,7 +1051,7 @@ git commit -m "feat(methods): bootstrap consensus tree over MFW bands with Newic
 ## Task 6: sklearn classifier wrappers
 
 **Files:**
-- Create: `src/tamga/methods/classify.py`
+- Create: `src/bitig/methods/classify.py`
 - Create: `tests/methods/test_classify.py`
 
 Thin factory that returns pre-configured sklearn classifiers + a cross-validation helper that
@@ -1068,9 +1068,9 @@ import numpy as np
 from sklearn.base import is_classifier
 from sklearn.model_selection import LeaveOneGroupOut
 
-from tamga.corpus import Corpus, Document
-from tamga.features import MFWExtractor
-from tamga.methods.classify import build_classifier, cross_validate_tamga
+from bitig.corpus import Corpus, Document
+from bitig.features import MFWExtractor
+from bitig.methods.classify import build_classifier, cross_validate_bitig
 
 
 def _corpus() -> Corpus:
@@ -1099,12 +1099,12 @@ def test_build_classifier_rejects_unknown() -> None:
         build_classifier("nonsense")
 
 
-def test_cross_validate_tamga_loao() -> None:
+def test_cross_validate_bitig_loao() -> None:
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
     mfw = MFWExtractor(n=5, scale="zscore", lowercase=True)
     X_fm = mfw.fit_transform(corpus)
-    report = cross_validate_tamga(
+    report = cross_validate_bitig(
         build_classifier("logreg", random_state=42),
         X_fm,
         y,
@@ -1115,12 +1115,12 @@ def test_cross_validate_tamga_loao() -> None:
     assert "per_class" in report
 
 
-def test_cross_validate_tamga_stratified() -> None:
+def test_cross_validate_bitig_stratified() -> None:
     corpus = _corpus()
     y = np.array(corpus.metadata_column("author"))
     mfw = MFWExtractor(n=5, scale="zscore", lowercase=True)
     X_fm = mfw.fit_transform(corpus)
-    report = cross_validate_tamga(
+    report = cross_validate_bitig(
         build_classifier("rf", random_state=42),
         X_fm,
         y,
@@ -1132,7 +1132,7 @@ def test_cross_validate_tamga_stratified() -> None:
 
 ### Step 6.2 — Run → FAIL.
 
-### Step 6.3 — Implement `src/tamga/methods/classify.py`
+### Step 6.3 — Implement `src/bitig/methods/classify.py`
 
 ```python
 """sklearn classifier wrappers + CV helper with stylometry-aware splits."""
@@ -1149,7 +1149,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import LeaveOneGroupOut, LeaveOneOut, StratifiedKFold, cross_val_predict
 from sklearn.svm import SVC
 
-from tamga.features import FeatureMatrix
+from bitig.features import FeatureMatrix
 
 _ESTIMATORS = {
     "logreg": lambda **kw: LogisticRegression(max_iter=2000, **kw),
@@ -1166,7 +1166,7 @@ def build_classifier(name: str, **kwargs: Any) -> BaseEstimator:
     return _ESTIMATORS[name](**kwargs)
 
 
-def cross_validate_tamga(
+def cross_validate_bitig(
     estimator: BaseEstimator,
     fm: FeatureMatrix,
     y: np.ndarray,
@@ -1210,8 +1210,8 @@ def cross_validate_tamga(
 ### Step 6.5 — Commit
 
 ```bash
-git add src/tamga/methods/classify.py tests/methods/test_classify.py
-git commit -m "feat(methods): sklearn classifier wrappers + cross_validate_tamga (stratified/loao/loto)"
+git add src/bitig/methods/classify.py tests/methods/test_classify.py
+git commit -m "feat(methods): sklearn classifier wrappers + cross_validate_bitig (stratified/loao/loto)"
 ```
 
 ---
@@ -1219,16 +1219,16 @@ git commit -m "feat(methods): sklearn classifier wrappers + cross_validate_tamga
 ## Task 7: CLI commands — `zeta`, `reduce`, `cluster`, `consensus`, `classify` batch
 
 **Files:**
-- Create: `src/tamga/cli/zeta_cmd.py`, `reduce_cmd.py`, `cluster_cmd.py`, `consensus_cmd.py`, `classify_cmd.py`
+- Create: `src/bitig/cli/zeta_cmd.py`, `reduce_cmd.py`, `cluster_cmd.py`, `consensus_cmd.py`, `classify_cmd.py`
 - Create: `tests/cli/test_zeta_cmd.py`, `test_reduce_cmd.py`, `test_cluster_cmd.py`, `test_consensus_cmd.py`, `test_classify_cmd.py`
-- Modify: `src/tamga/cli/__init__.py` (register all five)
+- Modify: `src/bitig/cli/__init__.py` (register all five)
 
-Each CLI command follows the same pattern as `tamga delta` in Phase 2: load corpus + metadata, build MFW feature matrix, run the method, print a Rich table or write a result file.
+Each CLI command follows the same pattern as `bitig delta` in Phase 2: load corpus + metadata, build MFW feature matrix, run the method, print a Rich table or write a result file.
 
-### Step 7.1 — `src/tamga/cli/zeta_cmd.py`
+### Step 7.1 — `src/bitig/cli/zeta_cmd.py`
 
 ```python
-"""`tamga zeta <corpus>` — contrastive vocabulary between two metadata groups."""
+"""`bitig zeta <corpus>` — contrastive vocabulary between two metadata groups."""
 
 from __future__ import annotations
 
@@ -1238,8 +1238,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from tamga.io import load_corpus
-from tamga.methods.zeta import ZetaClassic, ZetaEder
+from bitig.io import load_corpus
+from bitig.methods.zeta import ZetaClassic, ZetaEder
 
 console = Console()
 
@@ -1274,10 +1274,10 @@ def zeta_command(
         console.print(table)
 ```
 
-### Step 7.2 — `src/tamga/cli/reduce_cmd.py`
+### Step 7.2 — `src/bitig/cli/reduce_cmd.py`
 
 ```python
-"""`tamga reduce <corpus>` — dimensionality reduction of the MFW feature matrix."""
+"""`bitig reduce <corpus>` — dimensionality reduction of the MFW feature matrix."""
 
 from __future__ import annotations
 
@@ -1288,9 +1288,9 @@ import pandas as pd
 import typer
 from rich.console import Console
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
 
 console = Console()
 
@@ -1324,10 +1324,10 @@ def reduce_command(
     console.print(f"[green]wrote[/green] {output} ({coords.shape[0]} docs x {coords.shape[1]} components)")
 ```
 
-### Step 7.3 — `src/tamga/cli/cluster_cmd.py`
+### Step 7.3 — `src/bitig/cli/cluster_cmd.py`
 
 ```python
-"""`tamga cluster <corpus>` — hierarchical / k-means / HDBSCAN clustering of the MFW matrix."""
+"""`bitig cluster <corpus>` — hierarchical / k-means / HDBSCAN clustering of the MFW matrix."""
 
 from __future__ import annotations
 
@@ -1338,9 +1338,9 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
 
 console = Console()
 
@@ -1378,10 +1378,10 @@ def cluster_command(
     console.print(f"[green]wrote[/green] {output}")
 ```
 
-### Step 7.4 — `src/tamga/cli/consensus_cmd.py`
+### Step 7.4 — `src/bitig/cli/consensus_cmd.py`
 
 ```python
-"""`tamga consensus <corpus>` — bootstrap consensus tree over MFW bands."""
+"""`bitig consensus <corpus>` — bootstrap consensus tree over MFW bands."""
 
 from __future__ import annotations
 
@@ -1390,8 +1390,8 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from tamga.io import load_corpus
-from tamga.methods.consensus import BootstrapConsensus
+from bitig.io import load_corpus
+from bitig.methods.consensus import BootstrapConsensus
 
 console = Console()
 
@@ -1420,10 +1420,10 @@ def consensus_command(
     console.print(f"[green]wrote[/green] {output} (based on {result.values['total_dendrograms']} dendrograms)")
 ```
 
-### Step 7.5 — `src/tamga/cli/classify_cmd.py`
+### Step 7.5 — `src/bitig/cli/classify_cmd.py`
 
 ```python
-"""`tamga classify <corpus>` — sklearn classifier + CV report."""
+"""`bitig classify <corpus>` — sklearn classifier + CV report."""
 
 from __future__ import annotations
 
@@ -1434,9 +1434,9 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.classify import build_classifier, cross_validate_tamga
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.classify import build_classifier, cross_validate_bitig
 
 console = Console()
 
@@ -1456,7 +1456,7 @@ def classify_command(
     y = np.array(corpus.metadata_column(group_by))
     fm = MFWExtractor(n=mfw, min_df=2, scale="zscore", lowercase=True).fit_transform(corpus)
     clf = build_classifier(estimator, random_state=seed) if estimator != "hgbm" else build_classifier(estimator, random_state=seed)
-    report = cross_validate_tamga(clf, fm, y, cv_kind=cv_kind, groups_from=y if cv_kind == "loao" else None, folds=folds)
+    report = cross_validate_bitig(clf, fm, y, cv_kind=cv_kind, groups_from=y if cv_kind == "loao" else None, folds=folds)
     table = Table(title=f"classify — {estimator} / {cv_kind}")
     table.add_column("metric")
     table.add_column("value")
@@ -1477,7 +1477,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"
@@ -1519,7 +1519,7 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"
@@ -1562,7 +1562,7 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"
@@ -1612,7 +1612,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"
@@ -1646,7 +1646,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"
@@ -1669,16 +1669,16 @@ def test_classify_logreg_loao_runs() -> None:
     assert "accuracy" in result.stdout.lower()
 ```
 
-### Step 7.7 — Register all five in `src/tamga/cli/__init__.py`
+### Step 7.7 — Register all five in `src/bitig/cli/__init__.py`
 
 Append after the existing registrations:
 
 ```python
-from tamga.cli.classify_cmd import classify_command
-from tamga.cli.cluster_cmd import cluster_command
-from tamga.cli.consensus_cmd import consensus_command
-from tamga.cli.reduce_cmd import reduce_command
-from tamga.cli.zeta_cmd import zeta_command
+from bitig.cli.classify_cmd import classify_command
+from bitig.cli.cluster_cmd import cluster_command
+from bitig.cli.consensus_cmd import consensus_command
+from bitig.cli.reduce_cmd import reduce_command
+from bitig.cli.zeta_cmd import zeta_command
 
 app.command(name="zeta")(zeta_command)
 app.command(name="reduce")(reduce_command)
@@ -1692,8 +1692,8 @@ app.command(name="classify")(classify_command)
 `pytest tests/cli/test_zeta_cmd.py tests/cli/test_reduce_cmd.py tests/cli/test_cluster_cmd.py tests/cli/test_consensus_cmd.py tests/cli/test_classify_cmd.py -v` — expect 8 tests passing (1 consensus marked slow + integration).
 
 ```bash
-git add src/tamga/cli/zeta_cmd.py src/tamga/cli/reduce_cmd.py src/tamga/cli/cluster_cmd.py src/tamga/cli/consensus_cmd.py src/tamga/cli/classify_cmd.py tests/cli/test_zeta_cmd.py tests/cli/test_reduce_cmd.py tests/cli/test_cluster_cmd.py tests/cli/test_consensus_cmd.py tests/cli/test_classify_cmd.py src/tamga/cli/__init__.py
-git commit -m "feat(cli): tamga zeta, reduce, cluster, consensus, classify subcommands"
+git add src/bitig/cli/zeta_cmd.py src/bitig/cli/reduce_cmd.py src/bitig/cli/cluster_cmd.py src/bitig/cli/consensus_cmd.py src/bitig/cli/classify_cmd.py tests/cli/test_zeta_cmd.py tests/cli/test_reduce_cmd.py tests/cli/test_cluster_cmd.py tests/cli/test_consensus_cmd.py tests/cli/test_classify_cmd.py src/bitig/cli/__init__.py
+git commit -m "feat(cli): bitig zeta, reduce, cluster, consensus, classify subcommands"
 ```
 
 ---
@@ -1702,7 +1702,7 @@ git commit -m "feat(cli): tamga zeta, reduce, cluster, consensus, classify subco
 
 **Files:**
 - Create: `tests/integration/test_phase3_workflow.py`
-- Modify: `src/tamga/__init__.py` (re-export Phase 3 names)
+- Modify: `src/bitig/__init__.py` (re-export Phase 3 names)
 
 ### Step 8.1 — Integration test `tests/integration/test_phase3_workflow.py`
 
@@ -1714,12 +1714,12 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tamga.features import MFWExtractor
-from tamga.io import load_corpus
-from tamga.methods.classify import build_classifier, cross_validate_tamga
-from tamga.methods.cluster import HierarchicalCluster
-from tamga.methods.reduce import PCAReducer
-from tamga.methods.zeta import ZetaClassic
+from bitig.features import MFWExtractor
+from bitig.io import load_corpus
+from bitig.methods.classify import build_classifier, cross_validate_bitig
+from bitig.methods.cluster import HierarchicalCluster
+from bitig.methods.reduce import PCAReducer
+from bitig.methods.zeta import ZetaClassic
 
 pytestmark = pytest.mark.integration
 
@@ -1741,7 +1741,7 @@ def test_phase3_end_to_end_workflow() -> None:
     zeta = ZetaClassic(group_by="author", top_k=5, group_a="Hamilton", group_b="Madison").fit_transform(corpus)
     assert len(zeta.tables) == 2
 
-    report = cross_validate_tamga(
+    report = cross_validate_bitig(
         build_classifier("logreg", random_state=42),
         fm,
         y,
@@ -1751,17 +1751,17 @@ def test_phase3_end_to_end_workflow() -> None:
     assert 0.0 <= report["accuracy"] <= 1.0
 ```
 
-### Step 8.2 — `src/tamga/__init__.py` Phase 3 additions
+### Step 8.2 — `src/bitig/__init__.py` Phase 3 additions
 
 Add to the existing re-exports:
 
 ```python
-from tamga.methods.classify import build_classifier, cross_validate_tamga
-from tamga.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
-from tamga.methods.consensus import BootstrapConsensus
-from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
-from tamga.methods.zeta import ZetaClassic, ZetaEder
-from tamga.result import Result
+from bitig.methods.classify import build_classifier, cross_validate_bitig
+from bitig.methods.cluster import HDBSCANCluster, HierarchicalCluster, KMeansCluster
+from bitig.methods.consensus import BootstrapConsensus
+from bitig.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
+from bitig.methods.zeta import ZetaClassic, ZetaEder
+from bitig.result import Result
 ```
 
 And add to `__all__`:
@@ -1779,7 +1779,7 @@ And add to `__all__`:
 "ZetaClassic",
 "ZetaEder",
 "build_classifier",
-"cross_validate_tamga",
+"cross_validate_bitig",
 ```
 
 ### Step 8.3 — Update README Status to Phase 3
@@ -1792,7 +1792,7 @@ Replace the `## Status` paragraph with:
 **Phase 3 — Analytical breadth.** Ships Craig's Zeta (classic + Eder variants), dimensionality
 reducers (PCA/MDS/t-SNE/UMAP), clustering (hierarchical Ward/avg/complete/single, k-means, HDBSCAN),
 bootstrap consensus trees (Newick output), and sklearn-wrapped classifiers (logreg/SVM/RF/HGBM)
-with stylometry-aware CV (LOAO, leave-one-text-out, stratified). CLI: `tamga zeta`, `reduce`,
+with stylometry-aware CV (LOAO, leave-one-text-out, stratified). CLI: `bitig zeta`, `reduce`,
 `cluster`, `consensus`, `classify` — all live.
 
 Phases 4 (embeddings + Bayesian), 5 (viz + reports + wizard shell), 6 (docs + PyPI) remain.
@@ -1802,9 +1802,9 @@ Phases 4 (embeddings + Bayesian), 5 (viz + reports + wizard shell), 6 (docs + Py
 
 ```bash
 source .venv/bin/activate
-pytest -n auto --cov=tamga -q
+pytest -n auto --cov=bitig -q
 pre-commit run --all-files
-git add src/tamga/__init__.py README.md tests/integration/test_phase3_workflow.py
+git add src/bitig/__init__.py README.md tests/integration/test_phase3_workflow.py
 git commit -m "feat: public API re-exports for Phase 3 (analytical breadth)"
 git tag -a phase-3-analytical-breadth -m "Phase 3 complete: Zeta + reducers + clustering + consensus + classify with CLI"
 ```
@@ -1820,18 +1820,18 @@ uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 python -m spacy download en_core_web_sm
 pre-commit run --all-files
-pytest -n auto --cov=tamga -q
+pytest -n auto --cov=bitig -q
 
 # Acceptance CLI sequence
-tamga zeta ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
+bitig zeta ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
     --group-by author --variant classic --top-k 5 --group-a Hamilton --group-b Madison
-tamga reduce ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
+bitig reduce ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
     --method pca --n-components 2 --mfw 200 --output /tmp/pca.parquet
-tamga cluster ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
+bitig cluster ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
     --method hierarchical --n-clusters 3 --mfw 200 --output /tmp/clusters.parquet
-tamga consensus ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
+bitig consensus ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
     --bands 100,200 --replicates 3 --output /tmp/consensus.nwk
-tamga classify ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
+bitig classify ./tests/fixtures/federalist --metadata ./tests/fixtures/federalist/metadata.tsv \
     --estimator logreg --group-by author --cv-kind loao --mfw 200
 ```
 
@@ -1842,7 +1842,7 @@ Every command must exit 0 and produce its expected output.
 ## Self-Review
 
 - **Spec coverage:** §6.2 (Zeta), §6.3 (reduce), §6.4 (cluster), §6.5 (consensus), §6.6 (classify + LOAO). All covered.
-- **Deferred:** §6.7 Bayesian (Phase 4), §10 viz (Phase 5), §11 reports (Phase 5), `tamga run` + interactive shell (Phase 5).
+- **Deferred:** §6.7 Bayesian (Phase 4), §10 viz (Phase 5), §11 reports (Phase 5), `bitig run` + interactive shell (Phase 5).
 - **Placeholder scan:** no TBD/TODO.
-- **Type consistency:** `Result` used by every method; `FeatureMatrix` input shared; `cross_validate_tamga` signature consistent between test and implementation.
+- **Type consistency:** `Result` used by every method; `FeatureMatrix` input shared; `cross_validate_bitig` signature consistent between test and implementation.
 - **Commit cadence:** 8 tasks → 8 commits.

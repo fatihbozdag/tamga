@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from typer.testing import CliRunner
 
-from tamga.cli import app
+from bitig.cli import app
 
 runner = CliRunner()
 FED = Path(__file__).parent.parent / "fixtures" / "federalist"

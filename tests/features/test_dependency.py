@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from tamga.corpus import Corpus, Document
-from tamga.features.dependency import DependencyBigramExtractor
+from bitig.corpus import Corpus, Document
+from bitig.features.dependency import DependencyBigramExtractor
 
 pytestmark = pytest.mark.spacy
 

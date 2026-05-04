@@ -1,12 +1,12 @@
 # Evaluation (PAN suite)
 
-Forensic publications and courts expect more than raw accuracy. tamga ships the standard
+Forensic publications and courts expect more than raw accuracy. bitig ships the standard
 PAN verification-task metric menu behind one call.
 
 ## One-call evaluation
 
 ```python
-from tamga.forensic import compute_pan_report
+from bitig.forensic import compute_pan_report
 
 report = compute_pan_report(
     probs=calibrated_probs,     # from CalibratedScorer
@@ -72,7 +72,7 @@ alongside AUC because C_llr captures both discrimination *and* calibration in on
 
 ```python
 import matplotlib.pyplot as plt
-from tamga.forensic import tippett
+from bitig.forensic import tippett
 
 data = tippett(log_lrs, y)
 plt.step(data["thresholds"], data["target_cdf"], label="same-author")
@@ -94,9 +94,9 @@ metric in one call — AUC, c@1, F0.5u, Brier, ECE, (optionally) C_llr.
 *Don't use when:* you only need one metric; each metric function is callable directly.
 *Expect:* a `PANReport` dataclass with every field populated.
 
-::: tamga.forensic.metrics.compute_pan_report
+::: bitig.forensic.metrics.compute_pan_report
 
-::: tamga.forensic.metrics.PANReport
+::: bitig.forensic.metrics.PANReport
 
 ### AUC
 
@@ -107,7 +107,7 @@ set the threshold.
 *Expect:* a single number in `[0.5, 1]`. Does not depend on predicted probabilities
 being calibrated.
 
-::: tamga.forensic.metrics.auc
+::: bitig.forensic.metrics.auc
 
 ### c@1
 
@@ -116,7 +116,7 @@ honestly — accuracy plus a partial-credit bonus for abstention.
 *Don't use when:* your system always outputs a decision; `c@1` reduces to accuracy.
 *Expect:* a single number in `[0, 1]`. Dominates accuracy only when abstention rate > 0.
 
-::: tamga.forensic.metrics.c_at_1
+::: bitig.forensic.metrics.c_at_1
 
 ### F0.5u
 
@@ -125,7 +125,7 @@ since PAN 2022, precision-weighted and with a non-answer penalty.
 *Don't use when:* you're reporting to a non-PAN audience; it's a specialist metric.
 *Expect:* a single number in `[0, 1]`.
 
-::: tamga.forensic.metrics.f05u
+::: bitig.forensic.metrics.f05u
 
 ### C_llr
 
@@ -136,7 +136,7 @@ log-likelihood ratios.
 *Expect:* a single non-negative number; 0 is perfect; 1 is uninformative (matches a
 coin flip).
 
-::: tamga.forensic.metrics.cllr
+::: bitig.forensic.metrics.cllr
 
 ### ECE
 
@@ -146,7 +146,7 @@ claimed confidence and checks whether actual accuracy matches.
 noisy.
 *Expect:* a single number in `[0, 1]`; 0 is perfect calibration.
 
-::: tamga.forensic.metrics.ece
+::: bitig.forensic.metrics.ece
 
 ### Brier
 
@@ -155,7 +155,7 @@ outputs) — classic squared-error between predicted probability and ground trut
 *Don't use when:* you need a forensic LR-specific metric — use `C_llr`.
 *Expect:* a single number in `[0, 1]`; 0 is perfect.
 
-::: tamga.forensic.metrics.brier
+::: bitig.forensic.metrics.brier
 
 ### Tippett
 
@@ -165,4 +165,4 @@ log-LRs as cumulative distributions.
 *Expect:* two arrays of cumulative LRs (target and non-target) ready for a matplotlib
 plot.
 
-::: tamga.forensic.metrics.tippett
+::: bitig.forensic.metrics.tippett

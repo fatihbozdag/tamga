@@ -2,8 +2,8 @@
 
 from typer.testing import CliRunner
 
-from tamga import __version__
-from tamga.cli import app
+from bitig import __version__
+from bitig.cli import app
 
 runner = CliRunner()
 
@@ -11,7 +11,7 @@ runner = CliRunner()
 def test_cli_help_lists_subcommands() -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert "tamga" in result.stdout.lower()
+    assert "bitig" in result.stdout.lower()
 
 
 def test_cli_version_flag_prints_version() -> None:

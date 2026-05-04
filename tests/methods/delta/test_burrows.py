@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from tamga.features import FeatureMatrix
-from tamga.methods.delta.burrows import BurrowsDelta
+from bitig.features import FeatureMatrix
+from bitig.methods.delta.burrows import BurrowsDelta
 
 
 def _fm(X: np.ndarray) -> FeatureMatrix:  # noqa: N803

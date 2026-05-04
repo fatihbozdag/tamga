@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from tamga.corpus import Corpus
-from tamga.methods.consensus import BootstrapConsensus
+from bitig.corpus import Corpus
+from bitig.methods.consensus import BootstrapConsensus
 
 
 def _federalist_mini() -> Corpus:
     # Use the bundled Federalist fixture for a realistic test.
-    from tamga.io import load_corpus
+    from bitig.io import load_corpus
 
     return load_corpus(
         "tests/fixtures/federalist", metadata="tests/fixtures/federalist/metadata.tsv"

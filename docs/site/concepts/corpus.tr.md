@@ -1,13 +1,13 @@
 # Corpus
 
-`Corpus`, bir `Document` listesi ve (örtük olarak) bu belgelerin üst verisidir. Her ikisi de `tamga.corpus` içinde tanımlanmış veri sınıflarıdır.
+`Corpus`, bir `Document` listesi ve (örtük olarak) bu belgelerin üst verisidir. Her ikisi de `bitig.corpus` içinde tanımlanmış veri sınıflarıdır.
 
 ## Derlem oluşturma
 
 ### Dosya sisteminden
 
 ```bash
-tamga ingest corpus/ --metadata corpus/metadata.tsv
+bitig ingest corpus/ --metadata corpus/metadata.tsv
 ```
 
 `metadata.tsv`, ilk sütunu `filename` olan (değerler `corpus/` dizinindeki dosya adlarıyla eşleştirilir) ve diğer her sütunun `Document.metadata` alanına dönüştüğü sekmeyle ayrılmış bir dosyadır:
@@ -22,7 +22,7 @@ fed_50.txt	Unknown	1788	political essay
 ### Python ile
 
 ```python
-from tamga.io import load_corpus
+from bitig.io import load_corpus
 corpus = load_corpus("corpus/", metadata="corpus/metadata.tsv", strict=True)
 ```
 
@@ -32,7 +32,7 @@ corpus = load_corpus("corpus/", metadata="corpus/metadata.tsv", strict=True)
 ### Programatik olarak
 
 ```python
-from tamga.corpus import Corpus, Document
+from bitig.corpus import Corpus, Document
 
 corpus = Corpus(documents=[
     Document(id="q", text=q_text, metadata={"role": "questioned"}),
