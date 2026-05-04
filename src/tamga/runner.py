@@ -34,6 +34,7 @@ from tamga.methods.delta import (
     EderSimpleDelta,
     QuadraticDelta,
 )
+from tamga.methods.imposters import GeneralImposters
 from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
 from tamga.methods.rolling_delta import RollingDelta
 from tamga.methods.zeta import ZetaClassic, ZetaEder
@@ -225,6 +226,25 @@ def _dispatch_method(
         ).fit_transform(corpus)
         return rolling_result
 
+    if kind == "verify":
+        if not method_cfg.group_by:
+            raise ValueError("verify requires group_by (e.g. 'author')")
+        params = dict(method_cfg.params)
+        target_ids = params.pop("target_ids", None)
+        if not target_ids:
+            raise ValueError("verify requires params.target_ids (list of document ids to verify)")
+        candidate = params.pop("candidate", None)
+        if not candidate:
+            raise ValueError("verify requires params.candidate (the alleged author label)")
+        params.setdefault("seed", seed)
+        verify_result: Result = GeneralImposters(
+            target_ids=list(target_ids),
+            candidate=str(candidate),
+            group_by=method_cfg.group_by,
+            **params,
+        ).fit_transform(corpus)
+        return verify_result
+
     if kind == "zeta":
         variant = str(method_cfg.params.get("variant", "classic"))
         zeta_cls = _ZETA_VARIANTS.get(variant)
@@ -347,6 +367,7 @@ def _emit_default_plot(
             plot_confusion_matrix,
             plot_dendrogram,
             plot_feature_importance,
+            plot_imposters_scores,
             plot_rolling_delta,
             plot_scatter_2d,
             plot_zeta,
@@ -404,6 +425,14 @@ def _emit_default_plot(
         elif kind == "rolling_delta" and result.tables:
             fig = plot_rolling_delta(result.tables[0], title=str(result.method_name))
             png_name = "rolling_delta.png"
+
+        elif kind == "verify" and result.tables:
+            fig = plot_imposters_scores(
+                result.tables[0],
+                threshold=float(result.values.get("threshold", 0.5)),
+                title=str(result.method_name),
+            )
+            png_name = "imposters_scores.png"
 
         elif kind in ("delta", "bayesian"):
             preds = result.values.get("predictions")

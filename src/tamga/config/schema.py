@@ -17,6 +17,7 @@ CvKind = Literal["stratified", "loao", "group_kfold", "leave_one_text_out"]
 MethodKind = Literal[
     "delta",
     "rolling_delta",
+    "verify",
     "zeta",
     "reduce",
     "cluster",
