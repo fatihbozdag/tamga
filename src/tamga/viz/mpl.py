@@ -184,6 +184,64 @@ def plot_bootstrap_consensus_tree(
     return fig
 
 
+def plot_rolling_delta(
+    table: pd.DataFrame,
+    *,
+    title: str | None = None,
+    x_axis: str = "window_start_token",
+) -> Figure:
+    """Render the rolling-delta time-series for one or more target documents.
+
+    Expects the table emitted by RollingDelta: one row per (doc_id, window),
+    with a `nearest_author` column and `distance_<author>` columns. Produces
+    one subplot per `doc_id`; each subplot shows one distance line per author
+    and shades the strip where each author wins the window.
+    """
+    if table.empty:
+        raise ValueError("plot_rolling_delta needs at least one window")
+    if x_axis not in table.columns:
+        raise ValueError(f"x_axis {x_axis!r} not in table columns: {list(table.columns)}")
+    distance_cols = [c for c in table.columns if c.startswith("distance_")]
+    if not distance_cols:
+        raise ValueError("table has no `distance_<author>` columns")
+    authors = [c.removeprefix("distance_") for c in distance_cols]
+    palette = sns.color_palette(n_colors=len(authors))
+    color_for = dict(zip(authors, palette, strict=True))
+
+    doc_ids = list(dict.fromkeys(table["doc_id"]))
+    n = len(doc_ids)
+    fig, axes = plt.subplots(
+        n, 1, figsize=figure_size("one_and_half" if n == 1 else "double"), sharex=False
+    )
+    axes_iter = axes if isinstance(axes, np.ndarray) else np.array([axes])
+
+    for ax, doc_id in zip(axes_iter, doc_ids, strict=True):
+        sub = table[table["doc_id"] == doc_id].sort_values(x_axis)
+        x = sub[x_axis].to_numpy()
+        for author, dcol in zip(authors, distance_cols, strict=True):
+            ax.plot(x, sub[dcol].to_numpy(), label=author, color=color_for[author], lw=1.2)
+        # Highlight winning author per window with a thin coloured strip on the bottom.
+        ymin, ymax = ax.get_ylim()
+        strip = (ymax - ymin) * 0.04
+        for _, row in sub.iterrows():
+            ax.axvspan(
+                row[x_axis],
+                row[x_axis] + 1,
+                ymin=0,
+                ymax=strip / (ymax - ymin) if ymax > ymin else 0.04,
+                color=color_for.get(row["nearest_author"], "#888"),
+                alpha=0.55,
+                lw=0,
+            )
+        ax.set_title(str(doc_id), fontsize=9)
+        ax.set_ylabel("delta distance")
+        ax.legend(fontsize=7, loc="upper right")
+    axes_iter[-1].set_xlabel(x_axis.replace("_", " "))
+    fig.suptitle(title or "Rolling delta")
+    fig.tight_layout()
+    return fig
+
+
 def plot_zeta(
     df_a: pd.DataFrame,
     df_b: pd.DataFrame,

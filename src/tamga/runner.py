@@ -35,6 +35,7 @@ from tamga.methods.delta import (
     QuadraticDelta,
 )
 from tamga.methods.reduce import MDSReducer, PCAReducer, TSNEReducer, UMAPReducer
+from tamga.methods.rolling_delta import RollingDelta
 from tamga.methods.zeta import ZetaClassic, ZetaEder
 from tamga.plumbing.logging import get_logger
 from tamga.preprocess.pipeline import SpacyPipeline
@@ -206,6 +207,24 @@ def _dispatch_method(
             values={"predictions": preds, "accuracy": float((preds == y).mean())},
         )
 
+    if kind == "rolling_delta":
+        # Rolling delta owns its MFW fit because targets must be excluded from
+        # vocabulary and z-score statistics; it ignores `features:` references.
+        if not method_cfg.group_by:
+            raise ValueError("rolling_delta requires group_by (e.g. 'author')")
+        params = dict(method_cfg.params)
+        target_ids = params.pop("target_ids", None)
+        if not target_ids:
+            raise ValueError(
+                "rolling_delta requires params.target_ids (list of document ids to scan)"
+            )
+        rolling_result: Result = RollingDelta(
+            target_ids=list(target_ids),
+            group_by=method_cfg.group_by,
+            **params,
+        ).fit_transform(corpus)
+        return rolling_result
+
     if kind == "zeta":
         variant = str(method_cfg.params.get("variant", "classic"))
         zeta_cls = _ZETA_VARIANTS.get(variant)
@@ -328,6 +347,7 @@ def _emit_default_plot(
             plot_confusion_matrix,
             plot_dendrogram,
             plot_feature_importance,
+            plot_rolling_delta,
             plot_scatter_2d,
             plot_zeta,
         )
@@ -380,6 +400,10 @@ def _emit_default_plot(
                 label_b=str(result.values.get("group_b", "B")),
             )
             png_name = "zeta.png"
+
+        elif kind == "rolling_delta" and result.tables:
+            fig = plot_rolling_delta(result.tables[0], title=str(result.method_name))
+            png_name = "rolling_delta.png"
 
         elif kind in ("delta", "bayesian"):
             preds = result.values.get("predictions")

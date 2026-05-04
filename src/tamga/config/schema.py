@@ -14,7 +14,16 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from tamga.languages import LANGUAGES
 
 CvKind = Literal["stratified", "loao", "group_kfold", "leave_one_text_out"]
-MethodKind = Literal["delta", "zeta", "reduce", "cluster", "consensus", "classify", "bayesian"]
+MethodKind = Literal[
+    "delta",
+    "rolling_delta",
+    "zeta",
+    "reduce",
+    "cluster",
+    "consensus",
+    "classify",
+    "bayesian",
+]
 FeatureType = Literal[
     "mfw",
     "word_ngram",

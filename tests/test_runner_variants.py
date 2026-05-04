@@ -147,6 +147,32 @@ def test_consensus_emits_bct_plot(tmp_path: Path, mini_corpus_dir: Path) -> None
     assert (method_dir / "consensus_tree.png").exists()
 
 
+def test_rolling_delta_runs_and_plots(tmp_path: Path) -> None:
+    """End-to-end: fed_49 (disputed Madison) is scanned; result+plot land on disk."""
+    from tamga.runner import run_study
+
+    fed_dir = Path(__file__).parent / "fixtures" / "federalist"
+    cfg = _study_yaml(
+        tmp_path,
+        fed_dir,
+        kind="rolling_delta",
+        method_params={
+            "target_ids": ["fed_49"],
+            "window_size": 400,
+            "step": 200,
+            "base_delta": "burrows",
+            "mfw_n": 80,
+            "lowercase": True,
+        },
+        group_by="author",
+    )
+    run_dir = run_study(cfg, output_dir=tmp_path / "runs", run_name="r")
+    method_dir = run_dir / "rolling_delta_1"
+    assert (method_dir / "result.json").exists()
+    assert (method_dir / "table_0.parquet").exists()
+    assert (method_dir / "rolling_delta.png").exists()
+
+
 @pytest.mark.parametrize("variant", ["classic", "eder"])
 def test_zeta_variant_runs(tmp_path: Path, mini_corpus_dir: Path, variant: str) -> None:
     from tamga.runner import run_study
