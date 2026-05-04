@@ -24,6 +24,7 @@ def test_default_state_is_empty() -> None:
     assert s.corpus_metadata_cols == []
     assert s.study_path is None
     assert s.run_dir is None
+    assert s.plot_format == "static"
 
 
 def test_state_mutation_persists_across_get(tmp_path: Path) -> None:
