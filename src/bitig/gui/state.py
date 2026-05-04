@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Literal
+
+PlotFormat = Literal["static", "interactive"]
 
 
 @dataclass
@@ -15,6 +18,7 @@ class GuiState:
     corpus_metadata_cols: list[str] = field(default_factory=list)
     study_path: Path | None = None
     run_dir: Path | None = None
+    plot_format: PlotFormat = "static"
 
 
 _STATE: GuiState | None = None
