@@ -12,6 +12,7 @@ from tamga.viz.mpl import (
     plot_dendrogram,
     plot_distance_heatmap,
     plot_feature_importance,
+    plot_imposters_scores,
     plot_rolling_delta,
     plot_scatter_2d,
     plot_zeta,
@@ -119,6 +120,28 @@ def test_plot_rolling_delta_two_targets(tmp_path: Path):
     out = tmp_path / "rolling.png"
     fig.savefig(out)
     assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_imposters_scores_mixed_decisions(tmp_path: Path):
+    table = pd.DataFrame(
+        [
+            {"target_id": "doc_a", "candidate": "Alice", "score": 0.9, "verified": True},
+            {"target_id": "doc_b", "candidate": "Alice", "score": 0.55, "verified": True},
+            {"target_id": "doc_c", "candidate": "Alice", "score": 0.2, "verified": False},
+            {"target_id": "doc_d", "candidate": "Alice", "score": 0.05, "verified": False},
+        ]
+    )
+    fig = plot_imposters_scores(table, threshold=0.5)
+    out = tmp_path / "imp.png"
+    fig.savefig(out)
+    assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_imposters_scores_rejects_empty():
+    import pytest
+
+    with pytest.raises(ValueError, match="at least one target"):
+        plot_imposters_scores(pd.DataFrame())
 
 
 def test_plot_rolling_delta_rejects_empty_table():

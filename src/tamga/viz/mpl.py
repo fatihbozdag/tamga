@@ -242,6 +242,41 @@ def plot_rolling_delta(
     return fig
 
 
+def plot_imposters_scores(
+    table: pd.DataFrame,
+    *,
+    threshold: float = 0.5,
+    title: str | None = None,
+) -> Figure:
+    """Render General Imposters verification scores as a bar chart.
+
+    Expects the table emitted by GeneralImposters: one row per target with
+    `target_id`, `candidate`, and `score` columns. Bars are coloured by the
+    decision (verified vs rejected at `threshold`); a horizontal cutoff line
+    marks the threshold.
+    """
+    if table.empty:
+        raise ValueError("plot_imposters_scores needs at least one target")
+    required = {"target_id", "score"}
+    if not required.issubset(table.columns):
+        raise ValueError(f"table missing required columns: {required - set(table.columns)}")
+
+    sub = table.sort_values("score", ascending=False)
+    colors = ["#1f7a4d" if s >= threshold else "#a83232" for s in sub["score"]]
+    fig, ax = plt.subplots(figsize=figure_size("one_and_half"))
+    ax.bar(sub["target_id"].astype(str), sub["score"].to_numpy(), color=colors)
+    ax.axhline(threshold, color="grey", lw=1, ls="--", alpha=0.7)
+    ax.set_ylim(0, 1.0)
+    ax.set_ylabel("verification score")
+    ax.set_xlabel("target")
+    if len(sub) > 6:
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
+    candidate = str(sub["candidate"].iloc[0]) if "candidate" in sub.columns else "candidate"
+    ax.set_title(title or f"General Imposters: target vs {candidate!r}")
+    fig.tight_layout()
+    return fig
+
+
 def plot_zeta(
     df_a: pd.DataFrame,
     df_b: pd.DataFrame,
