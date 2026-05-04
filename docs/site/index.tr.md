@@ -11,8 +11,9 @@ hide:
 
 **Yazar tespiti, yazar grubu karşılaştırması ve adli dilbilim analizi için hesaplamalı stilometri.** R'ın `Stylo` paketinin modern bir Python karşılığı; güncel bir NLP işlem hattı (spaCy, transformer gömmeleri), Bayes katmanı (PyMC) ve kapsamlı bir adli dilbilim kanıt araç takımı içerir.
 
-> Adını **bitig**dan alır — Türk boylarının bireyi ve aileyi tek bakışta tanımlayan
-> damgasından, yani biçembilimsel parmak izinin kültürel karşılığından.
+> Adını **bitig**ten alır — Eski Türkçede *yazı* / *yazıt* anlamına gelir; 8. yüzyıl
+> Orhon yazıtlarına kazınan türden. Bir bitig, yazarın elini taşıyan bir kayıttı; bu
+> paket de o eli arar.
 
 ## Mimari
 
