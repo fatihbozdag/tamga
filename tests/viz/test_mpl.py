@@ -14,6 +14,7 @@ from tamga.viz.mpl import (
     plot_feature_importance,
     plot_imposters_scores,
     plot_pca_biplot,
+    plot_posterior_heatmap,
     plot_reliability_diagram,
     plot_rolling_delta,
     plot_scatter_2d,
@@ -156,6 +157,34 @@ def test_plot_pca_biplot_renders(tmp_path: Path):
     out = tmp_path / "biplot.png"
     fig.savefig(out)
     assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_posterior_heatmap_renders(tmp_path: Path):
+    rng = np.random.default_rng(0)
+    raw = rng.uniform(size=(6, 3))
+    proba = raw / raw.sum(axis=1, keepdims=True)
+    fig = plot_posterior_heatmap(
+        proba,
+        document_ids=[f"d{i}" for i in range(6)],
+        classes=["Hamilton", "Madison", "Jay"],
+    )
+    out = tmp_path / "posterior.png"
+    fig.savefig(out)
+    assert out.is_file() and out.stat().st_size > 0
+
+
+def test_plot_posterior_heatmap_validates_shapes():
+    import pytest
+
+    rng = np.random.default_rng(0)
+    raw = rng.uniform(size=(4, 2))
+    proba = raw / raw.sum(axis=1, keepdims=True)
+    with pytest.raises(ValueError, match="proba rows"):
+        plot_posterior_heatmap(proba, document_ids=["a", "b"], classes=["x", "y"])
+    with pytest.raises(ValueError, match="proba columns"):
+        plot_posterior_heatmap(proba, document_ids=["a", "b", "c", "d"], classes=["x"])
+    with pytest.raises(ValueError, match="proba must be 2-D"):
+        plot_posterior_heatmap(np.zeros(4), document_ids=["a"], classes=["x"])
 
 
 def test_plot_pca_biplot_validates_shapes():

@@ -147,6 +147,29 @@ def test_consensus_emits_bct_plot(tmp_path: Path, mini_corpus_dir: Path) -> None
     assert (method_dir / "consensus_tree.png").exists()
 
 
+def test_bayesian_emits_posterior_heatmap(tmp_path: Path, mini_corpus_dir: Path) -> None:
+    """Bayesian attribution should also drop a posterior_heatmap.png."""
+    from tamga.runner import run_study
+
+    cfg = _study_yaml(
+        tmp_path,
+        mini_corpus_dir,
+        kind="bayesian",
+        # Bayesian wants raw counts (scale="none"), not z-scored MFW.
+        feat_params={"n": 30, "scale": "none"},
+        method_params={"prior_alpha": 1.0},
+        group_by="author",
+    )
+    run_dir = run_study(cfg, output_dir=tmp_path / "runs", run_name="r")
+    method_dir = run_dir / "bayesian_1"
+    assert (method_dir / "result.json").exists()
+    assert (method_dir / "confusion_matrix.png").exists()
+    assert (method_dir / "posterior_heatmap.png").exists()
+    payload = json.loads((method_dir / "result.json").read_text())
+    assert "proba" in payload["values"]
+    assert "classes" in payload["values"]
+
+
 def test_pca_emits_biplot(tmp_path: Path, mini_corpus_dir: Path) -> None:
     """When method=reduce + variant=pca, runner should drop pca_biplot.png next to scatter.png."""
     from tamga.runner import run_study

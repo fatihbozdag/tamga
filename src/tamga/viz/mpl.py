@@ -242,6 +242,55 @@ def plot_rolling_delta(
     return fig
 
 
+def plot_posterior_heatmap(
+    proba: np.ndarray,
+    document_ids: list[str],
+    classes: list[str],
+    *,
+    title: str = "Posterior probability",
+    cmap: str = "magma",
+    annot: bool | None = None,
+) -> Figure:
+    """Render an (n_docs, n_classes) posterior-probability matrix as a heatmap.
+
+    Used by the Bayesian attribution branch to expose how confident the
+    classifier is in its top-1 pick: rows of nearly equal probability mean
+    the doc is genuinely ambiguous; rows dominated by one class mean a
+    confident attribution. `annot` defaults to True for small matrices and
+    False once the grid gets too dense to label cleanly.
+    """
+    proba = np.asarray(proba, dtype=float)
+    if proba.ndim != 2:
+        raise ValueError(f"proba must be 2-D (n_docs, n_classes); got shape {proba.shape}")
+    if proba.shape[0] != len(document_ids):
+        raise ValueError(
+            f"proba rows ({proba.shape[0]}) != len(document_ids) ({len(document_ids)})"
+        )
+    if proba.shape[1] != len(classes):
+        raise ValueError(f"proba columns ({proba.shape[1]}) != len(classes) ({len(classes)})")
+    if annot is None:
+        annot = proba.size <= 80
+
+    fig, ax = plt.subplots(figsize=figure_size("one_and_half"))
+    sns.heatmap(
+        proba,
+        xticklabels=classes,
+        yticklabels=document_ids,
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        annot=annot,
+        fmt=".2f" if annot else "",
+        cbar_kws={"label": "P(author | doc)"},
+        ax=ax,
+    )
+    ax.set_xlabel("author")
+    ax.set_ylabel("document")
+    ax.set_title(title)
+    fig.tight_layout()
+    return fig
+
+
 def plot_pca_biplot(
     coordinates: np.ndarray,
     loadings: np.ndarray,
