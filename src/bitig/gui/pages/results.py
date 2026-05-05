@@ -30,16 +30,21 @@ def _as_array(value: Any) -> np.ndarray | None:
         return None
 
 
-def _plotly_figures_for(result: Result) -> list[tuple[str, Any]]:
+def _plotly_figures_for(
+    result: Result, tables: list[pd.DataFrame] | None = None
+) -> list[tuple[str, Any]]:
     """Return [(title, plotly.Figure), ...] for the supported method types.
 
     Empty list means the method has no interactive equivalent and the caller
-    should fall back to static PNGs.
+    should fall back to static PNGs. `tables` is the list of `table_*.parquet`
+    DataFrames the caller loaded from the method directory; rolling-delta and
+    general-imposters use these instead of `result.values`.
     """
     import bitig.viz.plotly as bplotly
 
     name = result.method_name
     values = result.values
+    tables = tables or []
     out: list[tuple[str, Any]] = []
 
     if name in {"pca", "mds", "tsne", "umap"}:
@@ -96,8 +101,28 @@ def _plotly_figures_for(result: Result) -> list[tuple[str, Any]]:
         y_true = _as_array(values.get("y_true"))
         preds = _as_array(values.get("predictions"))
         if y_true is not None and preds is not None and y_true.shape == preds.shape:
-            fig = bplotly.plot_confusion_matrix(y_true, preds)
-            out.append(("confusion_matrix", fig))
+            out.append(("confusion_matrix", bplotly.plot_confusion_matrix(y_true, preds)))
+        proba = _as_array(values.get("proba"))
+        classes_val = values.get("classes")
+        if proba is not None and y_true is not None and proba.ndim == 2:
+            classes_arr = np.asarray(classes_val) if isinstance(classes_val, list) else None
+            out.append(
+                (
+                    "reliability_diagram",
+                    bplotly.plot_reliability_diagram(y_true, proba, classes=classes_arr),
+                )
+            )
+        return out
+
+    if name.startswith("rolling_delta") and tables:
+        out.append(("rolling_delta", bplotly.plot_rolling_delta(tables[0])))
+        return out
+
+    if name.startswith("general_imposters") and tables:
+        threshold = float(values.get("threshold", 0.5))
+        out.append(
+            ("imposters_scores", bplotly.plot_imposters_scores(tables[0], threshold=threshold))
+        )
         return out
 
     return out
@@ -112,8 +137,14 @@ def _try_render_plotly(method_dir: Path) -> bool:
         result = Result.from_json(result_file)
     except (OSError, json.JSONDecodeError, KeyError):
         return False
+    tables: list[pd.DataFrame] = []
+    for parquet in sorted(method_dir.glob("table_*.parquet")):
+        try:
+            tables.append(pd.read_parquet(parquet))
+        except Exception:
+            continue
     try:
-        figures = _plotly_figures_for(result)
+        figures = _plotly_figures_for(result, tables)
     except ImportError as exc:
         ui.markdown(
             f"_Interactive plots require `bitig[interactive]` -- {exc}. Showing static PNGs._"
