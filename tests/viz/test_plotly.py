@@ -10,12 +10,17 @@ from scipy.cluster.hierarchy import linkage
 
 pytest.importorskip("plotly")  # everything below requires the optional `bitig[interactive]` extra.
 
+import pandas as pd
+
 from bitig.viz.plotly import (
     plot_confusion_matrix,
     plot_dendrogram,
     plot_distance_heatmap,
+    plot_imposters_scores,
     plot_pca_biplot,
     plot_posterior_heatmap,
+    plot_reliability_diagram,
+    plot_rolling_delta,
     plot_scatter_2d,
 )
 
@@ -102,3 +107,68 @@ def test_plot_posterior_heatmap_validates_shapes() -> None:
         plot_posterior_heatmap(proba, document_ids=["a", "b", "c", "d"], classes=["x"])
     with pytest.raises(ValueError, match="proba must be 2-D"):
         plot_posterior_heatmap(np.zeros(4), document_ids=["a"], classes=["x"])
+
+
+def test_plot_rolling_delta(tmp_path: Path) -> None:
+    rows = []
+    for w in range(5):
+        rows.extend(
+            [
+                {
+                    "doc_id": "doc1",
+                    "window_idx": w,
+                    "window_start_token": w * 100,
+                    "window_end_token": (w + 1) * 100,
+                    "nearest_author": "alice" if w % 2 == 0 else "bob",
+                    "distance_alice": 0.4 + 0.05 * w,
+                    "distance_bob": 0.5 - 0.04 * w,
+                }
+            ]
+        )
+    table = pd.DataFrame(rows)
+    fig = plot_rolling_delta(table)
+    fig.write_html(tmp_path / "rolling.html")
+
+
+def test_plot_rolling_delta_validates() -> None:
+    with pytest.raises(ValueError, match="at least one window"):
+        plot_rolling_delta(pd.DataFrame())
+    with pytest.raises(ValueError, match="x_axis"):
+        plot_rolling_delta(
+            pd.DataFrame([{"doc_id": "d", "distance_alice": 0.1}]),
+            x_axis="missing_column",
+        )
+    with pytest.raises(ValueError, match="distance_<author>"):
+        plot_rolling_delta(
+            pd.DataFrame([{"doc_id": "d", "window_start_token": 0, "nearest_author": "alice"}])
+        )
+
+
+def test_plot_imposters_scores(tmp_path: Path) -> None:
+    table = pd.DataFrame(
+        [
+            {"target_id": "doc1", "candidate": "hamilton", "score": 0.82, "verified": True},
+            {"target_id": "doc2", "candidate": "hamilton", "score": 0.31, "verified": False},
+            {"target_id": "doc3", "candidate": "hamilton", "score": 0.55, "verified": True},
+        ]
+    )
+    fig = plot_imposters_scores(table, threshold=0.5)
+    fig.write_html(tmp_path / "imposters.html")
+
+
+def test_plot_imposters_scores_validates() -> None:
+    with pytest.raises(ValueError, match="at least one target"):
+        plot_imposters_scores(pd.DataFrame())
+    with pytest.raises(ValueError, match="missing required columns"):
+        plot_imposters_scores(pd.DataFrame([{"target_id": "d"}]))
+
+
+def test_plot_reliability_diagram(tmp_path: Path) -> None:
+    rng = np.random.default_rng(7)
+    n = 60
+    classes = np.array(["alice", "bob"])
+    y_true = rng.choice(classes, size=n)
+    raw = rng.uniform(size=(n, 2))
+    y_proba = raw / raw.sum(axis=1, keepdims=True)
+    fig = plot_reliability_diagram(y_true, y_proba, classes=classes, n_bins=5)
+    fig.write_html(tmp_path / "reliability.html")
