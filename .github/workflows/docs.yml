@@ -41,8 +41,8 @@ jobs:
           path: site
 
   deploy:
-    # Only deploy from pushes to main — not from PR builds.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Deploy from pushes to main and from manual workflow_dispatch (also on main) — not from PR builds.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: build
     runs-on: ubuntu-latest
     environment:
