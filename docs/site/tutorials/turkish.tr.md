@@ -70,6 +70,105 @@ Varsayılan bir Türkçe çalışma şunları hesaplar:
 - PNG / PDF şekiller (mesafe ısı haritası, PCA dağılım grafiği)
 - Derlem özetini, seed değerini ve tam çözümlenmiş yapılandırmayı kaydeden `provenance.json`
 
+## Çalışan örnek: Ömer Seyfettin'in 28 kısa hikayesi
+
+Depodaki `examples/turkish_seyfettin/` dizini, Ömer Seyfettin'in
+(1884-1920; Türkiye'de telif hakkı süresi 1991'de dolmuştur)
+[tr.wikisource.org](https://tr.wikisource.org) üzerinden `fetch_corpus.py`
+betiği ile çekilip çalışmayla birlikte depoya işlenmiş 28 kısa hikayesi
+üzerinde uçtan uca, yeniden üretilebilir bir çalıştırma sunar.
+
+```bash
+python examples/turkish_seyfettin/fetch_corpus.py --n 30   # ~30s; Wikisource'a saygılı
+python -m bitig run examples/turkish_seyfettin/study.yaml --name seyfettin
+```
+
+**Derlem.** 200 belirteçlik alt sınırı geçen 28 hikaye var; uzunluklar 326 ile
+4 455 belirteç arasında (medyan ≈ 1 700). Wikisource transkripsiyonları CC BY-SA 4.0
+lisanslıdır; atıf bilgileri ve kaynak URL'ler
+`examples/turkish_seyfettin/manifest.json` dosyasındadır.
+
+**Çalışma.** En sık 500 sözcük (z-skorlu, `min_df = 2`) + Türkçe işlev sözcükleri
+sıklıkları → Burrows Delta öz-atfetme + PCA + Ward hiyerarşik kümeleme.
+Tek-yazar kurguları yazar arası doğrulamayı (Imposters / classify) kabul etmediği
+için bu *yazar içi keşifsel stilometri*dir, yazar tespiti değildir.
+
+### Burrows Delta öz-atfetme
+
+28 hikayelik leave-one-out ızgarasında her hikayenin en yakın komşusu kendisidir
+(doğruluk = 1.0). Tek-yazar derlem için bu önemsiz sonuç — her belge kendi MFW
+profiline başkasınınkinden daha yakındır — aynı zamanda hiçbir hikayenin yanlış
+yazar metaverisiyle etiketlenmediğini doğrular. Esas sinyal bir sıra
+sonradadır: 2. en yakın komşular, biçemce yakın hikayeleri yüzeye çıkarır.
+Sıralamada kullanılan ikili mesafe matrisi
+`results/seyfettin/burrows/result.json` içinde saklanır.
+
+### MFW-500 sözcüksel uzayı üzerinde PCA
+
+![PCA dağılımı](turkish_figures/pca_scatter.png)
+
+PC1 varyansın **% 7.7**'sini, PC2 ise **% 7.2**'sini açıklar. Tek bir bileşenin
+baskın olmaması başlı başına tanılayıcıdır: tek bir yazarın iç sözcüksel
+varyansı, bir-iki eksende toplanmak yerine pek çok küçük eksene yayılır. Yazar
+arası bir PCA ile karşılaştırın (örn. [Federalist öğreticisi](federalist.md)):
+orada PC1 tek başına çoğunlukla % 30 ve üzerini yakalar.
+
+**En etkili yüklemeler — PC1**: `baktı`, `değildi`, `açtı`, `durdu`, `hafif`, `iki`, `şeyler`, `gelince`.
+PC1, basit-geçmiş 3. tekil anlatım eylemlerine (`baktı`, `açtı`, `durdu`)
+yaslanan hikayeleri bunlara yaslanmayanlardan ayırır.
+
+**En etkili yüklemeler — PC2**: `idi`, `ediyordu`, `onu`, `o`, `olduğu`, `nihayet`, `etti`, `durdu`.
+PC2, geçmiş-süreğen yardımcısını (`idi`, `ediyordu`) ve 3. tekil zamir öbeğini
+(`onu`, `o`, `olduğu`) yakalar — yani uzun-durum betimi ile olay-odaklı anlatım
+arasındaki seçim.
+
+Biplot, en etkili 12 yükleme vektörünü aynı 2-B izdüşüm üzerine bindirir:
+
+![PCA biplot](turkish_figures/pca_biplot.png)
+
+[Etkileşimli plotly biplot'ı aç ↗](turkish_figures/pca_biplot.html) — hikaye
+kimliklerini ve ok ucu etiketlerini görmek için imleci üstüne getirin.
+
+### Ward hiyerarşik kümeleme (k = 4)
+
+![Ward dendrogramı](turkish_figures/ward_dendrogram.png)
+
+Dört düz kümede kesim şunu verir:
+
+| Küme | n  | Üye hikaye kimlikleri |
+|-----:|---:|---|
+| 0    | 23 | derlemin gövdesi (`aleko`, `bomba`, `kasag`, `forsa`, …) |
+| 1    |  3 | `bir_refikin_defter_i_ihtisasat_ndan`, `elma`, `hediye` |
+| 2    |  1 | `bir_kay_s_n_tesiri` |
+| 3    |  1 | `keramet` |
+
+Üç parçalık küme, derlemdeki en kısa üç parçaya karşılık çıkar (329 / 517 /
+457 belirteç). İki tekil de kısadır (554 ve 511 belirteç). Dendrogram özünde
+**uzunluk-güdümlü bir sinyal** yüzeye çıkarmaktadır: ~600 belirteç altındaki
+metinlerde z-skorlu MFW sayımları gürültülenir, dolayısıyla kısa hikayeler
+konudan bağımsız olarak ana buluttan uzaklaşır. Bu yöntem hatası değil — küçük
+*N* için MFW kestirim varyansının doğal sonucu — ve bu çözümlemenin verdiği
+en kullanışlı bilgi de tam olarak budur:
+
+[Etkileşimli plotly dendrogramını aç ↗](turkish_figures/ward_dendrogram.html)
+
+> Türkçe kısa düzyazıda stilometri yapıyorsanız, alt küme yapısından
+> tema/dönem sonuçları çıkarmadan önce belge başına belirteç tabanını en az
+> 1 000'e yükseltin — ya da uzunluğa karşı çok daha hoşgörülü olan karakter
+> n-gramlarına geçin.
+
+### Bunun *yapmadığı* — sınırlamalar
+
+Gerçek bir **yazar tespiti** gösterimi, Wikisource'taki erken-cumhuriyet
+döneminde benzer kapsama sahip en az bir başka telif hakkı süresi dolmuş Türkçe
+düzyazı yazarına ihtiyaç duyar; Wikisource:tr şu anda bunu sunmuyor (Refik
+Halit Karay'ın transkripsiyonları orada bulunsa da altta yatan metinler ancak
+2036'da Türkiye'de kamuya geçecektir). Atfetme çalışmaları için Seyfettin'i
+çağdaş bir edebî yazar yerine farklı bir tür/kayıt dengelemesi sağlayan bir
+denetim derlemi (örn. meclis konuşmaları, konuya göre Türkçe Wikipedia
+seçilmiş makaleleri ya da kendi kurumsal derleminiz) ile eşleştirmenizi
+öneririz.
+
 ## Özelleştirme
 
 Öznitelikleri veya yöntemleri değiştirmek için `study.yaml` dosyasını düzenleyin. Örneğin,
