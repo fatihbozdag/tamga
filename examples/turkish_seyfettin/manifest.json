@@ -1,0 +1,175 @@
+{
+  "author": "Ömer Seyfettin",
+  "source": "tr.wikisource.org",
+  "license": "CC BY-SA 4.0 (transcription); underlying texts public domain",
+  "stories": [
+    {
+      "title": "Aleko",
+      "slug": "aleko",
+      "url": "https://tr.wikisource.org/wiki/Aleko",
+      "tokens": 4455
+    },
+    {
+      "title": "And",
+      "slug": "and",
+      "url": "https://tr.wikisource.org/wiki/And",
+      "tokens": 1811
+    },
+    {
+      "title": "Antiseptik",
+      "slug": "antiseptik",
+      "url": "https://tr.wikisource.org/wiki/Antiseptik",
+      "tokens": 639
+    },
+    {
+      "title": "Aşk Dalgası",
+      "slug": "ask_dalgas",
+      "url": "https://tr.wikisource.org/wiki/A%C5%9Fk_Dalgas%C4%B1",
+      "tokens": 2597
+    },
+    {
+      "title": "Aşk ve Ayak Parmakları",
+      "slug": "ask_ve_ayak_parmaklar",
+      "url": "https://tr.wikisource.org/wiki/A%C5%9Fk_ve_Ayak_Parmaklar%C4%B1",
+      "tokens": 988
+    },
+    {
+      "title": "Bahar ve Kelebekler",
+      "slug": "bahar_ve_kelebekler",
+      "url": "https://tr.wikisource.org/wiki/Bahar_ve_Kelebekler",
+      "tokens": 2725
+    },
+    {
+      "title": "Balkon (hikâye)",
+      "slug": "balkon_hikaye",
+      "url": "https://tr.wikisource.org/wiki/Balkon_%28hik%C3%A2ye%29",
+      "tokens": 1918
+    },
+    {
+      "title": "Başını Vermeyen Şehit",
+      "slug": "bas_n_vermeyen_sehit",
+      "url": "https://tr.wikisource.org/wiki/Ba%C5%9F%C4%B1n%C4%B1_Vermeyen_%C5%9Eehit",
+      "tokens": 2378
+    },
+    {
+      "title": "Binecek Şey",
+      "slug": "binecek_sey",
+      "url": "https://tr.wikisource.org/wiki/Binecek_%C5%9Eey",
+      "tokens": 1393
+    },
+    {
+      "title": "Bir Hatıra",
+      "slug": "bir_hat_ra",
+      "url": "https://tr.wikisource.org/wiki/Bir_Hat%C4%B1ra",
+      "tokens": 1228
+    },
+    {
+      "title": "Bir Kayışın Tesiri",
+      "slug": "bir_kay_s_n_tesiri",
+      "url": "https://tr.wikisource.org/wiki/Bir_Kay%C4%B1%C5%9F%C4%B1n_Tesiri",
+      "tokens": 551
+    },
+    {
+      "title": "Bir Refikin Defter-i İhtisasatından",
+      "slug": "bir_refikin_defter_i_ihtisasat_ndan",
+      "url": "https://tr.wikisource.org/wiki/Bir_Refikin_Defter-i_%C4%B0htisasat%C4%B1ndan",
+      "tokens": 326
+    },
+    {
+      "title": "Bir Temiz Havlu Uğruna",
+      "slug": "bir_temiz_havlu_ugruna",
+      "url": "https://tr.wikisource.org/wiki/Bir_Temiz_Havlu_U%C4%9Fruna",
+      "tokens": 1143
+    },
+    {
+      "title": "Bomba",
+      "slug": "bomba",
+      "url": "https://tr.wikisource.org/wiki/Bomba",
+      "tokens": 4416
+    },
+    {
+      "title": "Büyücü",
+      "slug": "buyucu",
+      "url": "https://tr.wikisource.org/wiki/B%C3%BCy%C3%BCc%C3%BC",
+      "tokens": 1777
+    },
+    {
+      "title": "Diyet",
+      "slug": "diyet",
+      "url": "https://tr.wikisource.org/wiki/Diyet",
+      "tokens": 2418
+    },
+    {
+      "title": "Dünyanın Düzeni",
+      "slug": "dunyan_n_duzeni",
+      "url": "https://tr.wikisource.org/wiki/D%C3%BCnyan%C4%B1n_D%C3%BCzeni",
+      "tokens": 1152
+    },
+    {
+      "title": "Elma",
+      "slug": "elma",
+      "url": "https://tr.wikisource.org/wiki/Elma",
+      "tokens": 514
+    },
+    {
+      "title": "Ferman",
+      "slug": "ferman",
+      "url": "https://tr.wikisource.org/wiki/Ferman",
+      "tokens": 2861
+    },
+    {
+      "title": "Fon Sadriştayn’ın Karısı",
+      "slug": "fon_sadristayn_n_kar_s",
+      "url": "https://tr.wikisource.org/wiki/Fon_Sadri%C5%9Ftayn%E2%80%99%C4%B1n_Kar%C4%B1s%C4%B1",
+      "tokens": 3115
+    },
+    {
+      "title": "Fon Sadriştayn’ın Oğlu",
+      "slug": "fon_sadristayn_n_oglu",
+      "url": "https://tr.wikisource.org/wiki/Fon_Sadri%C5%9Ftayn%E2%80%99%C4%B1n_O%C4%9Flu",
+      "tokens": 3155
+    },
+    {
+      "title": "Forsa",
+      "slug": "forsa",
+      "url": "https://tr.wikisource.org/wiki/Forsa",
+      "tokens": 1096
+    },
+    {
+      "title": "Gizli Mâbed",
+      "slug": "gizli_mabed",
+      "url": "https://tr.wikisource.org/wiki/Gizli_M%C3%A2bed",
+      "tokens": 1721
+    },
+    {
+      "title": "Havyar",
+      "slug": "havyar",
+      "url": "https://tr.wikisource.org/wiki/Havyar",
+      "tokens": 877
+    },
+    {
+      "title": "Hediye...",
+      "slug": "hediye",
+      "url": "https://tr.wikisource.org/wiki/Hediye...",
+      "tokens": 454
+    },
+    {
+      "title": "Hürriyet Bayrakları",
+      "slug": "hurriyet_bayraklar",
+      "url": "https://tr.wikisource.org/wiki/H%C3%BCrriyet_Bayraklar%C4%B1",
+      "tokens": 2202
+    },
+    {
+      "title": "Kaşağı",
+      "slug": "kasag",
+      "url": "https://tr.wikisource.org/wiki/Ka%C5%9Fa%C4%9F%C4%B1",
+      "tokens": 888
+    },
+    {
+      "title": "Kerâmet",
+      "slug": "keramet",
+      "url": "https://tr.wikisource.org/wiki/Ker%C3%A2met",
+      "tokens": 508
+    }
+  ]
+}
