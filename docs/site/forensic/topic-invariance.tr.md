@@ -48,7 +48,7 @@ fm = extractor.fit_transform(corpus)
 
 *Şu durumda kullanın:* içerik sözcüklerini yer tutucu ile değiştirerek agresif konu kaldırma istiyorsunuz — işlev sözcükleri, morfoloji ve noktalama korunur.
 *Şu durumda kullanmayın:* aşağı akışta herhangi bir içerik sözcüğü sinyaline ihtiyaç duyuyorsanız (örn., ayırt edici sözcük dağarcığı üzerinde Zeta).
-*Beklenen sonuç:* mevcut herhangi bir çıkarıcıya geçirdiğiniz yeni bir `Corpus` nesnesi. Modlar: `"dv_ma"` *tüm* içerik sözcüklerini maskeler, `"dv_sa"` POS'a göre seçici biçimde maskeler.
+*Beklenen sonuç:* mevcut herhangi bir çıkarıcıya geçirdiğiniz yeni bir `Corpus` nesnesi. Modlar: `"dv_ma"` bir içerik sözcüğünün her karakterini `*` ile değiştirir (uzunluk korunur), `"dv_sa"` her içerik sözcüğünü tek bir `*` karakterine indirger. İçerik mi işlev mi olduğu POS etiketlemesiyle değil, bir işlev-sözcük araması ile belirlenir.
 
 `distort_corpus`, **içeriği** maskelerken **stili** korumak için belgeler üzerinde ön işlem uygular: işlev sözcükleri (function words), noktalama, rakamlar ve boşluk karakterleri aynen bırakılır; içerik sözcüklerinin karakterleri değiştirilir.
 

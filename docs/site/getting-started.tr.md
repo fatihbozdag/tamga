@@ -36,14 +36,16 @@ cd my-study
 # (2) drop .txt files into corpus/
 # (3) fill in corpus/metadata.tsv — one row per file with filename → author, group, year, ...
 bitig ingest corpus/ --metadata corpus/metadata.tsv  # (4) parse + cache
-bitig info                    # (5a) verify the ingest
+bitig info                    # (5a) bitig / Python / spaCy sürümlerini + yapılandırılmış dili yazdırır
 bitig run study.yaml --name demo   # (5b) run the declared study
 bitig report results/demo --output results/demo/report.html
 ```
 
-`bitig init` ile oluşturulan proje iskeleti, 200 en sık sözcük üzerinde Burrows Delta
-+ PCA + Zeta içeren çalışan bir `study.yaml` içerir; dolayısıyla yukarıdaki adım dizisi,
-aldığınız herhangi bir derlemde baştan sona çalışır.
+`bitig init` ile oluşturulan proje iskeleti, tek bir en sık sözcük özellik kümesi
+(ilk 1000 sözcük) ve bir Burrows Delta yöntemi içeren çalışan bir `study.yaml` içerir;
+dolayısıyla yukarıdaki adım dizisi, aldığınız herhangi bir derlemde baştan sona çalışır.
+Analizi genişletmek için `study.yaml` dosyasına PCA/Zeta/kümeleme blokları ekleyin
+([Yöntemler](concepts/methods.md) ve [study.yaml şeması](reference/config.md) sayfalarına bakın).
 
 ## İlk Python oturumunuz
 
@@ -65,11 +67,14 @@ corpus = Corpus(documents=[
 # 1. Extract the most-frequent-word feature matrix.
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(corpus)
 
-# 2. Train Burrows Delta on the known docs and predict the questioned one.
+# 2. Train Burrows Delta on the known docs and attribute the questioned one.
 import numpy as np
 y = np.array(corpus.metadata_column("author"))
 train_mask = y != "?"
-clf = BurrowsDelta().fit_predict(fm)  # sklearn-compatible
+
+clf = BurrowsDelta().fit(fm.X[train_mask], y[train_mask])  # sklearn-compatible: fit(X, y)
+prediction = clf.predict(fm.X[~train_mask])                # e.g. array(['Alice'])
+print(prediction)
 ```
 
 ## Örnek veri: Federalist örneği

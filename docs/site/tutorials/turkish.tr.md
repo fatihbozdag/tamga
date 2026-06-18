@@ -55,20 +55,27 @@ içinde tamamlanır.
 
 ## Çıktılar
 
-Varsayılan bir Türkçe çalışma şunları hesaplar:
+`bitig init --language tr` iskelesi, şunları içeren minimal bir `study.yaml` yazar:
 
-- **MFW** (ilk 1000 belirteç, z-skorlanmış göreli sıklıklar)
-- **Türkçe işlev sözcükleri** — UD Turkish BOUN kapalı sınıf belirteçlerinden türetilen
-  `resources/languages/tr/function_words.txt` dosyasından yüklenir
-- **Ateşman ve Bezirci-Yılmaz** okunabilirlik endeksleri
-- **Burrows Delta** + PCA/MDS indirgeme grafikleri
+- **MFW** (ilk 1000 belirteç, z-skorlu)
+- **Burrows Delta** yazar tespiti
 
-`results/first-run/` çıktı klasörü şunları içerir:
+Bu, bir Türkçe derlemde kutudan çıktığı haliyle uçtan uca çalışır. Analizi genişletmek
+için daha fazla öznitelik/yöntem bloğu ekleyin — bitig'in Türkçe desteği bunların
+tümünde birinci sınıftır:
 
-- Delta skorları ve köken bilgisi içeren `result.json`
+- **Türkçe işlev sözcükleri** — dile özgü liste paketin içinde gelir
+  (`bitig/resources/languages/tr/function_words.txt` konumunda, UD Turkish BOUN kapalı
+  sınıf belirteçlerinden türetilmiştir) ve `type: function_word` için otomatik olarak seçilir
+- `type: readability` için **Ateşman ve Bezirci-Yılmaz** okunabilirlik endeksleri
+- Aşağıdaki dağılım grafikleri için **PCA / MDS** indirgeme (`kind: reduce`)
+
+Bir çalıştırmanın çıktı klasörü (ör. `results/first-run/`), yöntem başına şunları içerir:
+
+- Yöntemin skorları ve köken bilgisini içeren `result.json`
 - `table_*.parquet` öznitelik matrisleri
-- PNG / PDF şekiller (mesafe ısı haritası, PCA dağılım grafiği)
-- Derlem özetini, seed değerini ve tam çözümlenmiş yapılandırmayı kaydeden `provenance.json`
+- Herhangi bir reduce/cluster yöntemi için PNG / PDF şekiller (mesafe ısı haritası, PCA dağılım grafiği)
+- Derlem hash'ini, seed değerini ve tam çözümlenmiş yapılandırmayı içeren bir köken bilgisi kaydı
 
 ## Çalışan örnek: Ömer Seyfettin'in 28 kısa hikayesi
 

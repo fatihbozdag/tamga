@@ -36,14 +36,16 @@ cd my-study
 # (2) drop .txt files into corpus/
 # (3) fill in corpus/metadata.tsv — one row per file with filename → author, group, year, ...
 bitig ingest corpus/ --metadata corpus/metadata.tsv  # (4) parse + cache
-bitig info                    # (5a) verify the ingest
+bitig info                    # (5a) print bitig / Python / spaCy versions + configured language
 bitig run study.yaml --name demo   # (5b) run the declared study
 bitig report results/demo --output results/demo/report.html
 ```
 
-The project skeleton from `bitig init` includes a working `study.yaml` with Burrows Delta
-+ PCA + Zeta on 200 most-frequent words, so the above sequence runs end-to-end on any
-corpus you ingest.
+The project skeleton from `bitig init` includes a working `study.yaml` with one most-frequent-word
+feature set (top 1000 words) and a Burrows Delta method, so the above sequence runs end-to-end on
+any corpus you ingest. Add PCA/Zeta/clustering blocks to `study.yaml` (see the
+[Methods](concepts/methods.md) and [study.yaml schema](reference/config.md) pages) to broaden the
+analysis.
 
 ## Your first Python session
 
@@ -65,11 +67,14 @@ corpus = Corpus(documents=[
 # 1. Extract the most-frequent-word feature matrix.
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(corpus)
 
-# 2. Train Burrows Delta on the known docs and predict the questioned one.
+# 2. Train Burrows Delta on the known docs and attribute the questioned one.
 import numpy as np
 y = np.array(corpus.metadata_column("author"))
 train_mask = y != "?"
-clf = BurrowsDelta().fit_predict(fm)  # sklearn-compatible
+
+clf = BurrowsDelta().fit(fm.X[train_mask], y[train_mask])  # sklearn-compatible: fit(X, y)
+prediction = clf.predict(fm.X[~train_mask])                # e.g. array(['Alice'])
+print(prediction)
 ```
 
 ## Sample data: the Federalist showcase

@@ -6,10 +6,11 @@ Federalist Papers.
 ## Background
 
 The Federalist Papers (1787–1788) were published under the pseudonym *Publius* to
-argue for ratification of the US Constitution. Authorship of 73 papers is known
-(Hamilton, Madison, Jay); 12 are disputed between Hamilton and Madison. Mosteller &
-Wallace (1964) used word-frequency Bayesian inference to attribute all 12 disputed
-papers to Madison — a result confirmed by every subsequent stylometric analysis.
+argue for ratification of the US Constitution. Authorship of 74 papers is known
+(Hamilton, Madison, Jay, plus three Hamilton/Madison joint papers); 11 are disputed
+between Hamilton and Madison (Nos. 49–57, 62, 63). Mosteller & Wallace (1964) used
+word-frequency Bayesian inference to attribute all 11 disputed papers to Madison — a
+result confirmed by every subsequent stylometric analysis.
 
 This tutorial uses bitig to reproduce the essentials of their result: training Burrows
 Delta on the known Hamilton / Madison papers, projecting the disputed papers onto the

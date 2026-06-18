@@ -14,13 +14,14 @@ nearest-centroid classifier.
 | `ArgamonLinearDelta` | L2 (Euclidean) | Argamon 2008 |
 | `QuadraticDelta` | squared L2 | — |
 | `CosineDelta` | 1 − cosine similarity | Smith & Aldridge 2011 |
-| `EderDelta` / `EderSimpleDelta` | weighted Delta variants | Eder 2015 |
+| `EderDelta` / `EderSimpleDelta` | weighted Delta variants | Eder 2015 / 2017 |
 
 ```python
+import numpy as np
 from bitig import MFWExtractor, BurrowsDelta
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(corpus)
 y = np.array(corpus.metadata_column("author"))
-clf = BurrowsDelta().fit(fm, y)
+clf = BurrowsDelta().fit(fm, y)     # fit accepts a FeatureMatrix or an ndarray
 predictions = clf.predict(fm)       # nearest-centroid labels
 probs = clf.predict_proba(fm)       # softmax over negative distances
 ```
@@ -126,7 +127,8 @@ All reducers accept a `FeatureMatrix` and return a `Result` with 2-D / n-D coord
 orthogonal variance directions. Default choice for "plot my corpus" questions.
 *Don't use when:* authorship differences are highly non-linear; PCA's linear axes will
 miss curved manifolds.
-*Expect:* `coords` (n_docs × n_components) + `explained_variance_ratio_` per component.
+*Expect:* `Result.values["coordinates"]` (n_docs × n_components) + `["explained_variance_ratio"]`
+per component (and `["loadings"]`).
 
 ### UMAPReducer
 `UMAPReducer(n_components=2, n_neighbors=15, min_dist=0.1)`
@@ -135,7 +137,7 @@ miss curved manifolds.
 structure — typically the best-looking 2-D visualisation of stylometric features.
 *Don't use when:* you need reproducibility without pinning a seed — UMAP is
 stochastic. Always set `random_state`.
-*Expect:* `coords` (n_docs × n_components). Requires `bitig[viz]`.
+*Expect:* `Result.values["coordinates"]` (n_docs × n_components). Requires `bitig[cluster]`.
 
 ### TSNEReducer
 `TSNEReducer(n_components=2, perplexity=30)`
@@ -144,7 +146,7 @@ stochastic. Always set `random_state`.
 structure — authors cluster tightly.
 *Don't use when:* you need inter-cluster distances to be meaningful (t-SNE warps them),
 or when you plan to use the coordinates as features for a downstream method.
-*Expect:* `coords` (n_docs × n_components). Non-deterministic without a seed.
+*Expect:* `Result.values["coordinates"]` (n_docs × n_components). Non-deterministic without a seed.
 
 ### MDSReducer
 `MDSReducer(n_components=2, metric=True)`
@@ -152,7 +154,7 @@ or when you plan to use the coordinates as features for a downstream method.
 *Use when:* you want a projection that tries to preserve pairwise Delta distances as
 literally as possible — good for interpreting dendrogram + scatter together.
 *Don't use when:* you have a large corpus (>500 docs); MDS scales poorly.
-*Expect:* `coords` (n_docs × n_components) + `stress` (lower = better fit).
+*Expect:* `Result.values["coordinates"]` (n_docs × n_components) + `["stress"]` (lower = better fit).
 
 ## Clustering
 
@@ -166,13 +168,14 @@ also returns the linkage matrix for dendrograms.
 leaves are documents and branch heights are distances.
 *Don't use when:* your corpus is large enough (>2000 docs) that dendrogram inspection
 is no longer practical.
-*Expect:* `labels` (n_docs,) + `linkage_matrix` usable with `scipy.cluster.hierarchy.dendrogram`.
+*Expect:* `Result.values["labels"]` (n_docs,) + `["linkage"]` (the linkage matrix `Z`, usable with
+`scipy.cluster.hierarchy.dendrogram`).
 
 Supported linkages: `"ward"` (default, variance-minimising), `"average"`, `"complete"`,
 `"single"`.
 
 ### KMeansCluster
-`KMeansCluster(n_clusters=3, seed=42)`
+`KMeansCluster(n_clusters=3, random_state=42)`  *(default `n_clusters=2`)*
 
 *Use when:* you have a rough expected cluster count and want spherical clusters of
 comparable size — fastest clustering option.
@@ -187,13 +190,13 @@ don't know `n_clusters` ahead of time (use `HDBSCANCluster`).
 density, or want "noise" points to be labelled as outliers (-1).
 *Don't use when:* your corpus is small (<30 docs); HDBSCAN's density estimates get
 unstable.
-*Expect:* `labels` (n_docs,) with -1 for noise; `probabilities` (cluster-membership
-confidence).
+*Expect:* `Result.values["labels"]` (n_docs,) with -1 for noise; `["probabilities"]`
+(cluster-membership confidence). Requires `bitig[cluster]`.
 
 ## Consensus trees
 
 ### BootstrapConsensus
-`BootstrapConsensus(mfw_bands=[100, 200, 300], replicates=20)`
+`BootstrapConsensus(mfw_bands=[100, 200, 300], replicates=100)`  *(keyword-only; `mfw_bands` required, `replicates` defaults to 100)*
 
 *Use when:* you want robustness evidence for a dendrogram — repeatedly resample the
 MFW feature set and see which clades survive.

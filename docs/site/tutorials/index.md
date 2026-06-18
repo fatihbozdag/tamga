@@ -1,15 +1,16 @@
 # Tutorials
 
-Two runnable tutorials ship with bitig.
+Three runnable tutorials ship with bitig.
 
 ## [Federalist Papers](federalist.md)
 
 Reproduce the classical Mosteller & Wallace (1964) authorship attribution on the 85
-Federalist Papers, projecting the disputed papers (Nos. 49–58, 62, 63) onto the
+Federalist Papers, projecting the disputed papers (Nos. 49–57, 62, 63) onto the
 Hamilton / Madison feature space.
 
 Illustrates: corpus ingestion, MFW feature extraction, Burrows Delta training,
-cross-validation, PCA visualisation, Ward consensus dendrogram, Zeta contrast tables.
+cross-validation, PCA visualisation, Ward clustering, bootstrap consensus dendrograms,
+Zeta contrast tables.
 
 ## [PAN-CLEF verification](pan-clef.md)
 
@@ -20,3 +21,12 @@ AUC, c@1, F0.5u, Brier, ECE, C_llr — alongside a forensic HTML report with LR 
 and chain-of-custody.
 
 Illustrates: the full `bitig.forensic` workflow end-to-end.
+
+## [Turkish stylometry](turkish.md)
+
+An end-to-end Turkish authorship walkthrough — ingest a Turkish corpus through the
+Stanford Stanza (BOUN treebank) backend via `spacy-stanza`, then run the standard bitig
+feature extractors and methods unchanged.
+
+Illustrates: the multi-language registry, the `bitig[turkish]` extra, native Turkish
+readability formulas, and Turkish contextual embeddings.

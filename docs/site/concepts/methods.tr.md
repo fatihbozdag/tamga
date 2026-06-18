@@ -12,13 +12,14 @@ Tüm Delta varyantları `_DeltaBase`'i paylaşır, z-puanlı öznitelikler üzer
 | `ArgamonLinearDelta` | L2 (Öklid) | Argamon 2008 |
 | `QuadraticDelta` | karesel L2 | — |
 | `CosineDelta` | 1 − kosinüs benzerliği | Smith & Aldridge 2011 |
-| `EderDelta` / `EderSimpleDelta` | ağırlıklı Delta varyantları | Eder 2015 |
+| `EderDelta` / `EderSimpleDelta` | ağırlıklı Delta varyantları | Eder 2015 / 2017 |
 
 ```python
+import numpy as np
 from bitig import MFWExtractor, BurrowsDelta
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(corpus)
 y = np.array(corpus.metadata_column("author"))
-clf = BurrowsDelta().fit(fm, y)
+clf = BurrowsDelta().fit(fm, y)     # fit, bir FeatureMatrix veya ndarray kabul eder
 predictions = clf.predict(fm)       # en yakın-merkez etiketleri
 probs = clf.predict_proba(fm)       # negatif uzaklıklar üzerinde softmax
 ```
@@ -99,28 +100,28 @@ Tüm indirgeyiciler bir `FeatureMatrix` kabul eder ve 2 boyutlu / n boyutlu koor
 
 *Şu durumda kullanın:* eksenlerin dik varyans yönleri olduğu hızlı, yorumlanabilir bir 2 veya 3 boyutlu projeksiyon istiyorsanız. "Dermemi görselleştir" soruları için varsayılan seçim.
 *Şu durumda kullanmayın:* yazar farklılıkları son derece doğrusal değilse; PCA'nın doğrusal eksenleri kavisli manifoldları kaçırır.
-*Beklenen sonuç:* `coords` (n_docs × n_components) + bileşen başına `explained_variance_ratio_`.
+*Beklenen sonuç:* `Result.values["coordinates"]` (n_docs × n_components) + bileşen başına `["explained_variance_ratio"]` (ve `["loadings"]`).
 
 ### UMAPReducer
 `UMAPReducer(n_components=2, n_neighbors=15, min_dist=0.1)`
 
 *Şu durumda kullanın:* hem yerel *hem de* küresel yapıyı koruyan doğrusal olmayan bir projeksiyon istiyorsanız — genellikle stilometrik özniteliklerin en iyi görünen 2 boyutlu görselleştirmesi.
 *Şu durumda kullanmayın:* bir tohum sabitlemeden yeniden üretilebilirliğe ihtiyaç duyuyorsanız — UMAP stokastiktir. Her zaman `random_state` ayarlayın.
-*Beklenen sonuç:* `coords` (n_docs × n_components). `bitig[viz]` gerektirir.
+*Beklenen sonuç:* `Result.values["coordinates"]` (n_docs × n_components). `bitig[cluster]` gerektirir.
 
 ### TSNEReducer
 `TSNEReducer(n_components=2, perplexity=30)`
 
 *Şu durumda kullanın:* yerel komşuluk yapısını vurgulayan doğrusal olmayan bir projeksiyon istiyorsanız — yazarlar sıkı kümelenir.
 *Şu durumda kullanmayın:* kümeler arası uzaklıkların anlamlı olması gerekiyorsa (t-SNE bunları bozar) ya da koordinatları aşağı akış yöntemi için öznitelik olarak kullanmayı planlıyorsanız.
-*Beklenen sonuç:* `coords` (n_docs × n_components). Tohum olmadan belirleyici değildir.
+*Beklenen sonuç:* `Result.values["coordinates"]` (n_docs × n_components). Tohum olmadan belirleyici değildir.
 
 ### MDSReducer
 `MDSReducer(n_components=2, metric=True)`
 
 *Şu durumda kullanın:* çiftler arası Delta uzaklıklarını olabildiğince gerçeğe yakın korumaya çalışan bir projeksiyon istiyorsanız — dendrogram + dağılım grafiğini birlikte yorumlamak için uygundur.
 *Şu durumda kullanmayın:* büyük bir derlem (>500 belge) varsa; MDS kötü ölçeklenir.
-*Beklenen sonuç:* `coords` (n_docs × n_components) + `stress` (düşükse daha iyi uyum).
+*Beklenen sonuç:* `Result.values["coordinates"]` (n_docs × n_components) + `["stress"]` (düşükse daha iyi uyum).
 
 ## Kümeleme
 
@@ -131,12 +132,12 @@ Kümeleyiciler bir `FeatureMatrix` kabul eder ve küme etiketleri üretir; hiyer
 
 *Şu durumda kullanın:* yaprakların belgeler, dal yüksekliklerinin uzaklıklar olduğu bir dendrogram — stilometrinin kanonik görselleştirmesi — istiyorsanız.
 *Şu durumda kullanmayın:* derlem dendrogram incelemesinin artık pratik olmayacağı kadar büyükse (>2000 belge).
-*Beklenen sonuç:* `labels` (n_docs,) + `scipy.cluster.hierarchy.dendrogram` ile kullanılabilir `linkage_matrix`.
+*Beklenen sonuç:* `Result.values["labels"]` (n_docs,) + `["linkage"]` (`scipy.cluster.hierarchy.dendrogram` ile kullanılabilir bağlantı matrisi `Z`).
 
 Desteklenen bağlantılar: `"ward"` (varsayılan, varyansı en aza indiren), `"average"`, `"complete"`, `"single"`.
 
 ### KMeansCluster
-`KMeansCluster(n_clusters=3, seed=42)`
+`KMeansCluster(n_clusters=3, random_state=42)`  *(varsayılan `n_clusters=2`)*
 
 *Şu durumda kullanın:* tahmini bir küme sayınız varsa ve benzer boyutlu küresel kümeler istiyorsanız — en hızlı kümeleme seçeneği.
 *Şu durumda kullanmayın:* küme boyutları çok eşitsizse, küme şekilleri uzunsa veya `n_clusters`'ı önceden bilmiyorsanız (`HDBSCANCluster` kullanın).
@@ -147,12 +148,12 @@ Desteklenen bağlantılar: `"ward"` (varsayılan, varyansı en aza indiren), `"a
 
 *Şu durumda kullanın:* küme sayısını önceden bilmiyorsanız, değişken küme yoğunluğu bekliyorsanız veya "gürültü" noktalarının aykırı değer (-1) olarak etiketlenmesini istiyorsanız.
 *Şu durumda kullanmayın:* derlem küçükse (<30 belge); HDBSCAN'ın yoğunluk tahminleri kararsız hale gelir.
-*Beklenen sonuç:* gürültü için -1 içeren `labels` (n_docs,); `probabilities` (küme üyelik güveni).
+*Beklenen sonuç:* gürültü için -1 içeren `Result.values["labels"]` (n_docs,); `["probabilities"]` (küme üyelik güveni). `bitig[cluster]` gerektirir.
 
 ## Konsensüs ağaçları
 
 ### BootstrapConsensus
-`BootstrapConsensus(mfw_bands=[100, 200, 300], replicates=20)`
+`BootstrapConsensus(mfw_bands=[100, 200, 300], replicates=100)`  *(yalnızca anahtar sözcük; `mfw_bands` zorunlu, `replicates` varsayılanı 100)*
 
 *Şu durumda kullanın:* dendrogram için sağlamlık kanıtı istiyorsanız — MFW öznitelik kümesini tekrar tekrar yeniden örnekleyin ve hangi kladların hayatta kaldığını görün.
 *Şu durumda kullanmayın:* hızlı tek bir görselleştirmeye ihtiyaç duyuyorsanız; bootstrap birçok Delta + kümeleme döngüsü çalıştırır ve yavaştır.

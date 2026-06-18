@@ -26,11 +26,24 @@ and a pool of impostor documents I drawn from other authors, repeatedly:
 The fraction of winning iterations is the verification score in [0, 1].
 
 ```python
-from bitig.features import MFWExtractor
+from bitig.features import MFWExtractor, FeatureMatrix
 from bitig.forensic import GeneralImpostors
 
 # Build features over the pooled corpus so Q, K, and impostors share one vocabulary.
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(pooled_corpus)
+
+# verify() takes three FeatureMatrix views. Slice the pooled matrix by document id:
+row_of = {doc_id: i for i, doc_id in enumerate(fm.document_ids)}
+
+def slice_by_ids(fm: FeatureMatrix, ids: list[str]) -> FeatureMatrix:
+    rows = [row_of[i] for i in ids]
+    return FeatureMatrix(
+        X=fm.X[rows],
+        document_ids=[fm.document_ids[i] for i in rows],
+        feature_names=fm.feature_names,
+        feature_type=fm.feature_type,
+    )
+
 q_fm      = slice_by_ids(fm, ["questioned"])
 known_fm  = slice_by_ids(fm, known_doc_ids)
 impostors = slice_by_ids(fm, impostor_doc_ids)

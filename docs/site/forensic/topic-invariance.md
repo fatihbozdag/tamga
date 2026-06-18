@@ -68,7 +68,9 @@ punctuation.
 *Don't use when:* you need any content-word signal downstream (e.g., Zeta on
 distinctive vocabulary).
 *Expect:* a new `Corpus` object you pass to any existing extractor. Modes: `"dv_ma"`
-masks *all* content words, `"dv_sa"` masks selectively by POS.
+replaces each character of a content word with `*` (length-preserving), `"dv_sa"`
+collapses each content word to a single `*`. Content-vs-function is decided by a
+function-word lookup, not POS tagging.
 
 `distort_corpus` pre-processes documents to mask **content** while preserving **style**:
 function words, punctuation, digits, and whitespace remain verbatim; content-word
