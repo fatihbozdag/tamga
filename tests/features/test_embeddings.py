@@ -5,12 +5,16 @@ from __future__ import annotations
 import pytest
 
 from bitig.corpus import Corpus, Document
+from bitig.features.embeddings import (
+    ContextualEmbeddingExtractor,
+    SentenceEmbeddingExtractor,
+)
 
+# The extractor classes import fine without the extra (they raise ImportError only at
+# construction), so gate on whether the underlying dependency is actually importable —
+# mirroring the module's own `_sentence_transformers_available` guard.
 try:
-    from bitig.features.embeddings import (
-        ContextualEmbeddingExtractor,
-        SentenceEmbeddingExtractor,
-    )
+    import sentence_transformers  # noqa: F401
 
     _HAS_EMBEDDINGS = True
 except ImportError:
