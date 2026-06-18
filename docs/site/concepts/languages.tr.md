@@ -6,7 +6,7 @@ bitig beş dil için birinci sınıf destek sunar: **İngilizce**, **Türkçe**,
 
 | Kod | Dil | Arka uç | Varsayılan model | Okunabilirlik |
 |------|---------|-----------------|--------------------------|------------------------------------------|
-| en | İngilizce | yerel spaCy | `en_core_web_trf` | Flesch, Flesch-Kincaid, Gunning Fog, SMOG, Dale-Chall, Coleman-Liau, ARI |
+| en | İngilizce | yerel spaCy | `en_core_web_trf` | Flesch, Flesch-Kincaid, Gunning Fog (varsayılan); Coleman-Liau, ARI, SMOG mevcut |
 | tr | Türkçe | `spacy-stanza` | Stanza `tr` (BOUN) | Ateşman, Bezirci-Yılmaz |
 | de | Almanca | yerel spaCy | `de_dep_news_trf` | Flesch-Amstad, Wiener Sachtextformel |
 | es | İspanyolca | yerel spaCy | `es_dep_news_trf` | Fernández-Huerta, Szigriszt-Pazos |

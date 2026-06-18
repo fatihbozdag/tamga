@@ -8,7 +8,7 @@
   <a href="https://fatihbozdag.github.io/bitig/"><img alt="docs" src="https://img.shields.io/badge/docs-mkdocs%20material-0F1A2B?style=flat-square"></a>
   <a href="https://pypi.org/project/bitig/"><img alt="PyPI" src="https://img.shields.io/pypi/v/bitig?style=flat-square&color=0F1A2B"></a>
   <img alt="status" src="https://img.shields.io/badge/status-multi--language%20%7C%20forensic%20%7C%20phase%205-C9A34A?style=flat-square">
-  <img alt="tests" src="https://img.shields.io/badge/tests-700%20passing-0F1A2B?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/tests-680%2B%20passing-0F1A2B?style=flat-square">
   <img alt="languages" src="https://img.shields.io/badge/languages-EN%20%7C%20TR%20%7C%20DE%20%7C%20ES%20%7C%20FR-0F1A2B?style=flat-square">
 </p>
 
@@ -201,9 +201,14 @@ test suite (see the badge above).
 **Docs site is multilingual** — English (default) and Turkish (`/tr/`) launched via
 `mkdocs-static-i18n`; DE/ES/FR infrastructure ready, translation content deferred.
 
-**Remaining** — PyPI publish.
+**Published** — `bitig` is on [PyPI](https://pypi.org/project/bitig/) (`uv pip install bitig`),
+released via GitHub Actions Trusted Publishing.
 
-See [`docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md`](docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md) for the full design.
+See [`docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`](docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md) for the full design.
+
+## Changelog
+
+Release history is in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## License
 

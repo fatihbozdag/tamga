@@ -226,7 +226,7 @@ attribution on top).
 - **Swap in other authors.** Project Gutenberg has thousands of public-domain
   books. Pick three authors, grab 5 novels each, and ask bitig who wrote
   your favourite anonymous chapter.
-- **Read the full design.** `docs/superpowers/specs/2026-04-17-bitig-stylometry-package-design.md`
+- **Read the full design.** `docs/superpowers/specs/2026-04-17-tamga-stylometry-package-design.md`
   explains every method and feature in detail.
 
 ## One-page cheatsheet

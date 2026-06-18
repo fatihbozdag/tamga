@@ -30,7 +30,7 @@ report.to_dict()
 | `f05u` | Precision-weighted F with non-answer penalty | **PAN-style evaluation.** Penalises over-confident wrong answers. | 0 – 1 | Bevendorff et al. PAN 2022 |
 | `brier` | Posterior calibration | **Probabilistic output quality.** Lower = better-calibrated probabilities. | 0 (perfect) – 1 (worst) | Brier 1950 |
 | `ece` | Expected calibration error | **Is `predict_proba` honest?** Bins predictions by confidence; compares claimed vs. actual accuracy. | 0 (perfect) – 1 | — |
-| `cllr` | Log-likelihood-ratio cost | **Forensic LR quality.** The strict proper scoring rule for evidential output. | 0 (perfect) – ∞ | Brümmer & du Preez 2006 |
+| `cllr` | Log-likelihood-ratio cost | **Forensic LR quality.** The strict proper scoring rule for evidential output. | → 0 (approached, not reached) – ∞ | Brümmer & du Preez 2006 |
 | `tippett` | LR distribution plot | **Sanity-checking calibration visually.** Cumulative target vs. non-target LR curves should separate. | — | — |
 
 ### c@1

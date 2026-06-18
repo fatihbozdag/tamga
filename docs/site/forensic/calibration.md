@@ -66,7 +66,8 @@ trials.
 *Don't use when:* your score-to-probability relationship is non-monotonic or sharply
 bent — Platt's sigmoid will underfit.
 *Expect:* a scalar-parameter sigmoid fit; `predict_proba` outputs calibrated
-probabilities via `1 / (1 + exp(a*score + b))`.
+probabilities via a logistic sigmoid `1 / (1 + exp(-(a*score + b)))` (bitig fits this
+with scikit-learn's `LogisticRegression`).
 
 ### Isotonic calibration
 
@@ -106,8 +107,8 @@ scale:
 | 1 – 2 | moderate |
 | 2 – 3 | moderately strong |
 | 3 – 4 | strong |
-| 4 – 5 | very strong |
-| > 5 | extremely strong |
+| 4 – 6 | very strong |
+| > 6 | extremely strong |
 
 The `build_forensic_report` template renders this scale automatically beside each
 method's LR value. See [Reporting](reporting.md).

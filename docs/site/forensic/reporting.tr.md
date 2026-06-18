@@ -83,20 +83,34 @@ Adli rapor şablonu, Jinja2 otomatik kaçış (autoescape) etkin olarak oluştur
 *Şu durumda kullanmayın:* istatistiksel bir kitleye rapor sunuyorsanız — log-LR değerini `C_llr` ile birlikte doğrudan aktarın.
 *Beklenen sonuç:* log-LR büyüklüğüne karşılık gelen tek satırlık sözel ifade.
 
-Sözel ölçek, pratisyenlerin İngilizce ankor terimini koruyabilmesi için her iki dilde sunulmaktadır:
-
-| English | Turkish |
+| log₁₀(LR) aralığı | Sözel tanımlayıcı |
 |---|---|
-| weak support | *zayıf destek* |
-| moderate support | *ılımlı destek* |
-| moderately strong support | *ılımlı güçlü destek* |
-| strong support | *güçlü destek* |
-| very strong support | *çok güçlü destek* |
-| extremely strong support | *son derece güçlü destek* |
+| 0 – 1 | zayıf destek |
+| 1 – 2 | ılımlı destek |
+| 2 – 3 | ılımlı güçlü destek |
+| 3 – 4 | güçlü destek |
+| 4 – 6 | çok güçlü destek |
+| > 6 | son derece güçlü destek |
+
+Ölçek, `bitig.forensic.verbal_scale` (`LR_LADDER`) içinde tek doğruluk kaynağıdır. Rapor, tanımlayıcıyı otomatik olarak oluşturur; bunu programatik olarak da elde edebilirsiniz:
+
+```python
+from bitig.forensic.verbal_scale import lr_verbal_rung, lr_verbal_statement, ladder_rows
+
+lr_verbal_rung(10**5)        # 'very strong support'
+lr_verbal_statement(10**5)   # tam iki yönlü ENFSI/Nordgaard cümlesi (yön ile birlikte)
+ladder_rows()                # tablo oluşturmak için tam merdiven
+```
+
+İfade **iki yönlüdür**: LR > 1 iddia makamı önermesini (aynı yazar) destekler, LR < 1 savunma önermesini (farklı yazar) destekler; `max(LR, 1/LR)` büyüklüğü güç basamağını seçer.
 
 ## Referans
 
 ::: bitig.report.render.build_forensic_report
+
+::: bitig.forensic.verbal_scale.lr_verbal_statement
+
+::: bitig.forensic.verbal_scale.lr_verbal_rung
 
 ::: bitig.provenance.Provenance
     options:

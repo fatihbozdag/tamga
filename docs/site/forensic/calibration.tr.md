@@ -51,7 +51,7 @@ Her ikisi de monotondur — girdilerin sıra düzeni korunur, dolayısıyla AUC 
 
 *Şu durumda kullanın:* puanlayıcınızın karar sınırı log-odds cinsinden yaklaşık doğrusal bir yapıdaysa — lojistik regresyon benzeri bir şekil. İzotonikten daha az parametre gerektirir; daha az etiketli deneme yeterlidir.
 *Şu durumda kullanmayın:* puan-olasılık ilişkiniz monoton değilse veya keskin kıvrımlar içeriyorsa — Platt'ın sigmoidi yetersiz kalır.
-*Beklenen sonuç:* skaler parametreli sigmoid uyumu; `predict_proba`, `1 / (1 + exp(a*score + b))` aracılığıyla kalibre edilmiş olasılıklar üretir.
+*Beklenen sonuç:* skaler parametreli sigmoid uyumu; `predict_proba`, `1 / (1 + exp(-(a*score + b)))` lojistik sigmoidi aracılığıyla kalibre edilmiş olasılıklar üretir (bitig bunu scikit-learn'ün `LogisticRegression` ile uydurur).
 
 ### Izotonik kalibrasyon
 
@@ -86,8 +86,8 @@ Log-LR büyüklüklerini altı bantlı Nordgaard et al. (2012) / ENFSI (2015) s�
 | 1 – 2 | ılımlı |
 | 2 – 3 | ılımlı güçlü |
 | 3 – 4 | güçlü |
-| 4 – 5 | çok güçlü |
-| > 5 | son derece güçlü |
+| 4 – 6 | çok güçlü |
+| > 6 | son derece güçlü |
 
 `build_forensic_report` şablonu, bu ölçeği her yöntemin LR değerinin yanında otomatik olarak oluşturur. Bkz. [Raporlama](reporting.md).
 

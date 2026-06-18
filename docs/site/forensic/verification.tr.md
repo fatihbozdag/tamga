@@ -19,12 +19,25 @@ Koppel & Winter (2014). Sorgulanan belge Q, adayın bilinen belgeleri K ve diğe
 Kazanan yinemelerin oranı, [0, 1] aralığındaki doğrulama puanıdır.
 
 ```python
-from bitig.features import MFWExtractor
+from bitig.features import MFWExtractor, FeatureMatrix
 from bitig.forensic import GeneralImpostors
 
 # Q, K ve sahte yazarların ortak bir sözcük dağarcığı paylaşması için
 # birleştirilmiş derlem üzerinde öznitelikler oluşturulur.
 fm = MFWExtractor(n=200, scale="zscore", lowercase=True).fit_transform(pooled_corpus)
+
+# verify() üç FeatureMatrix görünümü alır. Birleştirilmiş matrisi belge id'sine göre dilimleyin:
+row_of = {doc_id: i for i, doc_id in enumerate(fm.document_ids)}
+
+def slice_by_ids(fm: FeatureMatrix, ids: list[str]) -> FeatureMatrix:
+    rows = [row_of[i] for i in ids]
+    return FeatureMatrix(
+        X=fm.X[rows],
+        document_ids=[fm.document_ids[i] for i in rows],
+        feature_names=fm.feature_names,
+        feature_type=fm.feature_type,
+    )
+
 q_fm      = slice_by_ids(fm, ["questioned"])
 known_fm  = slice_by_ids(fm, known_doc_ids)
 impostors = slice_by_ids(fm, impostor_doc_ids)

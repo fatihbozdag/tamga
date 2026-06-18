@@ -110,12 +110,31 @@ its `C_llr` directly.
 | 1 – 2 | moderate support |
 | 2 – 3 | moderately strong support |
 | 3 – 4 | strong support |
-| 4 – 5 | very strong support |
-| > 5 | extremely strong support |
+| 4 – 6 | very strong support |
+| > 6 | extremely strong support |
+
+The scale is the single source of truth in `bitig.forensic.verbal_scale` (`LR_LADDER`). The
+report renders the descriptor automatically; you can also obtain it programmatically:
+
+```python
+from bitig.forensic.verbal_scale import lr_verbal_rung, lr_verbal_statement, ladder_rows
+
+lr_verbal_rung(10**5)        # 'very strong support'
+lr_verbal_statement(10**5)   # full two-sided ENFSI/Nordgaard sentence (with direction)
+ladder_rows()                # the full ladder, for rendering a table
+```
+
+The statement is **two-sided**: an LR > 1 supports the prosecution proposition (same author),
+an LR < 1 supports the defence proposition (different author); the magnitude `max(LR, 1/LR)`
+selects the strength rung.
 
 ## Reference
 
 ::: bitig.report.render.build_forensic_report
+
+::: bitig.forensic.verbal_scale.lr_verbal_statement
+
+::: bitig.forensic.verbal_scale.lr_verbal_rung
 
 ::: bitig.provenance.Provenance
     options:

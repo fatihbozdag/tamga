@@ -8,7 +8,7 @@ formulas, and tested end-to-end pipelines.
 
 | Code | Name    | Backend         | Default model            | Readability                             |
 |------|---------|-----------------|--------------------------|------------------------------------------|
-| en   | English | native spaCy    | `en_core_web_trf`        | Flesch, Flesch-Kincaid, Gunning Fog, SMOG, Dale-Chall, Coleman-Liau, ARI |
+| en   | English | native spaCy    | `en_core_web_trf`        | Flesch, Flesch-Kincaid, Gunning Fog (default); Coleman-Liau, ARI, SMOG available |
 | tr   | Turkish | `spacy-stanza`  | Stanza `tr` (BOUN)       | Ateşman, Bezirci-Yılmaz                  |
 | de   | German  | native spaCy    | `de_dep_news_trf`        | Flesch-Amstad, Wiener Sachtextformel     |
 | es   | Spanish | native spaCy    | `es_dep_news_trf`        | Fernández-Huerta, Szigriszt-Pazos        |

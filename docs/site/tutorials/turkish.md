@@ -55,20 +55,26 @@ caches the DocBins; subsequent runs hit the cache and finish in seconds.
 
 ## What you get
 
-A default Turkish study computes:
+The `bitig init --language tr` scaffold writes a minimal `study.yaml` with:
 
-- **MFW** (top 1000 tokens, z-scored relative frequencies)
-- **Turkish function words** — loaded from `resources/languages/tr/function_words.txt`,
-  derived from UD Turkish BOUN closed-class tokens
-- **Ateşman and Bezirci-Yılmaz** readability indices
-- **Burrows Delta** + PCA/MDS reduction plots
+- **MFW** (top 1000 tokens, z-scored)
+- **Burrows Delta** attribution
 
-The output folder `results/first-run/` contains:
+That runs end-to-end on a Turkish corpus out of the box. To broaden the analysis, add more
+feature/method blocks — bitig's Turkish support is first-class across all of them:
 
-- `result.json` with Delta scores and provenance
+- **Turkish function words** — the per-language list ships inside the package (at
+  `bitig/resources/languages/tr/function_words.txt`, derived from UD Turkish BOUN
+  closed-class tokens) and is selected automatically for `type: function_word`
+- **Ateşman and Bezirci-Yılmaz** readability indices for `type: readability`
+- **PCA / MDS** reduction (`kind: reduce`) for the scatter plots below
+
+The output folder for a run (e.g. `results/first-run/`) contains, per method:
+
+- `result.json` with the method's scores and provenance
 - `table_*.parquet` feature matrices
-- PNG / PDF figures (distance heatmap, PCA scatter)
-- a `provenance.json` that records the corpus hash, seed, and full resolved config
+- PNG / PDF figures for any reduce/cluster method (distance heatmap, PCA scatter)
+- a provenance record with the corpus hash, seed, and full resolved config
 
 ## Worked example: 28 short stories by Ömer Seyfettin
 
