@@ -11,6 +11,7 @@ import numpy as np
 from bitig.corpus import Corpus
 from bitig.features.base import BaseFeatureExtractor
 from bitig.languages import LANGUAGES
+from bitig.plumbing.textnorm import fold_lower
 
 Scale = Literal["none", "zscore", "l1", "l2"]
 
@@ -68,10 +69,10 @@ class FunctionWordExtractor(BaseFeatureExtractor):
         self._words = _load_bundled_list(lang)
 
     def _transform(self, corpus: Corpus) -> tuple[np.ndarray, list[str]]:
-        index = {w: i for i, w in enumerate(self._words)}
+        index = {fold_lower(w): i for i, w in enumerate(self._words)}
         X = np.zeros((len(corpus), len(self._words)), dtype=float)  # noqa: N806
         for row, doc in enumerate(corpus.documents):
-            for tok in _WORD_RE.findall(doc.text.lower()):
+            for tok in _WORD_RE.findall(fold_lower(doc.text)):
                 if tok in index:
                     X[row, index[tok]] += 1
         if self.scale == "l1":
